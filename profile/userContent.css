@@ -1,0 +1,25 @@
+/* MinaFox content defaults. Scoped to Firefox internal start surfaces and the local MinaFox start page only. */
+@-moz-document url("about:home"), url("about:newtab"), url-prefix("file:///home/hermes/.local/share/minafox/start.html") {
+  :root {
+    color-scheme: dark !important;
+    --mf-content-bg: #15111f;
+    --mf-content-ink: #fff7ff;
+    --mf-content-lavender: #cba6f7;
+    --mf-content-pink: #f5c2e7;
+  }
+
+  body {
+    background:
+      radial-gradient(circle at 20% 10%, rgba(245, 194, 231, 0.22), transparent 30%),
+      radial-gradient(circle at 80% 18%, rgba(139, 92, 246, 0.2), transparent 28%),
+      var(--mf-content-bg) !important;
+    color: var(--mf-content-ink) !important;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible {
+    outline: 3px solid rgba(245, 194, 231, 0.5) !important;
+    outline-offset: 3px !important;
+  }
+}

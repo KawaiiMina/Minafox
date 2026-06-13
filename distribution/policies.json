@@ -1,0 +1,230 @@
+{
+  "policies": {
+    "DisableTelemetry": true,
+    "DisableFirefoxStudies": true,
+    "DisablePocket": true,
+    "DisableFirefoxAccounts": true,
+    "DisableAccounts": true,
+    "DisableDefaultBrowserAgent": true,
+    "DisableFeedbackCommands": true,
+    "DisableFirefoxScreenshots": true,
+    "DisableSetDesktopBackground": true,
+    "DontCheckDefaultBrowser": true,
+    "OfferToSaveLogins": false,
+    "NoDefaultBookmarks": true,
+    "OverrideFirstRunPage": "",
+    "OverridePostUpdatePage": "",
+    "Homepage": {
+      "URL": "file:///home/hermes/.local/share/minafox/start.html",
+      "Locked": false,
+      "StartPage": "homepage"
+    },
+    "SearchEngines": {
+      "Default": "DuckDuckGo"
+    },
+    "DNSOverHTTPS": {
+      "Enabled": true,
+      "ProviderURL": "https://mozilla.cloudflare-dns.com/dns-query",
+      "Locked": false
+    },
+    "Permissions": {
+      "Location": {
+        "BlockNewRequests": true
+      },
+      "Notifications": {
+        "BlockNewRequests": false
+      }
+    },
+    "Preferences": {
+      "toolkit.telemetry.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "toolkit.telemetry.unified": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "toolkit.telemetry.server": {
+        "Value": "",
+        "Status": "locked"
+      },
+      "datareporting.healthreport.uploadEnabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "datareporting.policy.dataSubmissionEnabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.crashReports.unsubmittedCheck.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.crashReports.unsubmittedCheck.autoSubmit2": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "app.shield.optoutstudies.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "app.normandy.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "app.normandy.api_url": {
+        "Value": "",
+        "Status": "locked"
+      },
+      "browser.newtabpage.activity-stream.telemetry": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.newtabpage.activity-stream.feeds.telemetry": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.ping-centre.telemetry": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "network.captive-portal-service.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "network.connectivity-service.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "default-browser-agent.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "toolkit.telemetry.archive.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "toolkit.telemetry.newProfilePing.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "toolkit.telemetry.shutdownPingSender.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "toolkit.telemetry.updatePing.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "toolkit.telemetry.bhrPing.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "toolkit.telemetry.firstShutdownPing.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "toolkit.telemetry.coverage.opt-out": {
+        "Value": true,
+        "Status": "locked"
+      },
+      "toolkit.coverage.opt-out": {
+        "Value": true,
+        "Status": "locked"
+      },
+      "toolkit.coverage.endpoint.base": {
+        "Value": "",
+        "Status": "locked"
+      },
+      "datareporting.healthreport.service.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "datareporting.sessions.current.clean": {
+        "Value": true,
+        "Status": "locked"
+      },
+      "browser.crashReports.unsubmittedCheck.autoSubmit": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "breakpad.reportURL": {
+        "Value": "",
+        "Status": "locked"
+      },
+      "messaging-system.rsexperimentloader.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.discovery.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.newtabpage.activity-stream.showSponsored": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.newtabpage.activity-stream.showSponsoredTopSites": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.newtabpage.activity-stream.feeds.section.topstories": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "datareporting.policy.firstRunURL": {
+        "Value": "",
+        "Status": "locked"
+      },
+      "browser.tabs.crashReporting.sendReport": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.newtabpage.activity-stream.feeds.snippets": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.urlbar.eventTelemetry.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.search.serpEventTelemetry.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.search.serpEventTelemetryCategorization.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.search.serpEventTelemetryCategorization.regionEnabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.urlbar.quicksuggest.dataCollection.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.urlbar.quicksuggest.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "dom.private-attribution.submission.enabled": {
+        "Value": false,
+        "Status": "locked"
+      }
+    },
+    "ExtensionSettings": {
+      "*": {
+        "installation_mode": "allowed"
+      },
+      "uBlock0@raymondhill.net": {
+        "installation_mode": "force_installed",
+        "install_url": "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi"
+      },
+      "firefox@betterttv.net": {
+        "installation_mode": "allowed",
+        "install_url": "https://addons.mozilla.org/firefox/downloads/latest/betterttv/latest.xpi"
+      }
+    }
+  }
+}

@@ -1,0 +1,70 @@
+# MinaFox SearXNG settings.
+# Local/private defaults for http://127.0.0.1:8888/.
+
+use_default_settings: true
+
+general:
+  debug: false
+  instance_name: "MinaFox Search"
+  privacypolicy_url: false
+  donation_url: false
+  contact_url: false
+  enable_metrics: false
+
+brand:
+  issue_url: false
+  docs_url: https://docs.searxng.org/
+  public_instances: false
+  wiki_url: false
+
+search:
+  safe_search: 1
+  autocomplete: "duckduckgo"
+  autocomplete_min: 3
+  default_lang: "en"
+  ban_time_on_fail: 5
+  max_ban_time_on_fail: 120
+  formats:
+    - html
+
+server:
+  bind_address: "0.0.0.0"
+  port: 8080
+  base_url: "http://127.0.0.1:8888/"
+  secret_key: "MINAFOX_CHANGE_ME_WITH_INSTALLER"
+  limiter: true
+  image_proxy: true
+  method: POST
+
+ui:
+  static_use_hash: true
+  default_locale: "en"
+  default_theme: simple
+  center_alignment: true
+  cache_url: false
+  hotkeys: default
+  query_in_title: false
+  infinite_scroll: false
+  search_on_category_select: false
+  theme_args:
+    simple_style: minafox
+
+outgoing:
+  request_timeout: 3.0
+  max_request_timeout: 10.0
+  useragent_suffix: "MinaFox"
+  pool_connections: 100
+  pool_maxsize: 20
+  enable_http2: true
+
+categories_as_tabs:
+  general:
+  images:
+  videos:
+  news:
+  map:
+  music:
+  it:
+  science:
+  files:
+  social media:

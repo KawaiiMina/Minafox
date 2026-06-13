@@ -1,0 +1,251 @@
+/* MinaFox SearXNG theme for the upstream Simple theme.
+   Design language: calm Zen-like minimalism, Arc-like panels, kawaii pink/purple
+   MinaFox identity, and strong keyboard focus states. */
+
+:root {
+  color-scheme: dark;
+  --mf-bg: #15111f;
+  --mf-bg-deep: #0f0c18;
+  --mf-ink: #fff7ff;
+  --mf-muted: #d7c8e8;
+  --mf-lavender: #cba6f7;
+  --mf-violet: #8b5cf6;
+  --mf-pink: #f5c2e7;
+  --mf-rose: #ff79c6;
+  --mf-blue: #89b4fa;
+  --mf-glass: rgba(42, 34, 58, 0.70);
+  --mf-glass-strong: rgba(63, 48, 86, 0.84);
+  --mf-border: rgba(245, 194, 231, 0.24);
+  --mf-glow: 0 0 22px rgba(245, 194, 231, 0.28), 0 0 42px rgba(139, 92, 246, 0.16);
+  --color-base-background: var(--mf-bg);
+  --color-base-font: var(--mf-ink);
+  --color-url-font: var(--mf-lavender);
+  --color-result-link-font: var(--mf-pink);
+  --color-result-link-visited-font: var(--mf-lavender);
+  --color-search-background: rgba(13, 10, 22, 0.62);
+  --color-search-border: var(--mf-border);
+  --color-search-shadow: var(--mf-glow);
+  --color-btn-background: linear-gradient(135deg, var(--mf-pink), var(--mf-lavender));
+  --color-btn-font: #1b1026;
+  --color-categories-item-selected-font: var(--mf-ink);
+  --color-categories-item-selected-border: var(--mf-pink);
+  --color-categories-item-border: rgba(203, 166, 247, 0.22);
+  --color-result-background: transparent;
+  --color-result-border: var(--mf-border);
+  --color-result-content-font: var(--mf-muted);
+  --color-result-publishdate-font: rgba(215, 200, 232, 0.70);
+  --color-result-engines-font: rgba(215, 200, 232, 0.70);
+}
+
+html,
+body {
+  min-height: 100%;
+  background:
+    radial-gradient(circle at 16% 8%, rgba(245, 194, 231, 0.24), transparent 30%),
+    radial-gradient(circle at 82% 12%, rgba(139, 92, 246, 0.22), transparent 30%),
+    radial-gradient(circle at 54% 88%, rgba(203, 166, 247, 0.15), transparent 34%),
+    linear-gradient(135deg, var(--mf-bg) 0%, #211936 48%, var(--mf-bg-deep) 100%) !important;
+  color: var(--mf-ink) !important;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body,
+main,
+#main_index,
+#main_results {
+  color: var(--mf-ink) !important;
+}
+
+#main_index,
+#main_results {
+  width: min(1080px, calc(100% - 28px));
+  margin-inline: auto;
+}
+
+#main_index {
+  min-height: 88vh;
+  display: grid;
+  align-content: center;
+}
+
+#main_index h1,
+#main_results h1 {
+  letter-spacing: -0.055em;
+  text-shadow: 0 0 36px rgba(245, 194, 231, 0.26);
+}
+
+#search,
+.search_box,
+#categories,
+.result,
+.suggestions,
+.infobox,
+#pagination,
+#preferences,
+.dialog-modal,
+#sidebar_results {
+  border: 1px solid var(--mf-border) !important;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)), var(--mf-glass) !important;
+  box-shadow: 0 24px 80px rgba(5, 3, 12, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(20px) saturate(145%);
+}
+
+#search,
+.search_box {
+  border-radius: 24px !important;
+  padding: clamp(10px, 2vw, 16px) !important;
+}
+
+#q,
+#search input[type="text"],
+#search input[type="search"] {
+  min-height: 3.2rem;
+  border: 1px solid rgba(203, 166, 247, 0.28) !important;
+  border-radius: 18px !important;
+  background: rgba(13, 10, 22, 0.62) !important;
+  color: var(--mf-ink) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+#q::placeholder,
+#search input::placeholder {
+  color: rgba(215, 200, 232, 0.72) !important;
+}
+
+button,
+input[type="submit"],
+#search button,
+.btn {
+  border: 0 !important;
+  border-radius: 16px !important;
+  background: linear-gradient(135deg, var(--mf-pink), var(--mf-lavender)) !important;
+  color: #1b1026 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 14px 30px rgba(245, 194, 231, 0.18) !important;
+}
+
+button:hover,
+input[type="submit"]:hover,
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--mf-glow) !important;
+}
+
+#categories {
+  border-radius: 999px !important;
+  margin-block: 18px !important;
+  padding: 8px !important;
+}
+
+#categories a,
+.category_button,
+.category {
+  border-radius: 999px !important;
+  color: var(--mf-muted) !important;
+  font-weight: 750 !important;
+}
+
+#categories .selected,
+#categories a[aria-current="page"],
+.category_button.selected {
+  background: linear-gradient(135deg, rgba(203, 166, 247, 0.38), rgba(245, 194, 231, 0.26)) !important;
+  color: var(--mf-ink) !important;
+  box-shadow: var(--mf-glow), inset 0 0 0 1px rgba(255, 255, 255, 0.16) !important;
+}
+
+.result {
+  border-radius: 24px !important;
+  margin-block: 14px !important;
+  padding: clamp(16px, 2.4vw, 24px) !important;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.result:hover,
+.result:focus-within {
+  transform: translateY(-2px);
+  border-color: rgba(245, 194, 231, 0.46) !important;
+  background: linear-gradient(145deg, rgba(245, 194, 231, 0.14), rgba(203, 166, 247, 0.08)), var(--mf-glass-strong) !important;
+  box-shadow: 0 18px 48px rgba(7, 4, 18, 0.34), 0 0 28px rgba(245, 194, 231, 0.16) !important;
+}
+
+.result h3,
+.result h3 a,
+.result .url_header a {
+  color: var(--mf-pink) !important;
+  text-decoration-color: rgba(245, 194, 231, 0.42) !important;
+  text-underline-offset: 0.18em;
+}
+
+.result-content,
+.result p,
+.result .content,
+.result .published_date,
+.result .engines {
+  color: var(--mf-muted) !important;
+  line-height: 1.65;
+}
+
+.result .url,
+.result .result_url,
+.result cite {
+  color: var(--mf-lavender) !important;
+}
+
+.suggestions,
+.infobox,
+#pagination,
+#preferences,
+.dialog-modal {
+  border-radius: 24px !important;
+  color: var(--mf-muted) !important;
+  padding: 16px !important;
+}
+
+.suggestions a,
+.infobox a,
+#pagination a {
+  color: var(--mf-pink) !important;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.result:focus-within {
+  outline: 3px solid rgba(245, 194, 231, 0.50) !important;
+  outline-offset: 3px !important;
+  border-color: rgba(245, 194, 231, 0.74) !important;
+  box-shadow: 0 0 0 6px rgba(139, 92, 246, 0.18), 0 0 32px rgba(245, 194, 231, 0.22) !important;
+}
+
+footer,
+#footer,
+#answers,
+#corrections {
+  color: rgba(215, 200, 232, 0.76) !important;
+}
+
+@media (max-width: 760px) {
+  #main_index,
+  #main_results {
+    width: min(100% - 20px, 1080px);
+  }
+
+  #categories {
+    border-radius: 24px !important;
+  }
+
+  .result,
+  .suggestions,
+  .infobox {
+    border-radius: 20px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}

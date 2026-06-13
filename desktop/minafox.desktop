@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Name=MinaFox
+Comment=Custom Firefox profile for Mina
+GenericName=Web Browser
+Exec=env MOZ_ENABLE_WAYLAND=1 firefox --name minafox --class MinaFox --profile %h/.mozilla/firefox/minafox
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=minafox
+Categories=Network;WebBrowser;
+MimeType=text/html;text/xml;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;
+StartupWMClass=MinaFox
