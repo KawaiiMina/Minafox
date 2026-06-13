@@ -1,8 +1,10 @@
-# MinaFox — custom Firefox distribution starter
+# MinaFox — standalone Firefox distribution starter
 
 This is a practical custom Firefox distribution/profile scaffold for an Arch + Hyprland desktop.
 
-It is **not** a full Firefox fork yet. It starts with the maintainable profile/distribution layer plus a local MinaFox SearXNG search overlay.
+MinaFox is currently in its **Standalone wrapper** phase: installing the repo gives you a dedicated `minafox` launcher, desktop entry, icon identity, profile namespace, themed start page, and policy/profile hardening while using the system Firefox binary underneath.
+
+It is **not** a full Firefox source fork yet. The plan is: Standalone wrapper now, Arch package next, source fork later after the wrapper distribution is reliable.
 
 ## Repository layout
 
@@ -15,7 +17,7 @@ The GitHub repo is organized around the installable pieces:
   - `assets/icons/hicolor/` — Linux icon-theme layout copied during install.
 - `desktop/` — desktop-facing files.
   - `desktop/start.html` — local MinaFox start page that submits searches to local SearXNG.
-  - `desktop/minafox.desktop` — Linux desktop launcher.
+  - `desktop/minafox.desktop` — Linux desktop launcher that calls `minafox`.
 - `distribution/` — Firefox enterprise policy files.
   - `distribution/policies.json` — extension policy, telemetry/studies shutdown, locked prefs.
 - `profile/` — files copied into the dedicated Firefox profile.
@@ -23,8 +25,10 @@ The GitHub repo is organized around the installable pieces:
   - `profile/userChrome.css` — MinaFox browser-chrome theme.
   - `profile/userContent.css` — scoped content styling for Firefox start surfaces and local MinaFox page.
 - `scripts/` — install and validation helpers.
-  - `scripts/install-minafox-arch.sh` — installs/updates the MinaFox Firefox profile assets.
+  - `scripts/install-minafox-arch.sh` — installs/updates the MinaFox Firefox profile assets and the user-local `minafox` launcher.
+  - `scripts/minafox-launcher.sh` — Wayland-friendly standalone wrapper around the system Firefox binary.
   - `scripts/install-minafox-searxng-arch.sh` — starts the local MinaFox SearXNG service with Docker/Podman Compose.
+  - `scripts/validate-minafox-standalone.py` — validates the `minafox` launcher, desktop entry, installer wiring, and docs.
   - `scripts/validate-minafox-ui.py` — validates theme/start-page structure.
   - `scripts/validate-no-host-paths.py` — validates that source files do not contain author-machine paths like hardcoded home directories.
   - `scripts/validate-no-firefox-telemetry.py` — validates telemetry prefs/policies.
@@ -39,6 +43,7 @@ The GitHub repo is organized around the installable pieces:
 
 ## What gets installed
 
+- User-local launcher: `~/.local/bin/minafox`
 - Firefox enterprise policies: `distribution/policies.json`
 - Dedicated profile prefs: `profile/user.js`
 - Optional UI CSS: `profile/userChrome.css` and `profile/userContent.css`
@@ -66,10 +71,16 @@ cd ~/Minafox
 Launch:
 
 ```bash
-firefox --profile ~/.mozilla/firefox/minafox
+minafox
 ```
 
-The desktop app is named **MinaFox**.
+If your shell does not find it yet, ensure your user-local bin directory is on `PATH`:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+The desktop app is named **MinaFox** and its desktop entry also launches `minafox`.
 
 ## Branding assets
 
@@ -95,20 +106,21 @@ Implemented theme files:
 - `profile/user.js` — enables `toolkit.legacyUserProfileCustomizations.stylesheets` so Firefox loads `userChrome.css`.
 - `scripts/validate-minafox-ui.py` — repeatable validation gate for the theme structure.
 
-Validate the theme files:
+Validate the theme and standalone wrapper files:
 
 ```bash
 cd ~/Minafox
 python3 scripts/validate-minafox-ui.py
+python3 scripts/validate-minafox-standalone.py
 python3 scripts/validate-no-host-paths.py
 ```
 
 Manual Firefox verification:
 
-1. Run `./scripts/install-minafox-arch.sh` to copy the profile/start page assets.
-2. Launch `firefox --profile ~/.mozilla/firefox/minafox`.
+1. Run `./scripts/install-minafox-arch.sh` to copy the profile/start page assets and install `~/.local/bin/minafox`.
+2. Launch `minafox`.
 3. Confirm the browser chrome uses the lavender/pink theme and the selected tab has a soft glow.
-4. Confirm the start page opens, the DuckDuckGo search form works, and quick links open.
+4. Confirm the start page opens, the local SearXNG search form works, and quick links open.
 5. Press `Tab` through the page; focus rings should be visible.
 6. Resize the window narrow/wide; cards should collapse cleanly on small widths.
 7. Open DevTools on the start page with `F12` or `Ctrl+Shift+I` and confirm no console errors.
@@ -196,23 +208,23 @@ Important limit: this removes/disables telemetry at the profile and enterprise-p
 For Hyprland Lua configs, adapt to your existing style:
 
 ```lua
-hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("env MOZ_ENABLE_WAYLAND=1 firefox --name minafox --class MinaFox --profile ~/.mozilla/firefox/minafox"))
+hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("minafox"))
 ```
 
 For legacy hyprland.conf:
 
 ```ini
-bind = $mod, B, exec, env MOZ_ENABLE_WAYLAND=1 firefox --name minafox --class MinaFox --profile ~/.mozilla/firefox/minafox
+bind = $mod, B, exec, minafox
 ```
 
 ## Next steps
 
-1. Pick the base: Firefox stable, Firefox ESR, or LibreWolf.
-2. Decide branding/name/icon.
-3. Add curated extensions.
-4. Add custom search shortcuts.
-5. Add vertical tabs / Sidebery if wanted.
-6. Later: make an Arch `PKGBUILD` that packages this config as `minafox-profile`.
+1. Add an Arch package skeleton for the standalone wrapper (`minafox-profile-git`).
+2. Continue the cosmic Arc/Zen-inspired start-page and chrome polish.
+3. Decide whether Sidebery should be force-installed by policy or documented as recommended.
+4. Decide whether local SearXNG should remain optional or become a packaged user service.
+5. After the wrapper and package are reliable, start the Firefox ESR source-fork proof-of-build.
+6. Later: move proven branding/defaults into the source fork and only then attempt native workspace UI.
 
 ## Notes
 

@@ -2,10 +2,12 @@
 set -euo pipefail
 
 APP_NAME="minafox"
+FIREFOX_BIN="${MINAFOX_FIREFOX_BIN:-firefox}"
 PROFILE_DIR="$HOME/.mozilla/firefox/$APP_NAME"
 START_DIR="$HOME/.local/share/$APP_NAME"
 DESKTOP_DIR="$HOME/.local/share/applications"
 ICON_DIR="$HOME/.local/share/icons/hicolor"
+BIN_DIR="$HOME/.local/bin"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 START_URL="$(python3 -c 'from pathlib import Path; print((Path.home() / ".local/share/minafox/start.html").as_uri())')"
 TMP_DIR="$(mktemp -d)"
@@ -17,7 +19,11 @@ render_template() {
   sed "s|__MINAFOX_START_URL__|$START_URL|g" "$src" > "$dest"
 }
 
-if ! command -v firefox >/dev/null 2>&1; then
+if ! command -v "$FIREFOX_BIN" >/dev/null 2>&1; then
+  if [[ "$FIREFOX_BIN" != "firefox" ]]; then
+    echo "Configured Firefox binary not found: $FIREFOX_BIN" >&2
+    exit 127
+  fi
   if command -v pacman >/dev/null 2>&1; then
     echo "Firefox is not installed. Installing via pacman..."
     sudo pacman -S --needed firefox
@@ -27,7 +33,8 @@ if ! command -v firefox >/dev/null 2>&1; then
   fi
 fi
 
-mkdir -p "$PROFILE_DIR/chrome" "$START_DIR" "$DESKTOP_DIR" "$ICON_DIR"
+mkdir -p "$PROFILE_DIR/chrome" "$START_DIR" "$DESKTOP_DIR" "$ICON_DIR" "$BIN_DIR"
+install -m 0755 "$ROOT_DIR/scripts/minafox-launcher.sh" "$BIN_DIR/minafox"
 render_template "$ROOT_DIR/profile/user.js" "$PROFILE_DIR/user.js"
 cp "$ROOT_DIR/profile/userChrome.css" "$PROFILE_DIR/chrome/userChrome.css"
 render_template "$ROOT_DIR/profile/userContent.css" "$PROFILE_DIR/chrome/userContent.css"
@@ -39,7 +46,7 @@ fi
 
 # Create/update profiles.ini entry if Firefox has not seen this profile yet.
 if ! grep -R -F "Path=$PROFILE_DIR" "$HOME/.mozilla/firefox/profiles.ini" >/dev/null 2>&1; then
-  firefox --CreateProfile "minafox $PROFILE_DIR" >/dev/null 2>&1 || true
+  "$FIREFOX_BIN" --CreateProfile "minafox $PROFILE_DIR" >/dev/null 2>&1 || true
 fi
 
 # Install enterprise policies for the Firefox package when possible.
@@ -60,6 +67,7 @@ update-desktop-database "$DESKTOP_DIR" >/dev/null 2>&1 || true
 gtk-update-icon-cache "$ICON_DIR" >/dev/null 2>&1 || true
 
 echo "Installed MinaFox profile: $PROFILE_DIR"
-echo "Launch with: firefox --profile '$PROFILE_DIR'"
+echo "Launch with: minafox"
+echo "Launcher installed at: $BIN_DIR/minafox"
 echo "Desktop entry: $DESKTOP_DIR/minafox.desktop"
 echo "Icons installed under: $ICON_DIR/*/apps/minafox.png"
