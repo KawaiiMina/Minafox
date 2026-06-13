@@ -2,7 +2,41 @@
 
 This is a practical custom Firefox distribution/profile scaffold for an Arch + Hyprland desktop.
 
-It is **not** a full Firefox fork yet. It starts with the maintainable layer:
+It is **not** a full Firefox fork yet. It starts with the maintainable profile/distribution layer plus a local MinaFox SearXNG search overlay.
+
+## Repository layout
+
+The GitHub repo is organized around the installable pieces:
+
+- `assets/` — MinaFox logo sources and generated app icons.
+  - `assets/minafox-logo-transparent.png` — transparent master PNG.
+  - `assets/minafox-logo.svg` — SVG-style logo wrapper.
+  - `assets/icons/` — generated PNG/ICO app icons.
+  - `assets/icons/hicolor/` — Linux icon-theme layout copied during install.
+- `desktop/` — desktop-facing files.
+  - `desktop/start.html` — local MinaFox start page that submits searches to local SearXNG.
+  - `desktop/minafox.desktop` — Linux desktop launcher.
+- `distribution/` — Firefox enterprise policy files.
+  - `distribution/policies.json` — extension policy, telemetry/studies shutdown, locked prefs.
+- `profile/` — files copied into the dedicated Firefox profile.
+  - `profile/user.js` — Firefox profile prefs, privacy hardening, chrome CSS enablement.
+  - `profile/userChrome.css` — MinaFox browser-chrome theme.
+  - `profile/userContent.css` — scoped content styling for Firefox start surfaces and local MinaFox page.
+- `scripts/` — install and validation helpers.
+  - `scripts/install-minafox-arch.sh` — installs/updates the MinaFox Firefox profile assets.
+  - `scripts/install-minafox-searxng-arch.sh` — starts the local MinaFox SearXNG service with Docker/Podman Compose.
+  - `scripts/validate-minafox-ui.py` — validates theme/start-page structure.
+  - `scripts/validate-no-firefox-telemetry.py` — validates telemetry prefs/policies.
+  - `scripts/validate-minafox-searxng.py` — validates the SearXNG overlay.
+- `searxng/` — local private search overlay.
+  - `searxng/Dockerfile` — builds from upstream `searxng/searxng` and copies the MinaFox overlay.
+  - `searxng/docker-compose.yml` — localhost-only service on `127.0.0.1:8888`.
+  - `searxng/settings.yml` — privacy-first SearXNG settings.
+  - `searxng/uwsgi.ini` — SearXNG container runtime config.
+  - `searxng/theme/minafox.css` — MinaFox Simple-theme stylesheet.
+  - `searxng/README.md` — SearXNG-specific run/update notes.
+
+## What gets installed
 
 - Firefox enterprise policies: `distribution/policies.json`
 - Dedicated profile prefs: `profile/user.js`
@@ -10,20 +44,21 @@ It is **not** a full Firefox fork yet. It starts with the maintainable layer:
 - Local quiet start page: `desktop/start.html`
 - Desktop launcher: `desktop/minafox.desktop`
 - MinaFox app icons and logo assets: `assets/`
-- Arch install helper: `scripts/install-minafox-arch.sh`
+- Local SearXNG overlay: `searxng/`
+- Arch install helpers: `scripts/install-minafox-arch.sh` and `scripts/install-minafox-searxng-arch.sh`
 
 ## Install on Arch
 
 ```bash
-git clone <this-folder-or-copy-it> ~/custom-firefox-distro
-cd ~/custom-firefox-distro
+git clone git@github.com:KawaiiMina/Minafox.git ~/Minafox
+cd ~/Minafox
 ./scripts/install-minafox-arch.sh
 ```
 
 Or if this folder is already present:
 
 ```bash
-cd /home/hermes/custom-firefox-distro
+cd ~/Minafox
 ./scripts/install-minafox-arch.sh
 ```
 
@@ -54,7 +89,7 @@ The current visual direction is a hybrid of calm Zen-like minimalism and Arc-lik
 Implemented theme files:
 
 - `profile/userChrome.css` — Firefox chrome theme: dark lavender glass, rounded URL bar, soft tab pills, pink/violet active glow, and sidebar/bookmarks styling.
-- `desktop/start.html` — cozy local start page with a centered DuckDuckGo search bar, workspace bubbles, and quick-link cards.
+- `desktop/start.html` — cozy local start page with a centered MinaFox SearXNG search bar, workspace bubbles, and quick-link cards.
 - `profile/userContent.css` — scoped support styling for `about:home`, `about:newtab`, and the local MinaFox start page only.
 - `profile/user.js` — enables `toolkit.legacyUserProfileCustomizations.stylesheets` so Firefox loads `userChrome.css`.
 - `scripts/validate-minafox-ui.py` — repeatable validation gate for the theme structure.
@@ -62,7 +97,7 @@ Implemented theme files:
 Validate the theme files:
 
 ```bash
-cd /home/hermes/custom-firefox-distro
+cd ~/Minafox
 python3 scripts/validate-minafox-ui.py
 ```
 
@@ -96,7 +131,7 @@ Implemented SearXNG files:
 Start local search:
 
 ```bash
-cd /home/hermes/custom-firefox-distro
+cd ~/Minafox
 ./scripts/install-minafox-searxng-arch.sh
 ```
 
@@ -109,7 +144,7 @@ http://127.0.0.1:8888/
 Validate the SearXNG overlay:
 
 ```bash
-cd /home/hermes/custom-firefox-distro
+cd ~/Minafox
 python3 scripts/validate-minafox-searxng.py
 ```
 
@@ -148,7 +183,7 @@ MinaFox now disables Firefox telemetry/reporting at both layers:
 Validate the telemetry removal gate:
 
 ```bash
-cd /home/hermes/custom-firefox-distro
+cd ~/Minafox
 python3 scripts/validate-no-firefox-telemetry.py
 ```
 
