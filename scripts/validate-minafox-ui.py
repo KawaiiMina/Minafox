@@ -181,7 +181,7 @@ def validate_user_content(failures: list[str]) -> str:
             "@-moz-document",
             'url("about:home")',
             'url("about:newtab")',
-            'url-prefix("file:///home/hermes/.local/share/minafox/start.html")',
+            'url-prefix("__MINAFOX_START_URL__")',
             ":focus-visible",
         ],
         failures,

@@ -22,7 +22,7 @@ Design goals:
 From the repo root, prefer the helper so the local SearXNG secret is generated safely:
 
 ```bash
-cd /home/hermes/custom-firefox-distro
+cd ~/Minafox
 ./scripts/install-minafox-searxng-arch.sh
 ```
 
@@ -37,7 +37,7 @@ http://127.0.0.1:8888/
 If you want to run Compose directly, create a local runtime settings file first so SearXNG does not use the checked-in placeholder secret:
 
 ```bash
-cd /home/hermes/custom-firefox-distro/searxng
+cd ~/Minafox/searxng
 printf 'SEARXNG_SECRET_KEY=%s\n' "$(openssl rand -hex 32)" > .env
 sed "s/MINAFOX_CHANGE_ME_WITH_INSTALLER/$(cut -d= -f2- .env)/g" settings.yml > settings.yml.local
 MINAFOX_SEARXNG_SETTINGS=./settings.yml.local docker compose up -d --build
@@ -78,7 +78,7 @@ The helper:
 ## Stop / update
 
 ```bash
-cd /home/hermes/custom-firefox-distro/searxng
+cd ~/Minafox/searxng
 docker compose down
 # or: podman compose down
 

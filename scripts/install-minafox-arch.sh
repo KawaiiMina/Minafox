@@ -7,6 +7,15 @@ START_DIR="$HOME/.local/share/$APP_NAME"
 DESKTOP_DIR="$HOME/.local/share/applications"
 ICON_DIR="$HOME/.local/share/icons/hicolor"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+START_URL="$(python3 -c 'from pathlib import Path; print((Path.home() / ".local/share/minafox/start.html").as_uri())')"
+TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
+
+render_template() {
+  local src="$1"
+  local dest="$2"
+  sed "s|__MINAFOX_START_URL__|$START_URL|g" "$src" > "$dest"
+}
 
 if ! command -v firefox >/dev/null 2>&1; then
   if command -v pacman >/dev/null 2>&1; then
@@ -19,9 +28,9 @@ if ! command -v firefox >/dev/null 2>&1; then
 fi
 
 mkdir -p "$PROFILE_DIR/chrome" "$START_DIR" "$DESKTOP_DIR" "$ICON_DIR"
-cp "$ROOT_DIR/profile/user.js" "$PROFILE_DIR/user.js"
+render_template "$ROOT_DIR/profile/user.js" "$PROFILE_DIR/user.js"
 cp "$ROOT_DIR/profile/userChrome.css" "$PROFILE_DIR/chrome/userChrome.css"
-cp "$ROOT_DIR/profile/userContent.css" "$PROFILE_DIR/chrome/userContent.css"
+render_template "$ROOT_DIR/profile/userContent.css" "$PROFILE_DIR/chrome/userContent.css"
 cp "$ROOT_DIR/desktop/start.html" "$START_DIR/start.html"
 cp "$ROOT_DIR/desktop/minafox.desktop" "$DESKTOP_DIR/minafox.desktop"
 if [[ -d "$ROOT_DIR/assets/icons/hicolor" ]]; then
@@ -29,19 +38,20 @@ if [[ -d "$ROOT_DIR/assets/icons/hicolor" ]]; then
 fi
 
 # Create/update profiles.ini entry if Firefox has not seen this profile yet.
-if ! grep -R "Path=$PROFILE_DIR" "$HOME/.mozilla/firefox/profiles.ini" >/dev/null 2>&1; then
+if ! grep -R -F "Path=$PROFILE_DIR" "$HOME/.mozilla/firefox/profiles.ini" >/dev/null 2>&1; then
   firefox --CreateProfile "minafox $PROFILE_DIR" >/dev/null 2>&1 || true
 fi
 
 # Install enterprise policies for the Firefox package when possible.
+render_template "$ROOT_DIR/distribution/policies.json" "$TMP_DIR/policies.json"
 if [[ -d /usr/lib/firefox ]]; then
   echo "Installing Firefox policies to /usr/lib/firefox/distribution (sudo required)."
   sudo mkdir -p /usr/lib/firefox/distribution
-  sudo cp "$ROOT_DIR/distribution/policies.json" /usr/lib/firefox/distribution/policies.json
+  sudo cp "$TMP_DIR/policies.json" /usr/lib/firefox/distribution/policies.json
 elif [[ -d /usr/lib64/firefox ]]; then
   echo "Installing Firefox policies to /usr/lib64/firefox/distribution (sudo required)."
   sudo mkdir -p /usr/lib64/firefox/distribution
-  sudo cp "$ROOT_DIR/distribution/policies.json" /usr/lib64/firefox/distribution/policies.json
+  sudo cp "$TMP_DIR/policies.json" /usr/lib64/firefox/distribution/policies.json
 else
   echo "Could not find Firefox install dir; profile installed, policies skipped." >&2
 fi

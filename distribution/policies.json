@@ -15,7 +15,7 @@
     "OverrideFirstRunPage": "",
     "OverridePostUpdatePage": "",
     "Homepage": {
-      "URL": "file:///home/hermes/.local/share/minafox/start.html",
+      "URL": "__MINAFOX_START_URL__",
       "Locked": false,
       "StartPage": "homepage"
     },

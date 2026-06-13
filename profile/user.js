@@ -6,7 +6,7 @@ user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 // Privacy / quiet startup
 user_pref("browser.shell.checkDefaultBrowser", false);
 user_pref("browser.startup.page", 1);
-user_pref("browser.startup.homepage", "file:///home/hermes/.local/share/minafox/start.html");
+user_pref("browser.startup.homepage", "__MINAFOX_START_URL__");
 
 // Telemetry / Mozilla data reporting off.
 // This disables collection/upload/reporting surfaces available at profile level.

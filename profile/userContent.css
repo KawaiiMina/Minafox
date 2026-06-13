@@ -1,5 +1,5 @@
 /* MinaFox content defaults. Scoped to Firefox internal start surfaces and the local MinaFox start page only. */
-@-moz-document url("about:home"), url("about:newtab"), url-prefix("file:///home/hermes/.local/share/minafox/start.html") {
+@-moz-document url("about:home"), url("about:newtab"), url-prefix("__MINAFOX_START_URL__") {
   :root {
     color-scheme: dark !important;
     --mf-content-bg: #15111f;

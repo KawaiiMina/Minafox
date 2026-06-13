@@ -26,6 +26,7 @@ The GitHub repo is organized around the installable pieces:
   - `scripts/install-minafox-arch.sh` — installs/updates the MinaFox Firefox profile assets.
   - `scripts/install-minafox-searxng-arch.sh` — starts the local MinaFox SearXNG service with Docker/Podman Compose.
   - `scripts/validate-minafox-ui.py` — validates theme/start-page structure.
+  - `scripts/validate-no-host-paths.py` — validates that source files do not contain author-machine paths like hardcoded home directories.
   - `scripts/validate-no-firefox-telemetry.py` — validates telemetry prefs/policies.
   - `scripts/validate-minafox-searxng.py` — validates the SearXNG overlay.
 - `searxng/` — local private search overlay.
@@ -99,6 +100,7 @@ Validate the theme files:
 ```bash
 cd ~/Minafox
 python3 scripts/validate-minafox-ui.py
+python3 scripts/validate-no-host-paths.py
 ```
 
 Manual Firefox verification:
@@ -194,7 +196,7 @@ Important limit: this removes/disables telemetry at the profile and enterprise-p
 For Hyprland Lua configs, adapt to your existing style:
 
 ```lua
-hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("env MOZ_ENABLE_WAYLAND=1 firefox --name minafox --class MinaFox --profile /home/wilhelmina/.mozilla/firefox/minafox"))
+hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("env MOZ_ENABLE_WAYLAND=1 firefox --name minafox --class MinaFox --profile ~/.mozilla/firefox/minafox"))
 ```
 
 For legacy hyprland.conf:
