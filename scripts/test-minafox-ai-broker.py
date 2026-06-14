@@ -113,6 +113,34 @@ class MinaFoxAIBrokerTests(unittest.TestCase):
         self.assertEqual(status, 413)
         self.assertEqual(body["error"], "prompt_too_large")
 
+    def test_non_loopback_bind_requires_explicit_lan_flag(self) -> None:
+        with mock.patch.dict(os.environ, {"MINAFOX_AI_BROKER_HOST": "0.0.0.0", "MINAFOX_AI_BROKER_ALLOW_LAN": ""}, clear=False):
+            self.assertFalse(self.broker.broker_bind_allowed("0.0.0.0"))
+
+        with mock.patch.dict(os.environ, {"MINAFOX_AI_BROKER_HOST": "0.0.0.0", "MINAFOX_AI_BROKER_ALLOW_LAN": "1"}, clear=False):
+            self.assertTrue(self.broker.broker_bind_allowed("0.0.0.0"))
+
+    def test_cors_allows_explicit_lan_origin_without_wildcard(self) -> None:
+        with mock.patch.dict(os.environ, {"MINAFOX_AI_BROKER_ALLOWED_ORIGINS": "http://192.0.2.10:8766", "MINAFOX_AI_BROKER_ALLOW_LAN": "1"}, clear=False):
+            origins = self.broker.allowed_cors_origins()
+
+        self.assertIn("http://192.0.2.10:8766", origins)
+        self.assertIn("http://127.0.0.1:8765", origins)
+        self.assertNotIn("null", origins)
+        self.assertNotIn("file://", origins)
+        self.assertNotIn("*", origins)
+
+    def test_lan_bind_requires_explicit_cors_origin(self) -> None:
+        with mock.patch.dict(os.environ, {"MINAFOX_AI_BROKER_ALLOW_LAN": "1", "MINAFOX_AI_BROKER_ALLOWED_ORIGINS": ""}, clear=False):
+            self.assertFalse(self.broker.broker_cors_config_allowed("0.0.0.0"))
+
+        with mock.patch.dict(os.environ, {"MINAFOX_AI_BROKER_ALLOW_LAN": "1", "MINAFOX_AI_BROKER_ALLOWED_ORIGINS": "null,file://,*,not-a-url"}, clear=False):
+            self.assertFalse(self.broker.broker_cors_config_allowed("0.0.0.0"))
+            self.assertEqual(self.broker.configured_cors_origins(), set())
+
+        with mock.patch.dict(os.environ, {"MINAFOX_AI_BROKER_ALLOW_LAN": "1", "MINAFOX_AI_BROKER_ALLOWED_ORIGINS": "http://192.0.2.10:8766"}, clear=False):
+            self.assertTrue(self.broker.broker_cors_config_allowed("0.0.0.0"))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

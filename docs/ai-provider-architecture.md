@@ -92,3 +92,46 @@ The start page then enables only the Ollama prompt controls through
 `http://127.0.0.1:8765/chat`. Cloud providers remain metadata-only until secrets
 storage is implemented, and Hermes Gateway remains detection-only until a
 separate pairing/auth and tool-safety UX exists.
+
+## Android/LAN UX harness
+
+Firefox for Android does not load the desktop `userChrome.css` wrapper, so MinaFox
+uses a browser-facing **Android/LAN UX harness** for responsive testing instead of
+building a full Firefox/Fenix APK during early UI work.
+
+The harness serves `desktop/start.html` and injects runtime service URLs before
+the start-page script runs:
+
+```text
+Android browser
+  -> http://<desktop-or-tailscale-host>:8766/
+MinaFox mobile harness
+  -> configured SearXNG base URL
+  -> configured minafox-ai-broker URL
+```
+
+Desktop defaults stay loopback-first. Android test mode must be explicit because
+`127.0.0.1` from a phone means the phone itself, not the desktop running SearXNG,
+Ollama, or the broker.
+
+Example trusted-LAN test commands:
+
+```bash
+python3 scripts/serve-minafox-mobile.py \
+  --host 0.0.0.0 \
+  --mode lan-test \
+  --search-base-url http://<desktop-lan-ip>:8888 \
+  --search-action-url http://<desktop-lan-ip>:8888/search \
+  --ai-broker-url http://<desktop-lan-ip>:8765
+
+MINAFOX_AI_BROKER_ALLOW_LAN=1 \
+MINAFOX_AI_BROKER_ALLOWED_ORIGINS=http://<desktop-lan-ip>:8766 \
+MINAFOX_AI_ENABLE_OLLAMA_CHAT=1 \
+MINAFOX_AI_BROKER_HOST=0.0.0.0 \
+./scripts/minafox-ai-broker.sh
+```
+
+LAN broker access is for trusted local/Tailscale testing only. The broker refuses
+non-loopback binds unless `MINAFOX_AI_BROKER_ALLOW_LAN=1` is set, and CORS uses
+`MINAFOX_AI_BROKER_ALLOWED_ORIGINS` rather than `*`. Do not put cloud provider
+keys in the harness, start page, browser storage, or static assets.

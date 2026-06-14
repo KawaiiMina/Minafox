@@ -914,6 +914,34 @@
     const actionStatus = document.querySelector("[data-action-status]");
     const searchForm = document.querySelector("#minafox-search-form");
     const searchInput = document.querySelector("#search-q");
+    const minafoxRuntimeConfig = window.MINAFOX_RUNTIME_CONFIG || {};
+    const searchBaseUrl = normalizeServiceUrl(minafoxRuntimeConfig.searchBaseUrl || "http://127.0.0.1:8888");
+    const searchActionUrl = normalizeServiceUrl(minafoxRuntimeConfig.searchActionUrl || `${searchBaseUrl}/search`);
+    const aiBrokerUrl = normalizeServiceUrl(minafoxRuntimeConfig.aiBrokerUrl || "http://127.0.0.1:8765");
+    const runtimeMode = minafoxRuntimeConfig.mode || "desktop-local";
+
+    function normalizeServiceUrl(url) {
+      return String(url || "").replace(/\/+$/, "");
+    }
+
+    function applyRuntimeConfig() {
+      if (searchForm) searchForm.action = searchActionUrl;
+      document.querySelectorAll('a[href="http://127.0.0.1:8888/"]').forEach((link) => {
+        link.href = `${searchBaseUrl}/`;
+      });
+      const subtitle = document.querySelector(".hero-card .subtitle");
+      if (subtitle && runtimeMode !== "desktop-local") {
+        subtitle.textContent = `A calm private launchpad for search, cozy focus, and your most-used browser spaces. Android/LAN test mode points search to ${searchBaseUrl}.`;
+      }
+      const aiStatus = document.querySelector("[data-ai-status]");
+      if (aiStatus && runtimeMode !== "desktop-local") {
+        aiStatus.textContent = `No API keys live in this static page. Android/LAN test mode will check the MinaFox broker at ${aiBrokerUrl}.`;
+      }
+      const searchStatus = document.querySelector("[data-search-status]");
+      if (searchStatus) searchStatus.textContent = `Checking MinaFox Search on ${searchBaseUrl}…`;
+    }
+
+    applyRuntimeConfig();
 
     function setSearchCategory(category) {
       if (!searchForm || !category) return;
@@ -1013,7 +1041,7 @@
       aiSendButton.disabled = true;
       aiResponse.textContent = "Mina is thinking locally…";
       try {
-        const response = await fetch("http://127.0.0.1:8765/chat", {
+        const response = await fetch(`${aiBrokerUrl}/chat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ provider: "ollama", prompt }),
@@ -1035,9 +1063,9 @@
       const dot = document.querySelector("[data-search-status-dot]");
       if (!status || !dot) return;
       try {
-        await fetch("http://127.0.0.1:8888/", { cache: "no-store", mode: "no-cors" });
+        await fetch(`${searchBaseUrl}/`, { cache: "no-store", mode: "no-cors" });
         dot.classList.add("is-online");
-        status.textContent = "MinaFox Search is reachable locally.";
+        status.textContent = `MinaFox Search is reachable at ${searchBaseUrl}.`;
       } catch (error) {
         dot.classList.add("is-offline");
         status.textContent = "MinaFox Search is offline. Copy the status command or start the user service.";
@@ -1049,8 +1077,8 @@
       if (!status) return;
       try {
         const [providersResponse, hermesResponse] = await Promise.all([
-          fetch("http://127.0.0.1:8765/providers", { cache: "no-store" }),
-          fetch("http://127.0.0.1:8765/hermes/health", { cache: "no-store" }),
+          fetch(`${aiBrokerUrl}/providers`, { cache: "no-store" }),
+          fetch(`${aiBrokerUrl}/hermes/health`, { cache: "no-store" }),
         ]);
         if (!providersResponse.ok) throw new Error("providers unavailable");
         const providers = await providersResponse.json();
@@ -1067,14 +1095,14 @@
             ? "Local Ollama is ready through the localhost broker. Cloud and Hermes modes remain disabled."
             : ollamaDetected
               ? "Broker sees Ollama, but chat is safely paused. Restart minafox-ai-broker with MINAFOX_AI_ENABLE_OLLAMA_CHAT=1 to test chat."
-              : "Broker is awake, but local Ollama is offline or not reachable on 127.0.0.1:11434."
+              : `Broker is awake at ${aiBrokerUrl}, but local Ollama is offline or not reachable from the broker.`
         );
         status.textContent = hermesAvailable
-          ? `minafox-ai-broker is awake on 127.0.0.1:8765. ${count} providers known. Local Ollama ${ollamaReady ? "chat is enabled" : ollamaDetected ? "is detected, but chat is paused" : "is not reachable"}. Hermes API Server is reachable; Hermes chat remains safety-disabled.`
-          : `minafox-ai-broker is awake on 127.0.0.1:8765. ${count} providers known. Local Ollama ${ollamaReady ? "chat is enabled" : ollamaDetected ? "is detected, but chat is paused" : "is not reachable"}. Hermes API Server is not reachable yet; Hermes chat remains safety-disabled.`;
+          ? `minafox-ai-broker is awake at ${aiBrokerUrl}. ${count} providers known. Local Ollama ${ollamaReady ? "chat is enabled" : ollamaDetected ? "is detected, but chat is paused" : "is not reachable"}. Hermes API Server is reachable; Hermes chat remains safety-disabled.`
+          : `minafox-ai-broker is awake at ${aiBrokerUrl}. ${count} providers known. Local Ollama ${ollamaReady ? "chat is enabled" : ollamaDetected ? "is detected, but chat is paused" : "is not reachable"}. Hermes API Server is not reachable yet; Hermes chat remains safety-disabled.`;
       } catch (error) {
-        setAiChatEnabled(false, "Broker offline. Start minafox-ai-broker for local Ollama chat detection.");
-        status.textContent = "No API keys live in this static page. Start minafox-ai-broker for provider detection. Hermes Gateway can trigger tool-capable agents, so chat stays disabled until explicit safety UX is added.";
+        setAiChatEnabled(false, `Broker unreachable at ${aiBrokerUrl}. If this is Android/LAN mode, make sure the phone can reach the desktop/Tailscale host — 127.0.0.1 on Android means the phone itself.`);
+        status.textContent = `No API keys live in this static page. Mina AI Den could not reach the broker at ${aiBrokerUrl}. Hermes Gateway can trigger tool-capable agents, so chat stays disabled until explicit safety UX is added.`;
       }
     })();
   </script>

@@ -30,7 +30,8 @@ DEFAULT_OLLAMA_BASE_URL = "http://127.0.0.1:11434"
 DEFAULT_OLLAMA_MODEL = "llama3.1:8b"
 MAX_BODY_BYTES = 64 * 1024
 MAX_PROMPT_CHARS = 4000
-ALLOWED_CORS_ORIGINS = {"null", "file://", "http://127.0.0.1:8765", "http://localhost:8765"}
+ALLOWED_CORS_ORIGINS = {"http://127.0.0.1:8765", "http://localhost:8765"}
+LOCAL_FILE_CORS_ORIGINS = {"null", "file://"}
 
 PROVIDERS: list[dict[str, Any]] = [
     {
@@ -110,9 +111,46 @@ def env_port(name: str, default: int) -> int:
     return port
 
 
+def is_loopback_host(host: str) -> bool:
+    return host in {"127.0.0.1", "localhost", "::1"}
+
+
+def broker_bind_allowed(host: str) -> bool:
+    return is_loopback_host(host) or env_bool("MINAFOX_AI_BROKER_ALLOW_LAN")
+
+
+def configured_cors_origins() -> set[str]:
+    origins: set[str] = set()
+    raw = os.environ.get("MINAFOX_AI_BROKER_ALLOWED_ORIGINS", "")
+    for origin in raw.split(","):
+        origin = origin.strip().rstrip("/")
+        if not origin or origin in {"*", "null", "file://"}:
+            continue
+        parsed = urllib.parse.urlparse(origin)
+        if parsed.scheme in {"http", "https"} and parsed.netloc:
+            origins.add(origin)
+    return origins
+
+
+def explicit_cors_origins_configured() -> bool:
+    return bool(configured_cors_origins())
+
+
+def broker_cors_config_allowed(host: str) -> bool:
+    return is_loopback_host(host) or explicit_cors_origins_configured()
+
+
+def allowed_cors_origins() -> set[str]:
+    origins = set(ALLOWED_CORS_ORIGINS)
+    if not env_bool("MINAFOX_AI_BROKER_ALLOW_LAN"):
+        origins.update(LOCAL_FILE_CORS_ORIGINS)
+    origins.update(configured_cors_origins())
+    return origins
+
+
 def assert_loopback_url(url: str) -> None:
     parsed = urllib.parse.urlparse(url)
-    if parsed.scheme not in {"http", "https"} or parsed.hostname not in {"127.0.0.1", "localhost", "::1"}:
+    if parsed.scheme not in {"http", "https"} or not parsed.hostname or not is_loopback_host(parsed.hostname):
         raise ValueError("Hermes API Server URL must be loopback-only by default")
 
 
@@ -290,7 +328,7 @@ class MinaFoxBrokerHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Cache-Control", "no-store")
         origin = self.headers.get("Origin")
-        if origin in ALLOWED_CORS_ORIGINS:
+        if origin in allowed_cors_origins():
             self.send_header("Access-Control-Allow-Origin", origin)
             self.send_header("Vary", "Origin")
             self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
@@ -357,8 +395,11 @@ class MinaFoxBrokerHandler(BaseHTTPRequestHandler):
 def main() -> int:
     host = os.environ.get("MINAFOX_AI_BROKER_HOST", DEFAULT_HOST)
     port = env_port("MINAFOX_AI_BROKER_PORT", DEFAULT_PORT)
-    if host not in {"127.0.0.1", "localhost", "::1"}:
-        print(f"Refusing non-loopback bind: {host}", file=sys.stderr)
+    if not broker_bind_allowed(host):
+        print(f"Refusing non-loopback bind: {host}. Set MINAFOX_AI_BROKER_ALLOW_LAN=1 only for trusted LAN/Tailscale testing.", file=sys.stderr)
+        return 2
+    if not broker_cors_config_allowed(host):
+        print("Refusing LAN bind without explicit MINAFOX_AI_BROKER_ALLOWED_ORIGINS. Set it to the trusted harness origin, never '*'.", file=sys.stderr)
         return 2
     server = ThreadingHTTPServer((host, port), MinaFoxBrokerHandler)
     print(f"MinaFox AI broker listening on http://{host}:{port}", flush=True)

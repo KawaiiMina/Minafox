@@ -210,6 +210,45 @@ Hermes API Server should stay on loopback at `http://127.0.0.1:8642`. Store `API
 
 Architecture notes: `docs/ai-provider-architecture.md`
 
+## Android/LAN UX harness
+
+For Android responsiveness and touch/UX testing, use the lightweight harness instead of compiling a full browser APK. It serves `desktop/start.html` and injects runtime endpoint URLs so the phone does not accidentally call phone-local `127.0.0.1`.
+
+Trusted LAN/Tailscale harness example:
+
+```bash
+cd ~/Minafox
+python3 scripts/serve-minafox-mobile.py \
+  --host 0.0.0.0 \
+  --mode lan-test \
+  --search-base-url http://<desktop-lan-ip>:8888 \
+  --search-action-url http://<desktop-lan-ip>:8888/search \
+  --ai-broker-url http://<desktop-lan-ip>:8765
+```
+
+Then open this on Android:
+
+```text
+http://<desktop-lan-ip>:8766/
+```
+
+If you also want AI Den status/chat from Android, the broker must be exposed explicitly for trusted local testing only:
+
+```bash
+MINAFOX_AI_BROKER_ALLOW_LAN=1 \
+MINAFOX_AI_BROKER_ALLOWED_ORIGINS=http://<desktop-lan-ip>:8766 \
+MINAFOX_AI_ENABLE_OLLAMA_CHAT=1 \
+MINAFOX_AI_BROKER_HOST=0.0.0.0 \
+./scripts/minafox-ai-broker.sh
+```
+
+Safety notes:
+
+- Loopback remains the default for desktop/private mode.
+- Never use wildcard CORS; list the harness origin with `MINAFOX_AI_BROKER_ALLOWED_ORIGINS`.
+- Do not put cloud provider keys in the harness, start page, localStorage, or static files.
+- Check 360px, 390px, 430px, and 768px widths for readable search, AI status, and touch targets.
+
 Validate the AI surface and privacy guardrails:
 
 ```bash

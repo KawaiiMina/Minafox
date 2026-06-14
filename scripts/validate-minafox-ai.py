@@ -13,6 +13,8 @@ README = ROOT / "README.md"
 BROKER = ROOT / "scripts" / "minafox-ai-broker.py"
 BROKER_WRAPPER = ROOT / "scripts" / "minafox-ai-broker.sh"
 BROKER_TEST = ROOT / "scripts" / "test-minafox-ai-broker.py"
+MOBILE_HARNESS = ROOT / "scripts" / "serve-minafox-mobile.py"
+MOBILE_HARNESS_TEST = ROOT / "scripts" / "test-serve-minafox-mobile.py"
 BROKER_SERVICE = ROOT / "systemd" / "user" / "minafox-ai-broker.service"
 
 PROVIDERS = (
@@ -50,6 +52,9 @@ START_SNIPPETS = (
     "Ollama is offline. Start Ollama locally",
     "ollama?.chat_enabled",
     "Broker sees Ollama, but chat is safely paused",
+    "MINAFOX_RUNTIME_CONFIG",
+    "aiBrokerUrl",
+    "searchBaseUrl",
 )
 
 DOC_SNIPPETS = (
@@ -64,6 +69,9 @@ DOC_SNIPPETS = (
     "http://127.0.0.1:8765",
     "http://127.0.0.1:8642",
     "API_SERVER_KEY",
+    "Android/LAN UX harness",
+    "MINAFOX_AI_BROKER_ALLOW_LAN=1",
+    "MINAFOX_AI_BROKER_ALLOWED_ORIGINS",
 )
 
 BROKER_SNIPPETS = (
@@ -84,6 +92,24 @@ BROKER_SNIPPETS = (
     "Ollama is offline. Start Ollama locally",
     "ollama_chat_enabled",
     "chat_disabled",
+    "MINAFOX_AI_BROKER_ALLOW_LAN",
+    "MINAFOX_AI_BROKER_ALLOWED_ORIGINS",
+    "allowed_cors_origins",
+    "configured_cors_origins",
+    "broker_bind_allowed",
+    "broker_cors_config_allowed",
+)
+
+MOBILE_HARNESS_SNIPPETS = (
+    "serve MinaFox start page for Android/LAN UX testing".replace("serve", "Serve"),
+    "ThreadingHTTPServer",
+    "MINAFOX_RUNTIME_CONFIG",
+    "aiBrokerUrl",
+    "searchBaseUrl",
+    "searchActionUrl",
+    "--search-action-url",
+    "lan-test",
+    "trusted local UX testing",
 )
 
 WRAPPER_SNIPPETS = (
@@ -138,16 +164,20 @@ def main() -> int:
     readme = read(README, failures)
     broker = read(BROKER, failures)
     broker_test = read(BROKER_TEST, failures)
+    mobile_harness = read(MOBILE_HARNESS, failures)
+    mobile_harness_test = read(MOBILE_HARNESS_TEST, failures)
     wrapper = read(BROKER_WRAPPER, failures)
     service = read(BROKER_SERVICE, failures)
 
     require("desktop/start.html", start, START_SNIPPETS, failures)
     require("docs/ai-provider-architecture.md", doc, DOC_SNIPPETS, failures)
     require("scripts/minafox-ai-broker.py", broker, BROKER_SNIPPETS, failures)
-    require("scripts/test-minafox-ai-broker.py", broker_test, ("handle_chat_payload", "ollama_request", "provider_disabled"), failures)
+    require("scripts/test-minafox-ai-broker.py", broker_test, ("handle_chat_payload", "ollama_request", "provider_disabled", "broker_bind_allowed", "allowed_cors_origins", "configured_cors_origins", "broker_cors_config_allowed"), failures)
+    require("scripts/serve-minafox-mobile.py", mobile_harness, MOBILE_HARNESS_SNIPPETS, failures)
+    require("scripts/test-serve-minafox-mobile.py", mobile_harness_test, ("RuntimeConfig", "render_start_page", "MINAFOX_RUNTIME_CONFIG"), failures)
     require("scripts/minafox-ai-broker.sh", wrapper, WRAPPER_SNIPPETS, failures)
     require("systemd/user/minafox-ai-broker.service", service, SERVICE_SNIPPETS, failures)
-    require("README.md", readme, ("## Mina AI Den", "scripts/validate-minafox-ai.py", "minafox-update", "minafox-ai-broker"), failures)
+    require("README.md", readme, ("## Mina AI Den", "## Android/LAN UX harness", "scripts/validate-minafox-ai.py", "minafox-update", "minafox-ai-broker", "serve-minafox-mobile.py"), failures)
 
     for provider in PROVIDERS:
         if provider not in start:
@@ -160,8 +190,8 @@ def main() -> int:
     for token in FORBIDDEN_STATIC_NETWORK_TOKENS:
         if token in start:
             failures.append(f"desktop/start.html: static AI surface contains forbidden direct network token {token!r}")
-    if "fetch(\"http://127.0.0.1:8765" not in start and "fetch('http://127.0.0.1:8765" not in start:
-        failures.append("desktop/start.html: AI surface should only fetch the MinaFox local broker on 127.0.0.1:8765")
+    if "fetch(`${aiBrokerUrl}" not in start:
+        failures.append("desktop/start.html: AI surface should fetch only the configured MinaFox broker URL")
     if 'Access-Control-Allow-Origin", "*"' in broker or "Access-Control-Allow-Origin', '*'" in broker:
         failures.append("scripts/minafox-ai-broker.py: must not use wildcard CORS")
 
@@ -171,6 +201,8 @@ def main() -> int:
         "README.md": readme,
         "scripts/minafox-ai-broker.py": broker,
         "scripts/test-minafox-ai-broker.py": broker_test,
+        "scripts/serve-minafox-mobile.py": mobile_harness,
+        "scripts/test-serve-minafox-mobile.py": mobile_harness_test,
         "scripts/minafox-ai-broker.sh": wrapper,
         "systemd/user/minafox-ai-broker.service": service,
     }
