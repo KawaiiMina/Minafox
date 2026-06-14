@@ -6,6 +6,19 @@ MinaFox is currently in its **Standalone wrapper** phase: installing the repo gi
 
 It is **not** a full Firefox source fork yet. The plan is: Standalone wrapper now, Arch package next, source fork later after the wrapper distribution is reliable.
 
+## License and Mozilla/MPL posture
+
+MinaFox-owned code is licensed under **MPL-2.0**; see [`LICENSE`](LICENSE). The current package intentionally stays a wrapper around the distro Firefox package:
+
+- it does **not** bundle or install a modified Firefox binary;
+- it does **not** copy Firefox source files into MinaFox-owned files;
+- it depends on system `firefox`;
+- it ships MinaFox-owned launcher/profile/CSS/start-page/policy/icon/helper files separately;
+- it keeps optional SearXNG as a separate localhost service/container;
+- it uses MinaFox branding and does not imply Mozilla endorsement.
+
+Third-party notes are tracked in [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md). Future Firefox ESR source-fork obligations are tracked in [`docs/licensing-and-source-fork.md`](docs/licensing-and-source-fork.md).
+
 ## Repository layout
 
 The GitHub repo is organized around the installable pieces:
@@ -18,6 +31,9 @@ The GitHub repo is organized around the installable pieces:
 - `docs/` — project/brand documentation.
   - `docs/brand-lore.md` — Mina the mascot, logo story, voice, and future mascot-art direction.
   - `docs/ai-provider-architecture.md` — optional Mina AI Den provider, privacy, and Hermes Gateway architecture.
+  - `docs/licensing-and-source-fork.md` — MPL, wrapper-package, and future Firefox source-fork guardrails.
+- `LICENSE` — MinaFox MPL-2.0 license text.
+- `THIRD_PARTY_LICENSES.md` — Firefox/SearXNG/provider notice tracker and compliance notes.
 - `desktop/` — desktop-facing files.
   - `desktop/start.html` — local MinaFox start page that submits searches to local SearXNG.
   - `desktop/minafox.desktop` — Linux desktop launcher that calls `minafox`.

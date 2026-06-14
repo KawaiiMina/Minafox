@@ -5,7 +5,7 @@ pkgrel=1
 pkgdesc="MinaFox standalone Firefox profile wrapper for Arch/Hyprland"
 arch=('any')
 url="https://github.com/KawaiiMina/Minafox"
-license=('MIT')
+license=('MPL-2.0')
 depends=('firefox' 'desktop-file-utils' 'hicolor-icon-theme' 'python')
 makedepends=('git')
 optdepends=(
@@ -37,8 +37,11 @@ package() {
   cp -a assets/icons/hicolor "$pkgdir/usr/share/icons/"
 
   install -Dm644 README.md "$pkgdir/usr/share/doc/minafox/README.md"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 THIRD_PARTY_LICENSES.md "$pkgdir/usr/share/doc/minafox/THIRD_PARTY_LICENSES.md"
   install -Dm644 docs/brand-lore.md "$pkgdir/usr/share/doc/minafox/brand-lore.md"
   install -Dm644 docs/ai-provider-architecture.md "$pkgdir/usr/share/doc/minafox/ai-provider-architecture.md"
+  install -Dm644 docs/licensing-and-source-fork.md "$pkgdir/usr/share/doc/minafox/licensing-and-source-fork.md"
   install -d "$pkgdir/usr/share/minafox"
   cp -a assets "$pkgdir/usr/share/minafox/"
   install -Dm644 desktop/start.html "$pkgdir/usr/share/minafox/desktop/start.html"

@@ -11,6 +11,7 @@ script therefore performs two portable checks:
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -23,9 +24,13 @@ PKGBUILD = PKG_DIR / "PKGBUILD"
 SRCINFO = PKG_DIR / ".SRCINFO"
 INSTALL = PKG_DIR / "minafox-profile-git.install"
 PKG_README = PKG_DIR / "README.md"
+LICENSE = ROOT / "LICENSE"
+THIRD_PARTY = ROOT / "THIRD_PARTY_LICENSES.md"
+LICENSING_DOC = ROOT / "docs" / "licensing-and-source-fork.md"
 
 REQUIRED_PKGBUILD_SNIPPETS = (
     "pkgname=minafox-profile-git",
+    "license=('MPL-2.0')",
     "depends=('firefox' 'desktop-file-utils' 'hicolor-icon-theme' 'python')",
     "makedepends=('git')",
     "source=('git+https://github.com/KawaiiMina/Minafox.git')",
@@ -34,8 +39,11 @@ REQUIRED_PKGBUILD_SNIPPETS = (
     "install -Dm755 scripts/minafox-ai-broker.sh \"$pkgdir/usr/bin/minafox-ai-broker\"",
     "install -Dm644 desktop/minafox.desktop \"$pkgdir/usr/share/applications/minafox.desktop\"",
     "install -Dm644 README.md \"$pkgdir/usr/share/doc/minafox/README.md\"",
+    "install -Dm644 LICENSE \"$pkgdir/usr/share/licenses/$pkgname/LICENSE\"",
+    "install -Dm644 THIRD_PARTY_LICENSES.md \"$pkgdir/usr/share/doc/minafox/THIRD_PARTY_LICENSES.md\"",
     "install -Dm644 docs/brand-lore.md \"$pkgdir/usr/share/doc/minafox/brand-lore.md\"",
     "install -Dm644 docs/ai-provider-architecture.md \"$pkgdir/usr/share/doc/minafox/ai-provider-architecture.md\"",
+    "install -Dm644 docs/licensing-and-source-fork.md \"$pkgdir/usr/share/doc/minafox/licensing-and-source-fork.md\"",
     "cp -a assets \"$pkgdir/usr/share/minafox/\"",
     "install -Dm644 profile/user.js \"$pkgdir/usr/share/minafox/profile/user.js\"",
     "install -Dm755 scripts/install-minafox-arch.sh \"$pkgdir/usr/share/minafox/scripts/install-minafox-arch.sh\"",
@@ -50,6 +58,7 @@ REQUIRED_PKGBUILD_SNIPPETS = (
 REQUIRED_SRCINFO_SNIPPETS = (
     "pkgbase = minafox-profile-git",
     "pkgname = minafox-profile-git",
+    "license = MPL-2.0",
     "depends = firefox",
     "depends = desktop-file-utils",
     "depends = hicolor-icon-theme",
@@ -85,8 +94,11 @@ REQUIRED_STAGED_FILES = (
     "usr/share/minafox/searxng/docker-compose.yml",
     "usr/share/minafox/searxng/theme/minafox.css",
     "usr/share/doc/minafox/README.md",
+    "usr/share/licenses/minafox-profile-git/LICENSE",
+    "usr/share/doc/minafox/THIRD_PARTY_LICENSES.md",
     "usr/share/doc/minafox/brand-lore.md",
     "usr/share/doc/minafox/ai-provider-architecture.md",
+    "usr/share/doc/minafox/licensing-and-source-fork.md",
 )
 
 
@@ -118,6 +130,91 @@ def validate_static(failures: list[str]) -> None:
         failures.append("minafox-profile-git.install: missing user setup post-install guidance")
     if "makepkg -si" not in readme or "python3 scripts/validate-minafox-arch-package.py" not in readme:
         failures.append("packaging README: missing build or validation command")
+    require(
+        "packaging README",
+        readme,
+        (
+            "It does **not** compile Firefox or turn MinaFox into a source fork yet.",
+            "/usr/share/licenses/minafox-profile-git/LICENSE",
+            "/usr/share/doc/minafox/THIRD_PARTY_LICENSES.md",
+            "/usr/share/doc/minafox/licensing-and-source-fork.md",
+        ),
+        failures,
+    )
+
+
+def arch_relation_is_token(value: str, token: str) -> bool:
+    value = value.strip(" \t\r\n'\"")
+    if value == token:
+        return True
+    return bool(re.match(rf"^{re.escape(token)}(?:[<>=]|<=|>=).+", value))
+
+
+def pkbuild_array_has_token(pkgbuild: str, name: str, token: str) -> bool:
+    """Return True if a bash array assignment contains token as an item.
+
+    This intentionally handles common PKGBUILD forms such as:
+    provides=('foo' 'firefox'), provides=("firefox"), and multiline arrays.
+    It is a guardrail, not a full bash parser.
+    """
+    pattern = re.compile(rf"(?m)^\s*{re.escape(name)}\s*=\s*\((.*?)\)", re.DOTALL)
+    for match in pattern.finditer(pkgbuild):
+        body = re.sub(r"#.*", "", match.group(1))
+        items = [part.strip(" \t\r\n'\"") for part in re.split(r"\s+", body) if part.strip()]
+        if any(arch_relation_is_token(item, token) for item in items):
+            return True
+    return False
+
+
+def srcinfo_has_relation(srcinfo: str, key: str, token: str) -> bool:
+    pattern = re.compile(rf"(?m)^\s*{re.escape(key)}\s*=\s*(\S+)\s*$")
+    return any(arch_relation_is_token(match.group(1), token) for match in pattern.finditer(srcinfo))
+
+
+def validate_license_guardrails(failures: list[str]) -> None:
+    pkgbuild = read(PKGBUILD, failures)
+    srcinfo = read(SRCINFO, failures)
+    license_text = read(LICENSE, failures)
+    third_party = read(THIRD_PARTY, failures)
+    licensing_doc = read(LICENSING_DOC, failures)
+
+    require("LICENSE", license_text, ("Mozilla Public License Version 2.0", "3.1. Distribution of Source Form"), failures)
+    require(
+        "THIRD_PARTY_LICENSES.md",
+        third_party,
+        (
+            "System Firefox",
+            "does not bundle a Firefox executable",
+            "does not copy Firefox source files into MinaFox-owned files",
+            "SearXNG is AGPL-3.0-or-later upstream",
+            "does not claim Mozilla endorsement",
+        ),
+        failures,
+    )
+    require(
+        "docs/licensing-and-source-fork.md",
+        licensing_doc,
+        (
+            "does **not** bundle or install a modified Firefox binary",
+            "does **not** copy Firefox source files into MinaFox-owned files",
+            "depends on the distro/system Firefox package",
+            "ships MinaFox-owned launcher, profile, CSS, start page, policy, icon, helper, and documentation files separately",
+            "avoid adding GPL-only or AGPL code directly into Firefox product source",
+            "avoid Mozilla/Firefox trademarks unless permission exists",
+        ),
+        failures,
+    )
+    for array_name in ("provides", "conflicts"):
+        if pkbuild_array_has_token(pkgbuild, array_name, "firefox"):
+            failures.append(f"PKGBUILD: wrapper package must not list firefox in {array_name}()")
+    for key in ("provides", "conflicts"):
+        if srcinfo_has_relation(srcinfo, key, "firefox"):
+            failures.append(f".SRCINFO: wrapper package must not list firefox as {key}")
+    for marker in ("/usr/bin/firefox", "/usr/lib/firefox", "firefox-source", "firefox-esr"):
+        if marker in pkgbuild:
+            failures.append(f"PKGBUILD: wrapper package must not contain {marker!r}")
+    if "license = MPL-2.0" not in srcinfo:
+        failures.append(".SRCINFO: missing MPL-2.0 license")
 
 
 def validate_package_simulation(failures: list[str]) -> None:
@@ -153,19 +250,30 @@ def validate_package_simulation(failures: list[str]) -> None:
             if not path.exists():
                 failures.append(f"staged package missing: {rel}")
 
+        forbidden_staged_prefixes = (
+            "usr/bin/firefox",
+            "usr/lib/firefox",
+            "usr/share/firefox",
+            "usr/share/minafox/firefox-source",
+            "usr/share/minafox/mozilla-central",
+        )
+        for staged_path in pkgdir.rglob("*"):
+            if not staged_path.is_file() and not staged_path.is_dir():
+                continue
+            rel = staged_path.relative_to(pkgdir).as_posix()
+            if any(rel == marker or rel.startswith(marker + "/") for marker in forbidden_staged_prefixes):
+                failures.append(f"staged package contains Firefox binary/source-like path: {rel}")
+
         for rel in (
             "usr/bin/minafox",
             "usr/bin/minafox-update",
             "usr/bin/minafox-ai-broker",
-    "usr/bin/minafox-ai-broker",
             "usr/share/minafox/scripts/install-minafox-arch.sh",
             "usr/share/minafox/scripts/install-minafox-searxng-arch.sh",
             "usr/share/minafox/scripts/minafox-launcher.sh",
             "usr/share/minafox/scripts/minafox-update.sh",
             "usr/share/minafox/scripts/minafox-ai-broker.py",
             "usr/share/minafox/scripts/minafox-ai-broker.sh",
-    "usr/share/minafox/scripts/minafox-ai-broker.py",
-    "usr/share/minafox/scripts/minafox-ai-broker.sh",
         ):
             path = pkgdir / rel
             if path.exists() and not os.access(path, os.X_OK):
@@ -196,6 +304,7 @@ def main() -> int:
         return 1
 
     validate_static(failures)
+    validate_license_guardrails(failures)
     if not failures:
         validate_package_simulation(failures)
 

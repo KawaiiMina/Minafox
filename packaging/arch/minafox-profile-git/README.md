@@ -16,8 +16,9 @@ It installs:
 - `/usr/share/minafox/` — profile, start page, branding assets, policy, SearXNG overlay, and helper scripts.
 - `/usr/lib/systemd/user/minafox-searxng.service` — optional local search user service.
 - `/usr/lib/systemd/user/minafox-ai-broker.service` — optional local AI broker user service.
-- `/usr/share/doc/minafox/README.md` and `/usr/share/doc/minafox/brand-lore.md` — project documentation and Mina mascot lore.
-- `/usr/share/doc/minafox/ai-provider-architecture.md` — Mina AI Den provider and privacy architecture notes.
+- `/usr/share/doc/minafox/README.md`, `/usr/share/doc/minafox/brand-lore.md`, and `/usr/share/doc/minafox/ai-provider-architecture.md` — project documentation, Mina mascot lore, and AI provider/privacy notes.
+- `/usr/share/doc/minafox/THIRD_PARTY_LICENSES.md` and `/usr/share/doc/minafox/licensing-and-source-fork.md` — third-party and MPL/source-fork guardrails.
+- `/usr/share/licenses/minafox-profile-git/LICENSE` — MinaFox's MPL-2.0 license text.
 
 It does **not** compile Firefox or turn MinaFox into a source fork yet.
 
@@ -79,9 +80,11 @@ systemctl --user enable --now minafox-ai-broker.service
 systemctl --user status minafox-ai-broker.service
 ```
 
-It binds to `127.0.0.1:8765`, exposes `/health`, `/providers`, and
-`/hermes/health`, and leaves `/chat` disabled until the Hermes safety UX is
-implemented.
+It binds to `127.0.0.1:8765`, exposes `/health`, `/providers`,
+`/hermes/health`, `/test-provider`, and `/chat`. `/chat` accepts only local
+Ollama payloads in the current safety phase and remains disabled unless
+`MINAFOX_AI_ENABLE_OLLAMA_CHAT=1` is set; Hermes Gateway and cloud chat stay
+blocked until their separate safety/config work exists.
 
 ## Optional local SearXNG user service
 
