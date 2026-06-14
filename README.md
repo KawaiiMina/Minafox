@@ -127,7 +127,7 @@ The current visual direction is a hybrid of calm Zen-like minimalism and Arc-lik
 
 Implemented theme files:
 
-- `profile/userChrome.css` — Firefox chrome theme: dark lavender glass, rounded URL bar, soft tab pills, pink/violet active glow, and sidebar/bookmarks styling.
+- `profile/userChrome.css` — Firefox chrome theme: dark lavender glass, a more centered command-bar-like URL bar with pink/violet focus glow, rounded soft tab pills, named design tokens for rail/pill/glow surfaces, and conservative sidebar/panel styling.
 - `desktop/start.html` — cosmic Arc/Zen-inspired local start page with a floating workspace rail, soft tab preview, centered MinaFox SearXNG command/search bar, quick app cards, focus/notes/lofi widgets, roadmap card, and design-system palette card.
 - `profile/userContent.css` — scoped support styling for `about:home`, `about:newtab`, and the local MinaFox start page only.
 - `profile/user.js` — enables `toolkit.legacyUserProfileCustomizations.stylesheets` so Firefox loads `userChrome.css`.
@@ -147,7 +147,7 @@ Manual Firefox verification:
 
 1. Run `./scripts/install-minafox-arch.sh` to copy the profile/start page assets and install `~/.local/bin/minafox`.
 2. Launch `minafox`.
-3. Confirm the browser chrome uses the lavender/pink theme and the selected tab has a soft glow.
+3. Confirm the browser chrome uses the lavender/pink theme, the URL bar reads as a centered command bar with a stronger focus glow, and the selected tab has a soft pink/violet pill glow.
 4. Confirm the start page opens, the local SearXNG search form works, and quick links open.
 5. Press `Tab` through the page; focus rings should be visible.
 6. Resize the window narrow/wide; cards should collapse cleanly on small widths.
