@@ -12,6 +12,7 @@ DOC = ROOT / "docs" / "ai-provider-architecture.md"
 README = ROOT / "README.md"
 BROKER = ROOT / "scripts" / "minafox-ai-broker.py"
 BROKER_WRAPPER = ROOT / "scripts" / "minafox-ai-broker.sh"
+BROKER_TEST = ROOT / "scripts" / "test-minafox-ai-broker.py"
 BROKER_SERVICE = ROOT / "systemd" / "user" / "minafox-ai-broker.service"
 
 PROVIDERS = (
@@ -41,6 +42,10 @@ START_SNIPPETS = (
     "http://127.0.0.1:8765",
     "/providers",
     "/hermes/health",
+    "data-ai-response",
+    "data-ai-chat-state",
+    "POST",
+    "/chat",
 )
 
 DOC_SNIPPETS = (
@@ -62,7 +67,10 @@ BROKER_SNIPPETS = (
     "GET /providers",
     "GET /hermes/health",
     "POST /chat",
+    "POST /test-provider",
     "HERMES_API_SERVER_KEY",
+    "Ollama chat can be enabled",
+    "MINAFOX_AI_ENABLE_OLLAMA_CHAT",
     "http://127.0.0.1:8642",
     "ThreadingHTTPServer",
     "127.0.0.1",
@@ -122,12 +130,14 @@ def main() -> int:
     doc = read(DOC, failures)
     readme = read(README, failures)
     broker = read(BROKER, failures)
+    broker_test = read(BROKER_TEST, failures)
     wrapper = read(BROKER_WRAPPER, failures)
     service = read(BROKER_SERVICE, failures)
 
     require("desktop/start.html", start, START_SNIPPETS, failures)
     require("docs/ai-provider-architecture.md", doc, DOC_SNIPPETS, failures)
     require("scripts/minafox-ai-broker.py", broker, BROKER_SNIPPETS, failures)
+    require("scripts/test-minafox-ai-broker.py", broker_test, ("handle_chat_payload", "ollama_request", "provider_disabled"), failures)
     require("scripts/minafox-ai-broker.sh", wrapper, WRAPPER_SNIPPETS, failures)
     require("systemd/user/minafox-ai-broker.service", service, SERVICE_SNIPPETS, failures)
     require("README.md", readme, ("## Mina AI Den", "scripts/validate-minafox-ai.py", "minafox-update", "minafox-ai-broker"), failures)
@@ -153,6 +163,7 @@ def main() -> int:
         "docs/ai-provider-architecture.md": doc,
         "README.md": readme,
         "scripts/minafox-ai-broker.py": broker,
+        "scripts/test-minafox-ai-broker.py": broker_test,
         "scripts/minafox-ai-broker.sh": wrapper,
         "systemd/user/minafox-ai-broker.service": service,
     }

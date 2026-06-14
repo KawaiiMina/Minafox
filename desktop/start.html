@@ -437,6 +437,13 @@
       padding: 12px 14px;
     }
 
+    .ai-den-card select:disabled,
+    .ai-den-card textarea:disabled,
+    .ai-send-button:disabled {
+      opacity: 0.58;
+      cursor: not-allowed;
+    }
+
     .ai-den-card textarea {
       min-height: 92px;
       resize: vertical;
@@ -466,6 +473,29 @@
     .ai-status-text {
       border-radius: 18px;
       line-height: 1.5;
+    }
+
+    .ai-response-box {
+      min-height: 48px;
+      border: 1px solid rgba(137, 180, 250, 0.20);
+      border-radius: 18px;
+      padding: 12px 14px;
+      background: rgba(13, 10, 22, 0.36);
+      color: var(--soft);
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .ai-response-box:empty {
+      display: none;
+    }
+
+    .ai-chat-state {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
     .service-status-card {
@@ -820,12 +850,12 @@
           <div class="ai-provider-row">
             <label for="ai-provider-select">Choose AI provider</label>
             <select id="ai-provider-select" class="ai-provider-select" disabled>
-              <option>Ollama — Local</option>
-              <option>OpenAI / ChatGPT-compatible — Cloud</option>
-              <option>Gemini — Cloud</option>
-              <option>Claude — Cloud</option>
-              <option>OpenRouter — Cloud</option>
-              <option>Hermes Gateway — LAN / advanced</option>
+              <option value="ollama" data-provider-id="ollama">Ollama — Local</option>
+              <option value="openai_compatible" data-provider-id="openai_compatible" disabled>OpenAI / ChatGPT-compatible — Cloud</option>
+              <option value="gemini" data-provider-id="gemini" disabled>Gemini — Cloud</option>
+              <option value="claude" data-provider-id="claude" disabled>Claude — Cloud</option>
+              <option value="openrouter" data-provider-id="openrouter" disabled>OpenRouter — Cloud</option>
+              <option value="hermes_gateway" data-provider-id="hermes_gateway" disabled>Hermes Gateway — LAN / advanced</option>
             </select>
           </div>
           <div class="ai-privacy-row" aria-label="AI privacy modes">
@@ -834,9 +864,11 @@
             <span class="privacy-pill" data-privacy-mode="lan">LAN: Hermes Gateway</span>
           </div>
           <label for="ai-prompt-input">AI prompt</label>
-          <textarea id="ai-prompt-input" class="ai-prompt-input" disabled placeholder="Mina is curled up until the local AI broker exists…"></textarea>
-          <button class="ai-send-button" type="button" disabled>Ask Mina later</button>
-          <p class="ai-status-text" data-ai-status>No API keys live in this static page. Cloud keys will belong in a future local config/keyring-backed broker. Hermes Gateway can trigger tool-capable agents, so LAN mode will require explicit pairing and warnings. Start minafox-ai-broker to detect http://127.0.0.1:8765.</p>
+          <textarea id="ai-prompt-input" class="ai-prompt-input" disabled placeholder="Mina is curled up until local Ollama is ready through the broker…"></textarea>
+          <button class="ai-send-button" type="button" disabled>Ask local Ollama</button>
+          <p class="ai-chat-state" data-ai-chat-state>Chat disabled until broker reports local Ollama ready.</p>
+          <output class="ai-response-box" data-ai-response aria-live="polite"></output>
+          <p class="ai-status-text" data-ai-status>No API keys live in this static page. Cloud keys stay in local config/keyring-backed broker settings. Hermes Gateway can trigger tool-capable agents, so LAN mode still requires explicit pairing and warnings. Start minafox-ai-broker to detect http://127.0.0.1:8765.</p>
         </article>
         <article class="dashboard-card service-status-card" aria-labelledby="search-status-title">
           <h2 id="search-status-title">Search service</h2>
@@ -955,6 +987,42 @@
       });
     });
 
+    const aiProviderSelect = document.querySelector("#ai-provider-select");
+    const aiPromptInput = document.querySelector("#ai-prompt-input");
+    const aiSendButton = document.querySelector(".ai-send-button");
+    const aiResponse = document.querySelector("[data-ai-response]");
+    const aiChatState = document.querySelector("[data-ai-chat-state]");
+
+    function setAiChatEnabled(enabled, message) {
+      if (aiProviderSelect) aiProviderSelect.disabled = !enabled;
+      if (aiPromptInput) aiPromptInput.disabled = !enabled;
+      if (aiSendButton) aiSendButton.disabled = !enabled;
+      if (aiChatState) aiChatState.textContent = message;
+    }
+
+    async function askLocalOllama() {
+      const prompt = aiPromptInput?.value.trim();
+      if (!prompt || !aiResponse) return;
+      aiSendButton.disabled = true;
+      aiResponse.textContent = "Mina is thinking locally…";
+      try {
+        const response = await fetch("http://127.0.0.1:8765/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ provider: "ollama", prompt }),
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.message || payload.error || "Local Ollama chat failed");
+        aiResponse.textContent = payload.message || "Mina replied with an empty message.";
+      } catch (error) {
+        aiResponse.textContent = `AI Den stayed safe: ${error.message}`;
+      } finally {
+        aiSendButton.disabled = false;
+      }
+    }
+
+    aiSendButton?.addEventListener("click", askLocalOllama);
+
     (async () => {
       const status = document.querySelector("[data-search-status]");
       const dot = document.querySelector("[data-search-status-dot]");
@@ -981,11 +1049,21 @@
         const providers = await providersResponse.json();
         const hermes = hermesResponse.ok ? await hermesResponse.json() : null;
         const hermesAvailable = Boolean(hermes?.hermes?.available);
-        const count = Array.isArray(providers.providers) ? providers.providers.length : 0;
+        const providerList = Array.isArray(providers.providers) ? providers.providers : [];
+        const ollama = providerList.find((provider) => provider.id === "ollama");
+        const ollamaReady = Boolean(ollama?.enabled && ollama?.available);
+        const count = providerList.length;
+        setAiChatEnabled(
+          ollamaReady,
+          ollamaReady
+            ? "Local Ollama is ready through the localhost broker. Cloud and Hermes modes remain disabled."
+            : "Broker is awake, but local Ollama is offline or chat is not enabled."
+        );
         status.textContent = hermesAvailable
-          ? `minafox-ai-broker is awake on 127.0.0.1:8765. ${count} providers known. Hermes API Server is reachable on localhost; chat remains safety-disabled.`
-          : `minafox-ai-broker is awake on 127.0.0.1:8765. ${count} providers known. Hermes API Server is not reachable yet; chat remains safety-disabled.`;
+          ? `minafox-ai-broker is awake on 127.0.0.1:8765. ${count} providers known. Local Ollama ${ollamaReady ? "is ready" : "is not ready"}. Hermes API Server is reachable; Hermes chat remains safety-disabled.`
+          : `minafox-ai-broker is awake on 127.0.0.1:8765. ${count} providers known. Local Ollama ${ollamaReady ? "is ready" : "is not ready"}. Hermes API Server is not reachable yet; Hermes chat remains safety-disabled.`;
       } catch (error) {
+        setAiChatEnabled(false, "Broker offline. Start minafox-ai-broker for local Ollama chat detection.");
         status.textContent = "No API keys live in this static page. Start minafox-ai-broker for provider detection. Hermes Gateway can trigger tool-capable agents, so chat stays disabled until explicit safety UX is added.";
       }
     })();

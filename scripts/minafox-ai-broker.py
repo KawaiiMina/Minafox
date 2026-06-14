@@ -6,6 +6,7 @@ Endpoints:
 - GET /providers
 - GET /hermes/health
 - POST /chat
+- POST /test-provider
 
 The broker is intentionally localhost-only by default. It keeps Hermes and
 future provider credentials out of the static MinaFox start page.
@@ -25,7 +26,10 @@ from typing import Any
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8765
 DEFAULT_HERMES_BASE_URL = "http://127.0.0.1:8642"
+DEFAULT_OLLAMA_BASE_URL = "http://127.0.0.1:11434"
+DEFAULT_OLLAMA_MODEL = "llama3.1:8b"
 MAX_BODY_BYTES = 64 * 1024
+MAX_PROMPT_CHARS = 4000
 ALLOWED_CORS_ORIGINS = {"null", "file://", "http://127.0.0.1:8765", "http://localhost:8765"}
 
 PROVIDERS: list[dict[str, Any]] = [
@@ -34,9 +38,9 @@ PROVIDERS: list[dict[str, Any]] = [
         "name": "Ollama",
         "label": "Ollama — Local",
         "privacy_mode": "local",
-        "status": "planned",
+        "status": "detectable",
         "enabled": False,
-        "notes": "Local model provider; not wired in this broker sprint.",
+        "notes": "Local model provider. Chat is available only when Ollama answers on loopback and MINAFOX_AI_ENABLE_OLLAMA_CHAT=1.",
     },
     {
         "id": "openai_compatible",
@@ -167,6 +171,105 @@ def hermes_request(path: str, timeout: float = 2.0) -> dict[str, Any]:
         }
 
 
+def ollama_request(path: str, payload: dict[str, Any] | None = None, timeout: float = 20.0) -> dict[str, Any]:
+    base_url = os.environ.get("OLLAMA_BASE_URL", DEFAULT_OLLAMA_BASE_URL).rstrip("/")
+    try:
+        assert_loopback_url(base_url)
+    except ValueError as exc:
+        return {"available": False, "status_code": None, "base_url": base_url, "error": str(exc)}
+    body = None
+    method = "GET"
+    if payload is not None:
+        method = "POST"
+        body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    request = urllib.request.Request(base_url + path, data=body, method=method)
+    request.add_header("Accept", "application/json")
+    if body is not None:
+        request.add_header("Content-Type", "application/json")
+    started = time.time()
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            raw = response.read(512 * 1024)
+            data = json.loads(raw.decode("utf-8")) if raw else {}
+            result: dict[str, Any] = {
+                "available": 200 <= response.status < 300,
+                "status_code": response.status,
+                "elapsed_ms": int((time.time() - started) * 1000),
+                "base_url": base_url,
+                "data": data,
+            }
+            if path == "/api/tags":
+                result["models"] = [model.get("name", "") for model in data.get("models", []) if model.get("name")]
+            return result
+    except urllib.error.HTTPError as exc:
+        return {"available": False, "status_code": exc.code, "elapsed_ms": int((time.time() - started) * 1000), "base_url": base_url, "error": exc.reason}
+    except Exception as exc:  # noqa: BLE001 - health/proxy endpoint should report, not crash
+        return {"available": False, "status_code": None, "elapsed_ms": int((time.time() - started) * 1000), "base_url": base_url, "error": type(exc).__name__}
+
+
+def build_providers() -> list[dict[str, Any]]:
+    hermes = hermes_request("/health")
+    ollama = ollama_request("/api/tags", timeout=2.0)
+    providers = [dict(provider) for provider in PROVIDERS]
+    for provider in providers:
+        if provider["id"] == "ollama":
+            provider["available"] = bool(ollama.get("available"))
+            provider["enabled"] = bool(ollama.get("available"))
+            provider["status"] = "ready" if ollama.get("available") else "offline"
+            provider["models"] = ollama.get("models", [])
+            provider["health"] = ollama
+        if provider["id"] == "hermes_gateway":
+            provider["available"] = hermes["available"]
+            provider["health"] = hermes
+    return providers
+
+
+def handle_chat_payload(payload: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+    provider = str(payload.get("provider") or "").strip()
+    prompt = str(payload.get("prompt") or "")
+    if not prompt.strip():
+        return 400, {"error": "invalid_prompt", "message": "Prompt is empty."}
+    if len(prompt) > MAX_PROMPT_CHARS:
+        return 413, {"error": "prompt_too_large", "max_prompt_chars": MAX_PROMPT_CHARS}
+    if provider != "ollama":
+        return 403, {
+            "error": "provider_disabled",
+            "message": "Only local Ollama chat can be enabled in this safety phase.",
+            "safety": "Hermes Gateway can trigger tool-capable agents and remains disabled until explicit safety UX exists.",
+        }
+    if not env_bool("MINAFOX_AI_ENABLE_OLLAMA_CHAT"):
+        return 403, {
+            "error": "chat_disabled",
+            "message": "Local Ollama chat is disabled. Set MINAFOX_AI_ENABLE_OLLAMA_CHAT=1 to enable this loopback-only provider.",
+        }
+    model = str(payload.get("model") or os.environ.get("OLLAMA_MODEL") or DEFAULT_OLLAMA_MODEL).strip()
+    ollama_payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt.strip()}],
+        "stream": False,
+    }
+    result = ollama_request("/api/chat", payload=ollama_payload)
+    if not result.get("available"):
+        return 503, {"error": "ollama_unavailable", "health": result}
+    data = result.get("data", {})
+    message = data.get("message", {}).get("content") if isinstance(data, dict) else None
+    if not isinstance(message, str):
+        return 502, {"error": "invalid_ollama_response", "health": result}
+    return 200, {"status": "ok", "provider": "ollama", "model": model, "message": message, "health": {"elapsed_ms": result.get("elapsed_ms"), "base_url": result.get("base_url")}}
+
+
+def handle_test_provider_payload(payload: dict[str, Any]) -> tuple[int, dict[str, Any]]:
+    provider = str(payload.get("provider") or "").strip()
+    if provider != "ollama":
+        return 403, {
+            "error": "provider_disabled",
+            "message": "Only local Ollama health can be tested from this safety phase.",
+            "safety": "Hermes Gateway remains a detection-only provider until explicit pairing/auth UX exists.",
+        }
+    health = ollama_request("/api/tags", timeout=2.0)
+    return (200 if health.get("available") else 503), {"status": "ok" if health.get("available") else "offline", "provider": "ollama", "health": health}
+
+
 class MinaFoxBrokerHandler(BaseHTTPRequestHandler):
     server_version = "MinaFoxAIBroker/0.1"
 
@@ -203,12 +306,7 @@ class MinaFoxBrokerHandler(BaseHTTPRequestHandler):
             })
             return
         if path == "/providers":
-            hermes = hermes_request("/health")
-            providers = [dict(provider) for provider in PROVIDERS]
-            for provider in providers:
-                if provider["id"] == "hermes_gateway":
-                    provider["available"] = hermes["available"]
-                    provider["health"] = hermes
+            providers = build_providers()
             self._send_json({
                 "status": "ok",
                 "broker": "minafox-ai-broker",
@@ -223,7 +321,7 @@ class MinaFoxBrokerHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802 - stdlib handler API
         path = urllib.parse.urlsplit(self.path).path
-        if path != "/chat":
+        if path not in {"/chat", "/test-provider"}:
             self._send_json({"error": "not_found", "path": path}, status=404)
             return
         raw_length = self.headers.get("Content-Length", "0")
@@ -235,18 +333,17 @@ class MinaFoxBrokerHandler(BaseHTTPRequestHandler):
         if length > MAX_BODY_BYTES:
             self._send_json({"error": "request_too_large", "max_body_bytes": MAX_BODY_BYTES}, status=413)
             return
-        _ = self.rfile.read(length) if length else b""
-        if not env_bool("MINAFOX_AI_BROKER_ENABLE_CHAT"):
-            self._send_json({
-                "error": "chat_disabled",
-                "message": "MinaFox broker is running, but chat is disabled until explicit Hermes safety UX is implemented.",
-                "safety": "Hermes Gateway can trigger tool-capable agents.",
-            }, status=403)
+        raw = self.rfile.read(length) if length else b"{}"
+        try:
+            payload = json.loads(raw.decode("utf-8")) if raw else {}
+        except json.JSONDecodeError:
+            self._send_json({"error": "invalid_json"}, status=400)
             return
-        self._send_json({
-            "error": "not_implemented",
-            "message": "Chat enablement is reserved for the next safety-reviewed sprint.",
-        }, status=501)
+        if not isinstance(payload, dict):
+            self._send_json({"error": "invalid_json"}, status=400)
+            return
+        status, body = (handle_chat_payload(payload) if path == "/chat" else handle_test_provider_payload(payload))
+        self._send_json(body, status=status)
 
 
 def main() -> int:

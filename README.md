@@ -150,7 +150,7 @@ Implemented theme files:
 
 ## Mina AI Den
 
-MinaFox includes the first **Mina AI Den** surface on the start page. It is intentionally calm and safety-disabled for now: it only calls the localhost `minafox-ai-broker` at `http://127.0.0.1:8765`, makes no direct provider calls from browser JavaScript, and stores no secrets in static files.
+MinaFox includes the first **Mina AI Den** surface on the start page. It stays privacy-first: browser JavaScript only calls the localhost `minafox-ai-broker` at `http://127.0.0.1:8765`, makes no direct cloud-provider or Hermes Gateway calls, and stores no secrets in static files.
 
 Provider placeholders shown in the UI:
 
@@ -179,7 +179,16 @@ The broker exposes:
 - `GET /health`
 - `GET /providers`
 - `GET /hermes/health`
-- `POST /chat` — currently returns a disabled safety response.
+- `POST /chat` — local Ollama only, disabled unless `MINAFOX_AI_ENABLE_OLLAMA_CHAT=1` is set.
+- `POST /test-provider` — local Ollama health check.
+
+To try local Ollama chat after starting Ollama:
+
+```bash
+MINAFOX_AI_ENABLE_OLLAMA_CHAT=1 ./scripts/minafox-ai-broker.sh
+```
+
+Cloud providers remain metadata-only until a secrets backend exists. Hermes Gateway remains detection-only until explicit pairing/auth and tool-safety UX exists.
 
 Hermes API Server should stay on loopback at `http://127.0.0.1:8642`. Store `API_SERVER_KEY` or `HERMES_API_SERVER_KEY` only in local env/secret files, not in MinaFox.
 

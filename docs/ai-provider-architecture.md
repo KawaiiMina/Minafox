@@ -31,8 +31,10 @@ The first broker sprint exposes only safe discovery endpoints:
 - `GET /health`
 - `GET /providers`
 - `GET /hermes/health`
-- `POST /chat` returns a disabled/safety response until explicit Hermes chat
-  UX exists.
+- `POST /chat` accepts only local Ollama payloads in the current phase. It is
+  disabled unless `MINAFOX_AI_ENABLE_OLLAMA_CHAT=1` is set, and it never routes
+  prompts to Hermes Gateway or cloud providers.
+- `POST /test-provider` currently checks only local Ollama health.
 
 Hermes itself is expected to run the API Server gateway on loopback with
 `API_SERVER_ENABLED=true` and an `API_SERVER_KEY` stored in a user-local secret
@@ -78,4 +80,15 @@ Rules before implementation:
 
 ## Current phase
 
-This sprint only adds UI, documentation, and validation. There are no network calls and no provider secrets.
+The current broker sprint keeps cloud and Hermes chat disabled, but it can light
+up **local Ollama** when the loopback Ollama API is reachable. Ollama chat can be
+enabled with:
+
+```bash
+MINAFOX_AI_ENABLE_OLLAMA_CHAT=1 minafox-ai-broker
+```
+
+The start page then enables only the Ollama prompt controls through
+`http://127.0.0.1:8765/chat`. Cloud providers remain metadata-only until secrets
+storage is implemented, and Hermes Gateway remains detection-only until a
+separate pairing/auth and tool-safety UX exists.
