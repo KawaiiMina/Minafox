@@ -58,6 +58,27 @@
 
     a { color: inherit; }
 
+    html {
+      scrollbar-color: rgba(245, 194, 231, 0.46) rgba(15, 11, 30, 0.72);
+      scrollbar-width: thin;
+    }
+
+    a,
+    button,
+    input,
+    textarea,
+    select {
+      touch-action: manipulation;
+    }
+
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 11, 30, 0.72); }
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, rgba(245, 194, 231, 0.62), rgba(139, 92, 246, 0.48));
+      border-radius: 999px;
+      border: 2px solid rgba(15, 11, 30, 0.72);
+    }
+
     .minafox-desktop,
     .minafox-shell {
       position: relative;
@@ -747,6 +768,141 @@
       }
     }
 
+    @media (max-width: 430px) {
+      body {
+        padding: 10px;
+        overflow-x: hidden;
+      }
+
+      .minafox-desktop,
+      .minafox-shell {
+        gap: 12px;
+        min-height: calc(100vh - 20px);
+      }
+
+      .workspace-rail {
+        position: sticky;
+        top: 8px;
+        z-index: 4;
+        grid-template-columns: auto 1fr;
+        gap: 10px;
+        padding: 10px;
+        align-items: center;
+      }
+
+      .brand-mark {
+        width: 44px;
+        height: 44px;
+        border-radius: 16px;
+        font-size: 1.35rem;
+      }
+
+      .workspace-bubbles {
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        padding-bottom: 2px;
+      }
+
+      .workspace-bubble {
+        min-width: 46px;
+        min-height: 46px;
+        border-radius: 16px;
+        padding-inline: 12px;
+      }
+
+      .rail-label { display: none; }
+
+      .soft-tabs {
+        padding: 12px;
+        gap: 12px;
+      }
+
+      .soft-tab-list {
+        display: flex;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        padding-bottom: 4px;
+        scroll-snap-type: x proximity;
+      }
+
+      .soft-tab {
+        min-width: max-content;
+        min-height: 44px;
+        scroll-snap-align: start;
+      }
+
+      .new-tab-pill {
+        min-height: 44px;
+        padding: 10px 12px;
+      }
+
+      .hero-card {
+        padding: 22px 16px;
+      }
+
+      .hero-card h1 {
+        font-size: clamp(2rem, 13vw, 3.35rem);
+      }
+
+      .command-bar {
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        padding: 9px;
+      }
+
+      .command-bar .sparkle,
+      .command-bar label {
+        display: none;
+      }
+
+      .command-bar input {
+        min-height: 44px;
+        padding-inline: 12px;
+      }
+
+      .command-bar button,
+      .search-mode-pill,
+      .mini-button,
+      .status-action,
+      .ai-send-button {
+        min-height: 44px;
+      }
+
+      .search-mode-pills,
+      .ai-privacy-row,
+      .status-actions {
+        display: flex;
+        overflow-x: auto;
+        gap: 8px;
+        padding-bottom: 4px;
+      }
+
+      .search-mode-pill,
+      .privacy-pill,
+      .status-action {
+        flex: 0 0 auto;
+      }
+
+      .quick-card,
+      .widget-card,
+      .dashboard-card {
+        padding: 15px;
+      }
+
+      .ai-chat-state,
+      .ai-status-text,
+      .service-status-card p {
+        font-size: 0.88rem;
+      }
+
+      .bottom-toolbar {
+        inset-inline: 18px;
+        bottom: 10px;
+      }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.001ms !important;
@@ -1101,8 +1257,8 @@
           ? `minafox-ai-broker is awake at ${aiBrokerUrl}. ${count} providers known. Local Ollama ${ollamaReady ? "chat is enabled" : ollamaDetected ? "is detected, but chat is paused" : "is not reachable"}. Hermes API Server is reachable; Hermes chat remains safety-disabled.`
           : `minafox-ai-broker is awake at ${aiBrokerUrl}. ${count} providers known. Local Ollama ${ollamaReady ? "chat is enabled" : ollamaDetected ? "is detected, but chat is paused" : "is not reachable"}. Hermes API Server is not reachable yet; Hermes chat remains safety-disabled.`;
       } catch (error) {
-        setAiChatEnabled(false, `Broker unreachable at ${aiBrokerUrl}. If this is Android/LAN mode, make sure the phone can reach the desktop/Tailscale host — 127.0.0.1 on Android means the phone itself.`);
-        status.textContent = `No API keys live in this static page. Mina AI Den could not reach the broker at ${aiBrokerUrl}. Hermes Gateway can trigger tool-capable agents, so chat stays disabled until explicit safety UX is added.`;
+        setAiChatEnabled(false, `Mina AI Den is offline for now. If this is Android/LAN mode, make sure the phone can reach the desktop/Tailscale host — 127.0.0.1 on Android means the phone itself.`);
+        status.textContent = `No API keys live in this static page. Mina AI Den is waiting for the broker at ${aiBrokerUrl}. Hermes Gateway can trigger tool-capable agents, so chat stays disabled until explicit safety UX is added.`;
       }
     })();
   </script>

@@ -110,7 +110,7 @@ Upgrade an installed Arch package from the MinaFox git package skeleton:
 minafox-update
 ```
 
-The updater uses `~/Minafox` by default, pulls the repo, then runs `makepkg -si` from `packaging/arch/minafox-profile-git`. It does not store GitHub tokens; configure GitHub HTTPS auth with `gh` or git credentials first if the repo is private.
+The updater uses `~/Minafox` by default, pulls the repo, then runs `makepkg -si` from `packaging/arch/minafox-profile-git`. After a successful package install it also runs `systemctl --user daemon-reload` and restarts MinaFox user services that are already active or enabled: `minafox-ai-broker.service`, `minafox-searxng.service`, and `minafox-mobile-harness.service`. Use `minafox-update --no-restart-services` if you only want the package rebuild/install step. It does not store GitHub tokens; configure GitHub HTTPS auth with `gh` or git credentials first if the repo is private.
 
 You can still run the full setup helper manually when you want an explicit refresh or want it to attempt enterprise-policy installation:
 
@@ -231,6 +231,15 @@ Then open this on Android:
 ```text
 http://<desktop-lan-ip>:8766/
 ```
+
+Installed package service option:
+
+```bash
+systemctl --user enable --now minafox-mobile-harness.service
+systemctl --user status minafox-mobile-harness.service
+```
+
+The packaged harness service defaults to `0.0.0.0:8766` for trusted LAN testing. Only enable it on a trusted LAN/Tailscale network, and keep your firewall/router from exposing port `8766` to untrusted networks. Override `MINAFOX_MOBILE_SEARCH_BASE_URL`, `MINAFOX_MOBILE_SEARCH_ACTION_URL`, and `MINAFOX_MOBILE_AI_BROKER_URL` with a user-service override if Android should point at a specific LAN/Tailscale hostname instead of loopback.
 
 If you also want AI Den status/chat from Android, the broker must be exposed explicitly for trusted local testing only:
 

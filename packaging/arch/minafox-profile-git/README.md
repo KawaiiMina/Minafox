@@ -16,6 +16,7 @@ It installs:
 - `/usr/share/minafox/` — profile, start page, branding assets, policy, SearXNG overlay, and helper scripts.
 - `/usr/lib/systemd/user/minafox-searxng.service` — optional local search user service.
 - `/usr/lib/systemd/user/minafox-ai-broker.service` — optional local AI broker user service.
+- `/usr/lib/systemd/user/minafox-mobile-harness.service` — optional Android/LAN UX harness user service.
 - `/usr/share/doc/minafox/README.md`, `/usr/share/doc/minafox/brand-lore.md`, and `/usr/share/doc/minafox/ai-provider-architecture.md` — project documentation, Mina mascot lore, and AI provider/privacy notes.
 - `/usr/share/doc/minafox/THIRD_PARTY_LICENSES.md` and `/usr/share/doc/minafox/licensing-and-source-fork.md` — third-party and MPL/source-fork guardrails.
 - `/usr/share/licenses/minafox-profile-git/LICENSE` — MinaFox's MPL-2.0 license text.
@@ -62,7 +63,7 @@ After installing the package, upgrade from the MinaFox git package skeleton with
 minafox-update
 ```
 
-By default this uses `~/Minafox`, pulls the repo, and runs `makepkg -si` from this package directory. Use `minafox-update --repo /path/to/Minafox` or `MINAFOX_REPO_DIR=/path/to/Minafox minafox-update` for another checkout.
+By default this uses `~/Minafox`, pulls the repo, runs `makepkg -si` from this package directory, reloads the systemd user manager, and restarts `minafox-ai-broker.service`, `minafox-searxng.service`, and `minafox-mobile-harness.service` when they are already active or enabled. Use `minafox-update --no-restart-services` to skip service reload/restart, and use `minafox-update --repo /path/to/Minafox` or `MINAFOX_REPO_DIR=/path/to/Minafox minafox-update` for another checkout.
 
 ## Optional Mina AI Den broker
 
@@ -97,6 +98,17 @@ journalctl --user -u minafox-searxng.service -f
 ```
 
 The helper copies the packaged read-only overlay into `~/.local/share/minafox/searxng`, generates the local secret/config there, and keeps SearXNG bound to `127.0.0.1:8888`. Install either the Docker stack (`docker` + `docker-compose`) or the Podman stack (`podman` + `podman-compose`) first.
+
+## Optional Android/LAN UX harness service
+
+For phone responsiveness testing without building an APK, enable the harness service:
+
+```bash
+systemctl --user enable --now minafox-mobile-harness.service
+systemctl --user status minafox-mobile-harness.service
+```
+
+It serves the MinaFox start page on `0.0.0.0:8766` for trusted LAN/Tailscale testing. Only enable it on trusted networks, and keep port `8766` blocked from untrusted networks. Use a user-service override for `MINAFOX_MOBILE_SEARCH_BASE_URL`, `MINAFOX_MOBILE_SEARCH_ACTION_URL`, and `MINAFOX_MOBILE_AI_BROKER_URL` when Android should call a specific LAN/Tailscale host.
 
 ## Local validation from this repo
 

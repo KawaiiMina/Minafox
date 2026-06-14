@@ -187,7 +187,15 @@ def validate_start_html(failures: list[str]) -> str:
     require_contains(
         "desktop/start.html",
         html,
-        [":focus-visible", "@media (max-width", "@media (prefers-reduced-motion"],
+        [
+            ":focus-visible",
+            "@media (max-width",
+            "@media (max-width: 430px)",
+            "scrollbar-color",
+            "touch-action: manipulation",
+            "overflow-x: auto",
+            "@media (prefers-reduced-motion",
+        ],
         failures,
     )
 

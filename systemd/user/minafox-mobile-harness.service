@@ -1,0 +1,24 @@
+[Unit]
+Description=MinaFox Android/LAN UX harness
+Documentation=file:/usr/share/doc/minafox/README.md
+After=network.target
+
+[Service]
+Type=simple
+Environment=MINAFOX_MOBILE_HARNESS_HOST=0.0.0.0
+Environment=MINAFOX_MOBILE_HARNESS_PORT=8766
+Environment=MINAFOX_MOBILE_HARNESS_MODE=lan-test
+Environment=MINAFOX_MOBILE_AI_BROKER_URL=http://127.0.0.1:8765
+Environment=MINAFOX_MOBILE_SEARCH_BASE_URL=http://127.0.0.1:8888
+ExecStart=/usr/bin/python3 /usr/share/minafox/scripts/serve-minafox-mobile.py
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+LockPersonality=true
+
+[Install]
+WantedBy=default.target

@@ -5,10 +5,16 @@ REPO_URL="${MINAFOX_REPO_URL:-https://github.com/KawaiiMina/Minafox.git}"
 REPO_DIR="${MINAFOX_REPO_DIR:-$HOME/Minafox}"
 PACKAGE_DIR="packaging/arch/minafox-profile-git"
 DO_PULL=1
+RESTART_SERVICES=1
+MINAFOX_SERVICES=(
+  minafox-ai-broker.service
+  minafox-searxng.service
+  minafox-mobile-harness.service
+)
 
 usage() {
   cat <<'USAGE'
-Usage: minafox-update [--repo DIR] [--no-pull] [--help]
+Usage: minafox-update [--repo DIR] [--no-pull] [--restart-services] [--no-restart-services] [--help]
 
 Upgrade the installed MinaFox Arch package from the MinaFox git package skeleton.
 
@@ -19,9 +25,12 @@ Defaults:
 Examples:
   minafox-update
   minafox-update --repo ~/Minafox
+  minafox-update --no-restart-services
   MINAFOX_REPO_DIR=~/src/Minafox minafox-update
 
-This script does not store GitHub tokens. Configure GitHub HTTPS auth with gh or git credentials first if the repository is private.
+After a successful package install, minafox-update reloads the systemd user manager and restarts the MinaFox user services by default:
+  minafox-ai-broker.service, minafox-searxng.service, minafox-mobile-harness.service
+Use --no-restart-services if you only want to rebuild/install the package.
 USAGE
 }
 
@@ -34,6 +43,14 @@ while (($#)); do
       ;;
     --no-pull)
       DO_PULL=0
+      shift
+      ;;
+    --restart-services)
+      RESTART_SERVICES=1
+      shift
+      ;;
+    --no-restart-services)
+      RESTART_SERVICES=0
       shift
       ;;
     -h|--help)
@@ -87,5 +104,24 @@ cd "$PACKAGE_DIR"
 echo "Building and installing minafox-profile-git ..."
 echo "makepkg may ask for your password through pacman when installing."
 makepkg -si
+
+if (( RESTART_SERVICES )); then
+  if command -v systemctl >/dev/null 2>&1; then
+    echo "Reloading MinaFox user services ..."
+    systemctl --user daemon-reload || echo "Warning: systemctl --user daemon-reload failed; services may need a manual reload." >&2
+    for service in "${MINAFOX_SERVICES[@]}"; do
+      if systemctl --user is-active --quiet "$service" || systemctl --user is-enabled --quiet "$service"; then
+        echo "Restarting $service ..."
+        systemctl --user restart "$service" || echo "Warning: could not restart $service. Check with: systemctl --user status $service" >&2
+      else
+        echo "Skipping $service because it is not active or enabled."
+      fi
+    done
+  else
+    echo "systemctl not found; skipping MinaFox user service restarts."
+  fi
+else
+  echo "Skipping MinaFox user service restarts (--no-restart-services)."
+fi
 
 echo "MinaFox package update complete. Launch with: minafox"

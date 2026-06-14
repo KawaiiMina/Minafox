@@ -16,6 +16,7 @@ BROKER_TEST = ROOT / "scripts" / "test-minafox-ai-broker.py"
 MOBILE_HARNESS = ROOT / "scripts" / "serve-minafox-mobile.py"
 MOBILE_HARNESS_TEST = ROOT / "scripts" / "test-serve-minafox-mobile.py"
 BROKER_SERVICE = ROOT / "systemd" / "user" / "minafox-ai-broker.service"
+MOBILE_HARNESS_SERVICE = ROOT / "systemd" / "user" / "minafox-mobile-harness.service"
 
 PROVIDERS = (
     "Ollama",
@@ -123,6 +124,13 @@ SERVICE_SNIPPETS = (
     "Environment=MINAFOX_AI_BROKER_HOST=127.0.0.1",
 )
 
+MOBILE_HARNESS_SERVICE_SNIPPETS = (
+    "Description=MinaFox Android/LAN UX harness",
+    "ExecStart=/usr/bin/python3 /usr/share/minafox/scripts/serve-minafox-mobile.py",
+    "MINAFOX_MOBILE_HARNESS_HOST=0.0.0.0",
+    "MINAFOX_MOBILE_HARNESS_PORT=8766",
+)
+
 FORBIDDEN_PATTERNS = (
     re.compile(r"sk-[A-Za-z0-9_-]{20,}"),
     re.compile(r"gh[pousr]_[A-Za-z0-9_]{20,}"),
@@ -168,6 +176,7 @@ def main() -> int:
     mobile_harness_test = read(MOBILE_HARNESS_TEST, failures)
     wrapper = read(BROKER_WRAPPER, failures)
     service = read(BROKER_SERVICE, failures)
+    mobile_harness_service = read(MOBILE_HARNESS_SERVICE, failures)
 
     require("desktop/start.html", start, START_SNIPPETS, failures)
     require("docs/ai-provider-architecture.md", doc, DOC_SNIPPETS, failures)
@@ -177,6 +186,7 @@ def main() -> int:
     require("scripts/test-serve-minafox-mobile.py", mobile_harness_test, ("RuntimeConfig", "render_start_page", "MINAFOX_RUNTIME_CONFIG"), failures)
     require("scripts/minafox-ai-broker.sh", wrapper, WRAPPER_SNIPPETS, failures)
     require("systemd/user/minafox-ai-broker.service", service, SERVICE_SNIPPETS, failures)
+    require("systemd/user/minafox-mobile-harness.service", mobile_harness_service, MOBILE_HARNESS_SERVICE_SNIPPETS, failures)
     require("README.md", readme, ("## Mina AI Den", "## Android/LAN UX harness", "scripts/validate-minafox-ai.py", "minafox-update", "minafox-ai-broker", "serve-minafox-mobile.py"), failures)
 
     for provider in PROVIDERS:
@@ -205,6 +215,7 @@ def main() -> int:
         "scripts/test-serve-minafox-mobile.py": mobile_harness_test,
         "scripts/minafox-ai-broker.sh": wrapper,
         "systemd/user/minafox-ai-broker.service": service,
+        "systemd/user/minafox-mobile-harness.service": mobile_harness_service,
     }
     for label, text in combined.items():
         for pattern in FORBIDDEN_PATTERNS:

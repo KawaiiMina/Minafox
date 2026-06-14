@@ -50,9 +50,11 @@ REQUIRED_PKGBUILD_SNIPPETS = (
     "install -Dm755 scripts/install-minafox-searxng-arch.sh \"$pkgdir/usr/share/minafox/scripts/install-minafox-searxng-arch.sh\"",
     "install -Dm755 scripts/minafox-update.sh \"$pkgdir/usr/share/minafox/scripts/minafox-update.sh\"",
     "install -Dm755 scripts/minafox-ai-broker.py \"$pkgdir/usr/share/minafox/scripts/minafox-ai-broker.py\"",
+    "install -Dm755 scripts/serve-minafox-mobile.py \"$pkgdir/usr/share/minafox/scripts/serve-minafox-mobile.py\"",
     "install -Dm755 scripts/minafox-ai-broker.sh \"$pkgdir/usr/share/minafox/scripts/minafox-ai-broker.sh\"",
     "install -Dm644 systemd/user/minafox-searxng.service \"$pkgdir/usr/lib/systemd/user/minafox-searxng.service\"",
     "install -Dm644 systemd/user/minafox-ai-broker.service \"$pkgdir/usr/lib/systemd/user/minafox-ai-broker.service\"",
+    "install -Dm644 systemd/user/minafox-mobile-harness.service \"$pkgdir/usr/lib/systemd/user/minafox-mobile-harness.service\"",
 )
 
 REQUIRED_SRCINFO_SNIPPETS = (
@@ -88,9 +90,11 @@ REQUIRED_STAGED_FILES = (
     "usr/share/minafox/scripts/minafox-launcher.sh",
     "usr/share/minafox/scripts/minafox-update.sh",
     "usr/share/minafox/scripts/minafox-ai-broker.py",
+    "usr/share/minafox/scripts/serve-minafox-mobile.py",
     "usr/share/minafox/scripts/minafox-ai-broker.sh",
     "usr/lib/systemd/user/minafox-searxng.service",
     "usr/lib/systemd/user/minafox-ai-broker.service",
+    "usr/lib/systemd/user/minafox-mobile-harness.service",
     "usr/share/minafox/searxng/docker-compose.yml",
     "usr/share/minafox/searxng/theme/minafox.css",
     "usr/share/doc/minafox/README.md",
