@@ -195,6 +195,8 @@
       text-align: center;
       text-decoration: none;
       font-weight: 850;
+      background: rgba(13, 10, 22, 0.24);
+      width: 100%;
     }
 
     .start-stage {
@@ -343,6 +345,31 @@
     .quick-card small {
       color: var(--muted);
       font-weight: 650;
+    }
+
+    .action-card {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)), var(--panel);
+      color: var(--ink);
+      cursor: pointer;
+      text-align: left;
+      font: inherit;
+    }
+
+    .action-status {
+      grid-column: 1 / -1;
+      margin: -2px 0 0;
+      min-height: 1.4em;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    .workspace-bubble.action-card {
+      width: 56px;
+      padding: 0;
+      text-align: center;
     }
 
     .widget-grid,
@@ -635,7 +662,7 @@
     <aside class="workspace-rail" aria-label="Workspace rail">
       <div class="brand-mark" aria-hidden="true">🦊</div>
       <nav class="workspace-bubbles" aria-label="Workspaces">
-        <a class="workspace-bubble" href="about:profiles" aria-label="Personal workspace">P</a>
+        <button class="workspace-bubble action-card" type="button" data-about-target="about:profiles" aria-label="Personal workspace">P</button>
         <a class="workspace-bubble" href="https://calendar.google.com/" aria-label="Work workspace">W</a>
         <a class="workspace-bubble" href="https://github.com/" aria-label="Development workspace">D</a>
         <a class="workspace-bubble" href="https://scholar.google.com/" aria-label="Research workspace">R</a>
@@ -651,7 +678,7 @@
         <a class="soft-tab" href="https://github.com/"><span>⌁</span><span>GitHub</span><span class="tab-close">×</span></a>
         <a class="soft-tab" href="https://youtube.com/"><span>♪</span><span>YouTube</span><span class="tab-close">×</span></a>
       </nav>
-      <a class="new-tab-pill" href="about:newtab">＋ New Tab</a>
+      <button class="new-tab-pill" type="button" data-about-target="about:blank">＋ New Tab</button>
     </aside>
 
     <section class="start-stage" aria-label="Start page content">
@@ -676,8 +703,9 @@
           <a class="quick-card" href="https://mail.proton.me/"><span>✉ Mail</span><small>Inbox check</small></a>
           <a class="quick-card" href="https://drive.proton.me/"><span>◈ Drive</span><small>Files</small></a>
           <a class="quick-card" href="https://calendar.google.com/"><span>☼ Calendar</span><small>Day map</small></a>
-          <a class="quick-card" href="about:preferences"><span>⚙ Settings</span><small>Firefox prefs</small></a>
-          <a class="quick-card" href="about:profiles"><span>🦊 Profiles</span><small>MinaFox home</small></a>
+          <button class="quick-card action-card" type="button" data-about-target="about:preferences"><span>⚙ Settings</span><small>Copy/open Firefox prefs</small></button>
+          <button class="quick-card action-card" type="button" data-about-target="about:profiles"><span>🦊 Profiles</span><small>Copy/open profile manager</small></button>
+          <p class="action-status" data-action-status aria-live="polite">Tip: Firefox blocks privileged about: pages from static start pages, so MinaFox copies those commands when needed.</p>
         </nav>
 
         <section class="widget-grid" aria-label="Focus widgets">
@@ -685,7 +713,7 @@
             <h2>Focus timer</h2>
             <div class="timer-face">45:00</div>
             <p>Deep Work with a soft landing after the timer.</p>
-            <a class="mini-button" href="about:newtab">Start focus</a>
+            <button class="mini-button action-card" type="button" data-about-target="about:blank">Start focus</button>
           </article>
           <article class="widget-card notes-card">
             <h2>Gentle notes</h2>
@@ -761,6 +789,52 @@
     </div>
   </main>
   <script>
+    const actionStatus = document.querySelector("[data-action-status]");
+
+    async function copyAboutCommand(target) {
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(target);
+          return true;
+        }
+      } catch (error) {
+        // Fall through to textarea copy fallback.
+      }
+      const scratch = document.createElement("textarea");
+      scratch.value = target;
+      scratch.setAttribute("readonly", "");
+      scratch.style.position = "fixed";
+      scratch.style.opacity = "0";
+      document.body.appendChild(scratch);
+      scratch.select();
+      let copied = false;
+      try {
+        copied = document.execCommand("copy");
+      } catch (error) {
+        copied = false;
+      }
+      scratch.remove();
+      return copied;
+    }
+
+    document.querySelectorAll("[data-about-target]").forEach((control) => {
+      control.addEventListener("click", async () => {
+        const target = control.getAttribute("data-about-target");
+        if (!target) return;
+        if (target === "about:blank") {
+          window.open("about:blank", "_blank", "noopener");
+          if (actionStatus) actionStatus.textContent = "Opened a blank focus tab.";
+          return;
+        }
+        const copied = await copyAboutCommand(target);
+        if (actionStatus) {
+          actionStatus.textContent = copied
+            ? `Copied ${target}. Paste it into the address bar and press Enter.`
+            : `Open ${target} from the address bar. Firefox blocks this from static pages.`;
+        }
+      });
+    });
+
     (async () => {
       const status = document.querySelector("[data-ai-status]");
       if (!status) return;

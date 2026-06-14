@@ -33,6 +33,7 @@ class StartPageParser(HTMLParser):
         self.forms: list[dict[str, str]] = []
         self.inputs: list[dict[str, str]] = []
         self.anchors: list[dict[str, str]] = []
+        self.buttons: list[dict[str, str]] = []
         self.text_chunks: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
@@ -47,6 +48,8 @@ class StartPageParser(HTMLParser):
             self.inputs.append(attr_map)
         if tag == "a":
             self.anchors.append(attr_map)
+        if tag == "button":
+            self.buttons.append(attr_map)
 
     def handle_data(self, data: str) -> None:
         if data.strip():
@@ -159,13 +162,27 @@ def validate_start_html(failures: list[str]) -> str:
         "ChatGPT": "https://chat.openai.com/",
         "GitHub": "https://github.com/",
         "YouTube": "https://youtube.com/",
-        "Settings": "about:preferences",
-        "Profiles": "about:profiles",
     }
     hrefs = {anchor.get("href", "") for anchor in parser.anchors}
     for label, href in expected_links.items():
         if href not in hrefs:
             failures.append(f"desktop/start.html: missing preserved quick link {label} ({href})")
+
+    action_targets = {button.get("data-about-target", "") for button in parser.buttons}
+    for label, target in {"New Tab": "about:blank", "Settings": "about:preferences", "Profiles": "about:profiles"}.items():
+        if target not in action_targets:
+            failures.append(f"desktop/start.html: missing safe start-page action button for {label} ({target})")
+    for blocked in {"about:newtab", "about:preferences", "about:profiles"}:
+        if blocked in hrefs:
+            failures.append(f"desktop/start.html: privileged about URL should not be a direct href: {blocked}")
+    if 0 <= html.find("MinaFox roadmap") < html.find("Mina AI Den"):
+        failures.append("desktop/start.html: Mina AI Den should appear before roadmap so it is visible on the first screen")
+    require_contains(
+        "desktop/start.html",
+        html,
+        ["data-action-status", "copyAboutCommand", "data-about-target"],
+        failures,
+    )
 
     require_contains(
         "desktop/start.html",
