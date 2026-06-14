@@ -165,6 +165,6 @@ In-repo docs remain available for versioned details:
 
 ## License and third-party posture
 
-MinaFox-owned code is licensed under **MPL-2.0**; see [`LICENSE`](LICENSE). The current distribution stays a wrapper around the distro Firefox package and uses separate MinaFox-owned assets/configuration. It does not imply Mozilla endorsement and does not ship a modified Firefox binary.
+MinaFox-owned code is licensed under **MPL-2.0**; see [`LICENSE`](LICENSE). The current distribution stays a wrapper around the distro Firefox package and uses separate MinaFox-owned assets/configuration. MinaFox is independent and is not affiliated with or endorsed by Mozilla; it does not ship a modified Firefox binary.
 
-Third-party notes live in [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md). Future Firefox source-fork guardrails live in [`docs/licensing-and-source-fork.md`](docs/licensing-and-source-fork.md).
+Brand-usage rules live in [`BRANDING.md`](BRANDING.md). Third-party notes live in [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md). Future Firefox source-fork guardrails live in [`docs/licensing-and-source-fork.md`](docs/licensing-and-source-fork.md).

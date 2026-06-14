@@ -1,1 +1,3 @@
 .hermes/plans/
+__pycache__/
+*.py[cod]

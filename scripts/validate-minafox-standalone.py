@@ -22,6 +22,7 @@ LAUNCHER = ROOT / "scripts" / "minafox-launcher.sh"
 DESKTOP = ROOT / "desktop" / "minafox.desktop"
 INSTALLER = ROOT / "scripts" / "install-minafox-arch.sh"
 README = ROOT / "README.md"
+BRANDING = ROOT / "BRANDING.md"
 POLICIES = ROOT / "distribution" / "policies.json"
 
 
@@ -49,6 +50,18 @@ REQUIRED_README_SNIPPETS = (
     "Standalone wrapper",
     "source fork later",
     "scripts/validate-minafox-standalone.py",
+    "BRANDING.md",
+    "not affiliated with or endorsed by Mozilla",
+)
+
+REQUIRED_BRANDING_SNIPPETS = (
+    "MinaFox",
+    "logo",
+    "mascot",
+    "official MinaFox builds",
+    "not affiliated with or endorsed by Mozilla",
+    "Firefox is a trademark of Mozilla Foundation",
+    "does not grant permission to use MinaFox brand assets",
 )
 
 
@@ -137,6 +150,14 @@ def validate_readme(failures: list[str]) -> str:
     if not text:
         return text
     require_contains("README.md", text, REQUIRED_README_SNIPPETS, failures)
+    return text
+
+
+def validate_branding(failures: list[str]) -> str:
+    text = read_text(BRANDING, failures)
+    if not text:
+        return text
+    require_contains("BRANDING.md", text, REQUIRED_BRANDING_SNIPPETS, failures)
     return text
 
 
@@ -269,6 +290,7 @@ def main() -> int:
         "desktop/minafox.desktop": validate_desktop(failures),
         "scripts/install-minafox-arch.sh": validate_installer(failures),
         "README.md": validate_readme(failures),
+        "BRANDING.md": validate_branding(failures),
         "distribution/policies.json": read_text(POLICIES, failures),
     }
     validate_no_placeholders_or_host_paths(contents, failures)

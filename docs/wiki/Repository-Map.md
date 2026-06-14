@@ -4,6 +4,7 @@
 
 - `README.md` — concise repo landing page.
 - `LICENSE` — MinaFox-owned code license, MPL-2.0.
+- `BRANDING.md` — MinaFox brand usage and Mozilla/Firefox non-affiliation policy.
 - `THIRD_PARTY_LICENSES.md` — Firefox/SearXNG/provider notice tracker.
 
 ## `assets/`

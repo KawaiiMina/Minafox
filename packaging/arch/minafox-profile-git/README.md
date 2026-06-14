@@ -18,6 +18,7 @@ It installs:
 - `/usr/lib/systemd/user/minafox-ai-broker.service` — optional local AI broker user service.
 - `/usr/lib/systemd/user/minafox-mobile-harness.service` — optional Android/LAN UX harness user service.
 - `/usr/share/doc/minafox/README.md`, `/usr/share/doc/minafox/brand-lore.md`, and `/usr/share/doc/minafox/ai-provider-architecture.md` — project documentation, Mina mascot lore, and AI provider/privacy notes.
+- `/usr/share/doc/minafox/BRANDING.md` — MinaFox name, logo, mascot, official-build, and Mozilla non-affiliation policy.
 - `/usr/share/doc/minafox/THIRD_PARTY_LICENSES.md` and `/usr/share/doc/minafox/licensing-and-source-fork.md` — third-party and MPL/source-fork guardrails.
 - `/usr/share/licenses/minafox-profile-git/LICENSE` — MinaFox's MPL-2.0 license text.
 

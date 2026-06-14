@@ -38,6 +38,7 @@ package() {
 
   install -Dm644 README.md "$pkgdir/usr/share/doc/minafox/README.md"
   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 BRANDING.md "$pkgdir/usr/share/doc/minafox/BRANDING.md"
   install -Dm644 THIRD_PARTY_LICENSES.md "$pkgdir/usr/share/doc/minafox/THIRD_PARTY_LICENSES.md"
   install -Dm644 docs/brand-lore.md "$pkgdir/usr/share/doc/minafox/brand-lore.md"
   install -Dm644 docs/ai-provider-architecture.md "$pkgdir/usr/share/doc/minafox/ai-provider-architecture.md"

@@ -37,6 +37,10 @@ The wrapper phase remains separate from Firefox source:
 
 Third-party notes live in `THIRD_PARTY_LICENSES.md`.
 
+## Trademarks and brand use
+
+Brand-usage rules live in `BRANDING.md`. In short: the code license does not grant permission to use the MinaFox name, logo, or mascot for modified builds that look like official MinaFox builds, and Firefox is a trademark of Mozilla Foundation. MinaFox is independent and is not affiliated with or endorsed by Mozilla.
+
 ## Future source-fork guardrails
 
 Before distributing a modified Firefox build, MinaFox must preserve MPL and third-party notices, keep MPL-covered file modifications under MPL-2.0, publish corresponding source or patch branches, document source availability, avoid incompatible code additions, update license/about documentation, and avoid Mozilla/Firefox trademarks unless permission exists.

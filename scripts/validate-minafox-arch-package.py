@@ -25,6 +25,7 @@ SRCINFO = PKG_DIR / ".SRCINFO"
 INSTALL = PKG_DIR / "minafox-profile-git.install"
 PKG_README = PKG_DIR / "README.md"
 LICENSE = ROOT / "LICENSE"
+BRANDING = ROOT / "BRANDING.md"
 THIRD_PARTY = ROOT / "THIRD_PARTY_LICENSES.md"
 LICENSING_DOC = ROOT / "docs" / "licensing-and-source-fork.md"
 
@@ -40,6 +41,7 @@ REQUIRED_PKGBUILD_SNIPPETS = (
     "install -Dm644 desktop/minafox.desktop \"$pkgdir/usr/share/applications/minafox.desktop\"",
     "install -Dm644 README.md \"$pkgdir/usr/share/doc/minafox/README.md\"",
     "install -Dm644 LICENSE \"$pkgdir/usr/share/licenses/$pkgname/LICENSE\"",
+    "install -Dm644 BRANDING.md \"$pkgdir/usr/share/doc/minafox/BRANDING.md\"",
     "install -Dm644 THIRD_PARTY_LICENSES.md \"$pkgdir/usr/share/doc/minafox/THIRD_PARTY_LICENSES.md\"",
     "install -Dm644 docs/brand-lore.md \"$pkgdir/usr/share/doc/minafox/brand-lore.md\"",
     "install -Dm644 docs/ai-provider-architecture.md \"$pkgdir/usr/share/doc/minafox/ai-provider-architecture.md\"",
@@ -99,6 +101,7 @@ REQUIRED_STAGED_FILES = (
     "usr/share/minafox/searxng/theme/minafox.css",
     "usr/share/doc/minafox/README.md",
     "usr/share/licenses/minafox-profile-git/LICENSE",
+    "usr/share/doc/minafox/BRANDING.md",
     "usr/share/doc/minafox/THIRD_PARTY_LICENSES.md",
     "usr/share/doc/minafox/brand-lore.md",
     "usr/share/doc/minafox/ai-provider-architecture.md",
@@ -179,10 +182,25 @@ def validate_license_guardrails(failures: list[str]) -> None:
     pkgbuild = read(PKGBUILD, failures)
     srcinfo = read(SRCINFO, failures)
     license_text = read(LICENSE, failures)
+    branding = read(BRANDING, failures)
     third_party = read(THIRD_PARTY, failures)
     licensing_doc = read(LICENSING_DOC, failures)
 
     require("LICENSE", license_text, ("Mozilla Public License Version 2.0", "3.1. Distribution of Source Form"), failures)
+    require(
+        "BRANDING.md",
+        branding,
+        (
+            "MinaFox",
+            "logo",
+            "mascot",
+            "official MinaFox builds",
+            "not affiliated with or endorsed by Mozilla",
+            "Firefox is a trademark of Mozilla Foundation",
+            "does not grant permission to use MinaFox brand assets",
+        ),
+        failures,
+    )
     require(
         "THIRD_PARTY_LICENSES.md",
         third_party,
