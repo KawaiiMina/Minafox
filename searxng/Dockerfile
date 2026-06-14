@@ -7,3 +7,6 @@ FROM docker.io/searxng/searxng:latest
 COPY settings.yml /etc/searxng/settings.yml
 COPY uwsgi.ini /etc/searxng/uwsgi.ini
 COPY theme/minafox.css /usr/local/searxng/searx/static/themes/simple/css/minafox.min.css
+# Use the upstream-compatible dark style name so current SearXNG accepts the
+# settings value while the active dark style still follows MinaFox design.
+COPY theme/minafox.css /usr/local/searxng/searx/static/themes/simple/css/dark.min.css

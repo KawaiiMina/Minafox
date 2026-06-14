@@ -1,10 +1,13 @@
 /* MinaFox SearXNG theme for the upstream Simple theme.
-   Design language: calm Zen-like minimalism, Arc-like panels, kawaii pink/purple
-   MinaFox identity, and strong keyboard focus states. */
+   Design philosophy: Mina as a cosmic fox browser guardian — calm, cute,
+   privacy-minded, gentle, focused, lightly mischievous, and never noisy.
+   Visual language: night-sky depth, soft pink/purple/lavender, glass panels,
+   readable contrast, and strong keyboard focus states. */
 
 :root {
   color-scheme: dark;
   --mf-bg: #15111f;
+  --mf-cosmic-bg: #0f0b1e;
   --mf-bg-deep: #0f0c18;
   --mf-ink: #fff7ff;
   --mf-muted: #d7c8e8;
@@ -17,7 +20,7 @@
   --mf-glass-strong: rgba(63, 48, 86, 0.84);
   --mf-border: rgba(245, 194, 231, 0.24);
   --mf-glow: 0 0 22px rgba(245, 194, 231, 0.28), 0 0 42px rgba(139, 92, 246, 0.16);
-  --color-base-background: var(--mf-bg);
+  --color-base-background: var(--mf-cosmic-bg);
   --color-base-font: var(--mf-ink);
   --color-url-font: var(--mf-lavender);
   --color-result-link-font: var(--mf-pink);
@@ -44,7 +47,7 @@ body {
     radial-gradient(circle at 16% 8%, rgba(245, 194, 231, 0.24), transparent 30%),
     radial-gradient(circle at 82% 12%, rgba(139, 92, 246, 0.22), transparent 30%),
     radial-gradient(circle at 54% 88%, rgba(203, 166, 247, 0.15), transparent 34%),
-    linear-gradient(135deg, var(--mf-bg) 0%, #211936 48%, var(--mf-bg-deep) 100%) !important;
+    linear-gradient(135deg, var(--mf-cosmic-bg) 0%, #211936 48%, var(--mf-bg-deep) 100%) !important;
   color: var(--mf-ink) !important;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }

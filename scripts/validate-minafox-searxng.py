@@ -24,6 +24,7 @@ REQUIRED_FILES = [
 
 REQUIRED_THEME_TOKENS = [
     "--mf-bg",
+    "--mf-cosmic-bg",
     "--mf-ink",
     "--mf-muted",
     "--mf-lavender",
@@ -33,6 +34,9 @@ REQUIRED_THEME_TOKENS = [
     "--mf-glass",
     "--mf-border",
     "--mf-glow",
+    "cosmic fox",
+    "privacy-minded",
+    "gentle",
 ]
 
 REQUIRED_THEME_SELECTORS = [
@@ -108,6 +112,8 @@ def main() -> int:
         (compose, "MinaFox SearXNG", "compose"),
         (dockerfile, "searxng/searxng", "Dockerfile"),
         (dockerfile, "minafox.min.css", "Dockerfile"),
+        (dockerfile, "dark.min.css", "Dockerfile"),
+        (dockerfile, "Use the upstream-compatible dark style name", "Dockerfile"),
         (installer, "docker compose", "installer"),
         (installer, "podman compose", "installer"),
         (installer, "grep -E '^SEARXNG_SECRET_KEY='", "installer"),
