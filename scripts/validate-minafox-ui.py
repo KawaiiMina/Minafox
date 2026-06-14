@@ -20,6 +20,7 @@ USER_CHROME = ROOT / "profile" / "userChrome.css"
 START_HTML = ROOT / "desktop" / "start.html"
 USER_JS = ROOT / "profile" / "user.js"
 USER_CONTENT = ROOT / "profile" / "userContent.css"
+BRAND_LORE = ROOT / "docs" / "brand-lore.md"
 
 
 class StartPageParser(HTMLParser):
@@ -218,6 +219,27 @@ def validate_user_content(failures: list[str]) -> str:
     return css
 
 
+def validate_brand_lore(failures: list[str]) -> str:
+    lore = read_text(BRAND_LORE, failures)
+    if not lore:
+        return lore
+
+    require_contains(
+        "docs/brand-lore.md",
+        lore,
+        [
+            "# MinaFox Brand Lore",
+            "Mascot name: Mina",
+            "Mina is",
+            "Logo/mascot direction",
+            "Voice and personality",
+            "Accessibility and privacy",
+        ],
+        failures,
+    )
+    return lore
+
+
 def validate_no_scaffold_markers(files: dict[str, str], failures: list[str]) -> None:
     scaffold_markers = re.compile(r"\b(?:TODO|FIXME|XXX|LOREM IPSUM)\b", re.IGNORECASE)
     for label, content in files.items():
@@ -233,6 +255,7 @@ def main() -> int:
         "desktop/start.html": validate_start_html(failures),
         "profile/user.js": validate_user_js(failures),
         "profile/userContent.css": validate_user_content(failures),
+        "docs/brand-lore.md": validate_brand_lore(failures),
     }
     validate_no_scaffold_markers(contents, failures)
 

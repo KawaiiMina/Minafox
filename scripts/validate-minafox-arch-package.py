@@ -31,7 +31,8 @@ REQUIRED_PKGBUILD_SNIPPETS = (
     "source=('git+https://github.com/KawaiiMina/Minafox.git')",
     "install -Dm755 scripts/minafox-launcher.sh \"$pkgdir/usr/bin/minafox\"",
     "install -Dm644 desktop/minafox.desktop \"$pkgdir/usr/share/applications/minafox.desktop\"",
-    "cp -a assets/icons/hicolor \"$pkgdir/usr/share/icons/\"",
+    "install -Dm644 README.md \"$pkgdir/usr/share/doc/minafox/README.md\"",
+    "install -Dm644 docs/brand-lore.md \"$pkgdir/usr/share/doc/minafox/brand-lore.md\"",
     "cp -a assets \"$pkgdir/usr/share/minafox/\"",
     "install -Dm644 profile/user.js \"$pkgdir/usr/share/minafox/profile/user.js\"",
     "install -Dm755 scripts/install-minafox-arch.sh \"$pkgdir/usr/share/minafox/scripts/install-minafox-arch.sh\"",
@@ -71,6 +72,7 @@ REQUIRED_STAGED_FILES = (
     "usr/share/minafox/searxng/docker-compose.yml",
     "usr/share/minafox/searxng/theme/minafox.css",
     "usr/share/doc/minafox/README.md",
+    "usr/share/doc/minafox/brand-lore.md",
 )
 
 

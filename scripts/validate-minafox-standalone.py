@@ -22,6 +22,7 @@ LAUNCHER = ROOT / "scripts" / "minafox-launcher.sh"
 DESKTOP = ROOT / "desktop" / "minafox.desktop"
 INSTALLER = ROOT / "scripts" / "install-minafox-arch.sh"
 README = ROOT / "README.md"
+POLICIES = ROOT / "distribution" / "policies.json"
 
 
 REQUIRED_LAUNCHER_SNIPPETS = (
@@ -137,6 +138,18 @@ def validate_readme(failures: list[str]) -> str:
         return text
     require_contains("README.md", text, REQUIRED_README_SNIPPETS, failures)
     return text
+
+
+def validate_no_forced_ublock_install(contents: dict[str, str], failures: list[str]) -> None:
+    forbidden_markers = (
+        "uBlock0@raymondhill.net",
+        "ublock-origin/latest.xpi",
+        "uBlock Origin is force-installed",
+    )
+    for label, text in contents.items():
+        for marker in forbidden_markers:
+            if marker in text:
+                failures.append(f"{label}: remove forced uBlock Origin install marker {marker!r}")
 
 
 def validate_no_placeholders_or_host_paths(contents: dict[str, str], failures: list[str]) -> None:
@@ -256,8 +269,10 @@ def main() -> int:
         "desktop/minafox.desktop": validate_desktop(failures),
         "scripts/install-minafox-arch.sh": validate_installer(failures),
         "README.md": validate_readme(failures),
+        "distribution/policies.json": read_text(POLICIES, failures),
     }
     validate_no_placeholders_or_host_paths(contents, failures)
+    validate_no_forced_ublock_install(contents, failures)
     validate_packaged_first_run_smoke(failures)
 
     if failures:

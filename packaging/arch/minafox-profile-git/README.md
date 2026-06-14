@@ -13,7 +13,7 @@ It installs:
 - `/usr/share/icons/hicolor/.../apps/minafox.png` — icon-theme assets.
 - `/usr/share/minafox/` — profile, start page, branding assets, policy, SearXNG overlay, and helper scripts.
 - `/usr/lib/systemd/user/minafox-searxng.service` — optional local search user service.
-- `/usr/share/doc/minafox/README.md` — project documentation.
+- `/usr/share/doc/minafox/README.md` and `/usr/share/doc/minafox/brand-lore.md` — project documentation and Mina mascot lore.
 
 It does **not** compile Firefox or turn MinaFox into a source fork yet.
 

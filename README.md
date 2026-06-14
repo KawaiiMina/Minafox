@@ -15,6 +15,8 @@ The GitHub repo is organized around the installable pieces:
   - `assets/minafox-logo.svg` — SVG-style logo wrapper.
   - `assets/icons/` — generated PNG/ICO app icons.
   - `assets/icons/hicolor/` — Linux icon-theme layout copied during install.
+- `docs/` — project/brand documentation.
+  - `docs/brand-lore.md` — Mina the mascot, logo story, voice, and future mascot-art direction.
 - `desktop/` — desktop-facing files.
   - `desktop/start.html` — local MinaFox start page that submits searches to local SearXNG.
   - `desktop/minafox.desktop` — Linux desktop launcher that calls `minafox`.
@@ -111,7 +113,9 @@ The desktop app is named **MinaFox** and its desktop entry also launches `minafo
 
 ## Branding assets
 
-MinaFox uses a cute pink/purple fox-browser logo.
+MinaFox uses a cute pink/purple fox-browser logo. The mascot behind the mark is **Mina**, a cozy cosmic fox guide who represents calm navigation, privacy, and gentle help when the web gets noisy.
+
+- Brand lore and mascot direction: `docs/brand-lore.md`
 
 - Transparent PNG master: `assets/minafox-logo-transparent.png`
 - SVG-style vector version: `assets/minafox-logo.svg`
@@ -266,7 +270,7 @@ bind = $mod, B, exec, minafox
 
 ## Notes
 
-- uBlock Origin is force-installed by policy.
+- Extension installs are allowed, but MinaFox does not force-install add-ons by policy.
 - Telemetry/studies/Pocket are disabled.
 - DRM stays enabled so streaming sites can work; change `media.eme.enabled` to `false` if you prefer stricter privacy.
 - The profile uses Wayland-friendly portal prefs for Hyprland.

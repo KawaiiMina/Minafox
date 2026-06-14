@@ -217,10 +217,6 @@
       "*": {
         "installation_mode": "allowed"
       },
-      "uBlock0@raymondhill.net": {
-        "installation_mode": "force_installed",
-        "install_url": "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi"
-      },
       "firefox@betterttv.net": {
         "installation_mode": "allowed",
         "install_url": "https://addons.mozilla.org/firefox/downloads/latest/betterttv/latest.xpi"
