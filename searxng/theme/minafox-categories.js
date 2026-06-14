@@ -1,7 +1,8 @@
 // MinaFox SearXNG category guard.
 // SearXNG's Simple theme uses checkboxes so users can select multiple
 // categories. MinaFox intentionally behaves like a calmer tab bar: selecting
-// one category clears the others, and at least one category remains selected.
+// one category clears the others, at least one category remains selected, and
+// changing category immediately reruns the current search in that category.
 (() => {
   const categoryInputs = () => Array.from(
     document.querySelectorAll('#categories input[type="checkbox"][name^="category_"]')
@@ -24,6 +25,22 @@
     }
   };
 
+  const submitCategorySearch = (selected) => {
+    if (!selected || !selected.checked) return;
+
+    const form = selected.form || selected.closest('form') || document.querySelector('form#search');
+    const query = form ? form.querySelector('#q') : null;
+    if (!form || !query || !query.value.trim()) return;
+
+    window.setTimeout(() => {
+      if (typeof form.requestSubmit === 'function') {
+        form.requestSubmit();
+      } else {
+        form.submit();
+      }
+    }, 0);
+  };
+
   const init = () => {
     const inputs = categoryInputs();
     if (!inputs.length) return;
@@ -33,7 +50,10 @@
     if (checked.length === 0) inputs[0].checked = true;
 
     inputs.forEach((input) => {
-      input.addEventListener('change', () => keepSingleCategory(input));
+      input.addEventListener('change', () => {
+        keepSingleCategory(input);
+        submitCategorySearch(input);
+      });
     });
   };
 
