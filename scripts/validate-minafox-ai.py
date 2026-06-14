@@ -48,6 +48,8 @@ START_SNIPPETS = (
     "/chat",
     "friendlyAiError",
     "Ollama is offline. Start Ollama locally",
+    "ollama?.chat_enabled",
+    "Broker sees Ollama, but chat is safely paused",
 )
 
 DOC_SNIPPETS = (
@@ -80,6 +82,8 @@ BROKER_SNIPPETS = (
     "ALLOWED_CORS_ORIGINS",
     "assert_loopback_url",
     "Ollama is offline. Start Ollama locally",
+    "ollama_chat_enabled",
+    "chat_disabled",
 )
 
 WRAPPER_SNIPPETS = (

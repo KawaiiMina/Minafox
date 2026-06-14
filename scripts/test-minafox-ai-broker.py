@@ -28,7 +28,8 @@ class MinaFoxAIBrokerTests(unittest.TestCase):
         self.broker = load_broker()
 
     def test_ollama_provider_is_enabled_only_when_local_tags_endpoint_responds(self) -> None:
-        with mock.patch.object(self.broker, "ollama_request", return_value={"available": True, "models": ["llama3.1:8b"]}), \
+        with mock.patch.dict(os.environ, {"MINAFOX_AI_ENABLE_OLLAMA_CHAT": "1"}, clear=False), \
+             mock.patch.object(self.broker, "ollama_request", return_value={"available": True, "models": ["llama3.1:8b"]}), \
              mock.patch.object(self.broker, "hermes_request", return_value={"available": False}):
             providers = self.broker.build_providers()
 
@@ -37,6 +38,18 @@ class MinaFoxAIBrokerTests(unittest.TestCase):
         self.assertTrue(ollama["available"])
         self.assertEqual(ollama["status"], "ready")
         self.assertEqual(ollama["models"], ["llama3.1:8b"])
+
+    def test_ollama_provider_is_detected_but_not_enabled_when_chat_flag_is_missing(self) -> None:
+        with mock.patch.dict(os.environ, {"MINAFOX_AI_ENABLE_OLLAMA_CHAT": ""}, clear=False), \
+             mock.patch.object(self.broker, "ollama_request", return_value={"available": True, "models": ["llama3.1:8b"]}), \
+             mock.patch.object(self.broker, "hermes_request", return_value={"available": False}):
+            providers = self.broker.build_providers()
+
+        ollama = next(provider for provider in providers if provider["id"] == "ollama")
+        self.assertTrue(ollama["available"])
+        self.assertFalse(ollama["enabled"])
+        self.assertFalse(ollama["chat_enabled"])
+        self.assertEqual(ollama["status"], "chat_disabled")
 
     def test_ollama_chat_proxies_to_loopback_ollama_without_cloud_or_hermes(self) -> None:
         captured: dict[str, object] = {}

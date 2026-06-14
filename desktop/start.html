@@ -1058,17 +1058,20 @@
         const hermesAvailable = Boolean(hermes?.hermes?.available);
         const providerList = Array.isArray(providers.providers) ? providers.providers : [];
         const ollama = providerList.find((provider) => provider.id === "ollama");
-        const ollamaReady = Boolean(ollama?.enabled && ollama?.available);
+        const ollamaDetected = Boolean(ollama?.available);
+        const ollamaReady = Boolean(ollama?.chat_enabled || (ollama?.enabled && ollama?.status === "ready"));
         const count = providerList.length;
         setAiChatEnabled(
           ollamaReady,
           ollamaReady
             ? "Local Ollama is ready through the localhost broker. Cloud and Hermes modes remain disabled."
-            : "Broker is awake, but local Ollama is offline or chat is not enabled."
+            : ollamaDetected
+              ? "Broker sees Ollama, but chat is safely paused. Restart minafox-ai-broker with MINAFOX_AI_ENABLE_OLLAMA_CHAT=1 to test chat."
+              : "Broker is awake, but local Ollama is offline or not reachable on 127.0.0.1:11434."
         );
         status.textContent = hermesAvailable
-          ? `minafox-ai-broker is awake on 127.0.0.1:8765. ${count} providers known. Local Ollama ${ollamaReady ? "is ready" : "is not ready"}. Hermes API Server is reachable; Hermes chat remains safety-disabled.`
-          : `minafox-ai-broker is awake on 127.0.0.1:8765. ${count} providers known. Local Ollama ${ollamaReady ? "is ready" : "is not ready"}. Hermes API Server is not reachable yet; Hermes chat remains safety-disabled.`;
+          ? `minafox-ai-broker is awake on 127.0.0.1:8765. ${count} providers known. Local Ollama ${ollamaReady ? "chat is enabled" : ollamaDetected ? "is detected, but chat is paused" : "is not reachable"}. Hermes API Server is reachable; Hermes chat remains safety-disabled.`
+          : `minafox-ai-broker is awake on 127.0.0.1:8765. ${count} providers known. Local Ollama ${ollamaReady ? "chat is enabled" : ollamaDetected ? "is detected, but chat is paused" : "is not reachable"}. Hermes API Server is not reachable yet; Hermes chat remains safety-disabled.`;
       } catch (error) {
         setAiChatEnabled(false, "Broker offline. Start minafox-ai-broker for local Ollama chat detection.");
         status.textContent = "No API keys live in this static page. Start minafox-ai-broker for provider detection. Hermes Gateway can trigger tool-capable agents, so chat stays disabled until explicit safety UX is added.";

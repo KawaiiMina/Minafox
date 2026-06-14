@@ -210,12 +210,15 @@ def ollama_request(path: str, payload: dict[str, Any] | None = None, timeout: fl
 def build_providers() -> list[dict[str, Any]]:
     hermes = hermes_request("/health")
     ollama = ollama_request("/api/tags", timeout=2.0)
+    ollama_chat_enabled = env_bool("MINAFOX_AI_ENABLE_OLLAMA_CHAT")
     providers = [dict(provider) for provider in PROVIDERS]
     for provider in providers:
         if provider["id"] == "ollama":
-            provider["available"] = bool(ollama.get("available"))
-            provider["enabled"] = bool(ollama.get("available"))
-            provider["status"] = "ready" if ollama.get("available") else "offline"
+            ollama_available = bool(ollama.get("available"))
+            provider["available"] = ollama_available
+            provider["chat_enabled"] = bool(ollama_available and ollama_chat_enabled)
+            provider["enabled"] = provider["chat_enabled"]
+            provider["status"] = "ready" if provider["chat_enabled"] else "chat_disabled" if ollama_available else "offline"
             provider["models"] = ollama.get("models", [])
             provider["health"] = ollama
         if provider["id"] == "hermes_gateway":
@@ -307,6 +310,7 @@ class MinaFoxBrokerHandler(BaseHTTPRequestHandler):
                 "service": "minafox-ai-broker",
                 "host": os.environ.get("MINAFOX_AI_BROKER_HOST", DEFAULT_HOST),
                 "port": env_port("MINAFOX_AI_BROKER_PORT", DEFAULT_PORT),
+                "ollama_chat_enabled": env_bool("MINAFOX_AI_ENABLE_OLLAMA_CHAT"),
             })
             return
         if path == "/providers":
