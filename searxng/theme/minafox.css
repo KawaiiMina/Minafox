@@ -266,12 +266,20 @@ input[type="submit"]:hover,
   padding: 8px !important;
 }
 
+#main_results {
+  --mf-results-logo-width: 64px;
+  --mf-results-header-gap: clamp(12px, 2vw, 22px);
+  --mf-results-search-indent: calc(var(--mf-results-logo-width) + var(--mf-results-header-gap));
+  --mf-results-search-rail: min(742px, calc(100% - var(--mf-results-search-indent)));
+}
+
 #main_results #categories {
   order: 3 !important;
-  flex: 0 0 auto !important;
-  width: fit-content !important;
-  max-width: min(calc(100% - 28px), 1040px) !important;
-  margin: 12px auto !important;
+  flex: 0 0 var(--mf-results-search-rail) !important;
+  width: var(--mf-results-search-rail) !important;
+  max-width: var(--mf-results-search-rail) !important;
+  margin: 14px 0 12px var(--mf-results-search-indent) !important;
+  box-sizing: border-box !important;
   overflow-x: auto !important;
 }
 
@@ -279,11 +287,11 @@ input[type="submit"]:hover,
 #categories_container {
   display: flex !important;
   flex-wrap: nowrap !important;
-  justify-content: center !important;
+  justify-content: space-around !important;
   align-items: center !important;
   gap: 6px !important;
-  width: max-content !important;
-  min-width: 100% !important;
+  width: 100% !important;
+  min-width: max-content !important;
 }
 
 .autocomplete .help {
@@ -427,6 +435,8 @@ footer,
   }
 
   #main_results #search_header {
+    --mf-results-search-indent: 0px;
+    --mf-results-search-rail: 100%;
     align-items: stretch !important;
     gap: 10px !important;
     padding-inline: 0 !important;
