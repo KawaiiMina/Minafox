@@ -49,6 +49,13 @@ REQUIRED_THEME_TOKENS = [
 REQUIRED_THEME_SELECTORS = [
     "#main_results",
     "#search",
+    "#main_results #search",
+    "#main_results #search_header",
+    "flex-wrap: wrap",
+    "#main_results #search_view",
+    "#main_results .search_box",
+    "#main_results #categories",
+    "order: 3",
     "#q",
     ".result",
     ".result h3",
@@ -182,6 +189,12 @@ def main() -> int:
 
     if "source .env" in installer or ". .env" in installer:
         failures.append("installer must parse .env as data, not source it as shell code")
+
+    if re.search(r"(?m)^#search,\s*\n\s*\.search_box\s*\{", theme):
+        failures.append("theme must not style the whole results-page #search form as a glass card; style #main_index #search and .search_box separately")
+
+    if "#main_results #search {" in theme and "background: transparent" not in theme:
+        failures.append("results-page #search must reset to a transparent layout container")
 
     if failures:
         print("MinaFox SearXNG validation: FAIL", file=sys.stderr)
