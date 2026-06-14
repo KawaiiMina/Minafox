@@ -1,0 +1,54 @@
+# Maintainer: MinaFox maintainers
+pkgname=minafox-profile-git
+pkgver=0.1.0.r5.gbe77521
+pkgrel=1
+pkgdesc="MinaFox standalone Firefox profile wrapper for Arch/Hyprland"
+arch=('any')
+url="https://github.com/KawaiiMina/Minafox"
+license=('MIT')
+depends=('firefox' 'desktop-file-utils' 'hicolor-icon-theme' 'python')
+makedepends=('git')
+optdepends=(
+  'docker: run the optional local MinaFox SearXNG service'
+  'podman: run the optional local MinaFox SearXNG service without Docker'
+)
+provides=('minafox-profile')
+conflicts=('minafox-profile')
+install="${pkgname}.install"
+source=('git+https://github.com/KawaiiMina/Minafox.git')
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "$srcdir/Minafox"
+  printf '0.1.0.r%s.g%s' "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+package() {
+  cd "$srcdir/Minafox"
+
+  install -Dm755 scripts/minafox-launcher.sh "$pkgdir/usr/bin/minafox"
+
+  install -Dm644 desktop/minafox.desktop "$pkgdir/usr/share/applications/minafox.desktop"
+  install -d "$pkgdir/usr/share/icons"
+  cp -a assets/icons/hicolor "$pkgdir/usr/share/icons/"
+
+  install -Dm644 README.md "$pkgdir/usr/share/doc/minafox/README.md"
+  install -d "$pkgdir/usr/share/minafox"
+  cp -a assets "$pkgdir/usr/share/minafox/"
+  install -Dm644 desktop/start.html "$pkgdir/usr/share/minafox/desktop/start.html"
+  install -Dm644 distribution/policies.json "$pkgdir/usr/share/minafox/distribution/policies.json"
+  install -Dm644 profile/user.js "$pkgdir/usr/share/minafox/profile/user.js"
+  install -Dm644 profile/userChrome.css "$pkgdir/usr/share/minafox/profile/userChrome.css"
+  install -Dm644 profile/userContent.css "$pkgdir/usr/share/minafox/profile/userContent.css"
+
+  install -Dm755 scripts/install-minafox-arch.sh "$pkgdir/usr/share/minafox/scripts/install-minafox-arch.sh"
+  install -Dm755 scripts/minafox-launcher.sh "$pkgdir/usr/share/minafox/scripts/minafox-launcher.sh"
+  install -Dm755 scripts/install-minafox-searxng-arch.sh "$pkgdir/usr/share/minafox/scripts/install-minafox-searxng-arch.sh"
+
+  install -Dm644 searxng/README.md "$pkgdir/usr/share/minafox/searxng/README.md"
+  install -Dm644 searxng/Dockerfile "$pkgdir/usr/share/minafox/searxng/Dockerfile"
+  install -Dm644 searxng/docker-compose.yml "$pkgdir/usr/share/minafox/searxng/docker-compose.yml"
+  install -Dm644 searxng/settings.yml "$pkgdir/usr/share/minafox/searxng/settings.yml"
+  install -Dm644 searxng/uwsgi.ini "$pkgdir/usr/share/minafox/searxng/uwsgi.ini"
+  install -Dm644 searxng/theme/minafox.css "$pkgdir/usr/share/minafox/searxng/theme/minafox.css"
+}

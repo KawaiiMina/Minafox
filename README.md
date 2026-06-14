@@ -29,10 +29,13 @@ The GitHub repo is organized around the installable pieces:
   - `scripts/minafox-launcher.sh` — Wayland-friendly standalone wrapper around the system Firefox binary.
   - `scripts/install-minafox-searxng-arch.sh` — starts the local MinaFox SearXNG service with Docker/Podman Compose.
   - `scripts/validate-minafox-standalone.py` — validates the `minafox` launcher, desktop entry, installer wiring, and docs.
+  - `scripts/validate-minafox-arch-package.py` — validates the Arch package skeleton and simulates the `package()` function without requiring an Arch host.
   - `scripts/validate-minafox-ui.py` — validates theme/start-page structure.
   - `scripts/validate-no-host-paths.py` — validates that source files do not contain author-machine paths like hardcoded home directories.
   - `scripts/validate-no-firefox-telemetry.py` — validates telemetry prefs/policies.
   - `scripts/validate-minafox-searxng.py` — validates the SearXNG overlay.
+- `packaging/` — distro packaging experiments.
+  - `packaging/arch/minafox-profile-git/` — Arch VCS package skeleton for the standalone wrapper.
 - `searxng/` — local private search overlay.
   - `searxng/Dockerfile` — builds from upstream `searxng/searxng` and copies the MinaFox overlay.
   - `searxng/docker-compose.yml` — localhost-only service on `127.0.0.1:8888`.
@@ -55,6 +58,8 @@ The GitHub repo is organized around the installable pieces:
 
 ## Install on Arch
 
+### User-local install from a clone
+
 ```bash
 git clone git@github.com:KawaiiMina/Minafox.git ~/Minafox
 cd ~/Minafox
@@ -66,6 +71,25 @@ Or if this folder is already present:
 ```bash
 cd ~/Minafox
 ./scripts/install-minafox-arch.sh
+```
+
+### Package install from the Arch skeleton
+
+```bash
+cd ~/Minafox/packaging/arch/minafox-profile-git
+makepkg -si
+```
+
+The package installs `minafox`, the desktop entry, icons, docs, and packaged assets under `/usr/share/minafox`. After package install, run this once as your user to sync the full profile/start-page assets:
+
+```bash
+/usr/share/minafox/scripts/install-minafox-arch.sh
+```
+
+Validate the package skeleton from any Linux dev host:
+
+```bash
+python3 scripts/validate-minafox-arch-package.py
 ```
 
 Launch:
@@ -106,12 +130,13 @@ Implemented theme files:
 - `profile/user.js` — enables `toolkit.legacyUserProfileCustomizations.stylesheets` so Firefox loads `userChrome.css`.
 - `scripts/validate-minafox-ui.py` — repeatable validation gate for the theme structure.
 
-Validate the theme and standalone wrapper files:
+Validate the theme, standalone wrapper, package skeleton, and host-path checks:
 
 ```bash
 cd ~/Minafox
 python3 scripts/validate-minafox-ui.py
 python3 scripts/validate-minafox-standalone.py
+python3 scripts/validate-minafox-arch-package.py
 python3 scripts/validate-no-host-paths.py
 ```
 
@@ -219,7 +244,7 @@ bind = $mod, B, exec, minafox
 
 ## Next steps
 
-1. Add an Arch package skeleton for the standalone wrapper (`minafox-profile-git`).
+1. Make the packaged launcher auto-sync `/usr/share/minafox` assets into the dedicated user profile on first run.
 2. Continue the cosmic Arc/Zen-inspired start-page and chrome polish.
 3. Decide whether Sidebery should be force-installed by policy or documented as recommended.
 4. Decide whether local SearXNG should remain optional or become a packaged user service.

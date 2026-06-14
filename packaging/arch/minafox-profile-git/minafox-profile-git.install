@@ -1,0 +1,26 @@
+post_install() {
+  cat <<'EOF'
+
+MinaFox profile wrapper installed.
+
+Launch with:
+  minafox
+
+For the full current profile/start-page assets in your user profile, run:
+  /usr/share/minafox/scripts/install-minafox-arch.sh
+
+That helper may ask for sudo when installing Firefox enterprise policies under:
+  /usr/lib/firefox/distribution
+
+That user setup writes to:
+  ~/.mozilla/firefox/minafox
+  ~/.local/share/minafox
+  ~/.local/share/applications/minafox.desktop
+  ~/.local/bin/minafox
+
+EOF
+}
+
+post_upgrade() {
+  post_install
+}

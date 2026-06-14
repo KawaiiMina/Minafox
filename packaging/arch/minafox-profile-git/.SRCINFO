@@ -1,0 +1,21 @@
+pkgbase = minafox-profile-git
+	pkgdesc = MinaFox standalone Firefox profile wrapper for Arch/Hyprland
+	pkgver = 0.1.0.r5.gbe77521
+	pkgrel = 1
+	url = https://github.com/KawaiiMina/Minafox
+	install = minafox-profile-git.install
+	arch = any
+	license = MIT
+	makedepends = git
+	depends = firefox
+	depends = desktop-file-utils
+	depends = hicolor-icon-theme
+	depends = python
+	optdepends = docker: run the optional local MinaFox SearXNG service
+	optdepends = podman: run the optional local MinaFox SearXNG service without Docker
+	provides = minafox-profile
+	conflicts = minafox-profile
+	source = git+https://github.com/KawaiiMina/Minafox.git
+	sha256sums = SKIP
+
+pkgname = minafox-profile-git
