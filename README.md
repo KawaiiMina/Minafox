@@ -17,6 +17,7 @@ The GitHub repo is organized around the installable pieces:
   - `assets/icons/hicolor/` — Linux icon-theme layout copied during install.
 - `docs/` — project/brand documentation.
   - `docs/brand-lore.md` — Mina the mascot, logo story, voice, and future mascot-art direction.
+  - `docs/ai-provider-architecture.md` — optional Mina AI Den provider, privacy, and Hermes Gateway architecture.
 - `desktop/` — desktop-facing files.
   - `desktop/start.html` — local MinaFox start page that submits searches to local SearXNG.
   - `desktop/minafox.desktop` — Linux desktop launcher that calls `minafox`.
@@ -30,12 +31,14 @@ The GitHub repo is organized around the installable pieces:
   - `scripts/install-minafox-arch.sh` — installs/updates the MinaFox Firefox profile assets and the user-local `minafox` launcher.
   - `scripts/minafox-launcher.sh` — Wayland-friendly standalone wrapper around the system Firefox binary.
   - `scripts/install-minafox-searxng-arch.sh` — prepares and starts the local MinaFox SearXNG service with Docker/Podman Compose, including the packaged systemd user-service path.
+  - `scripts/minafox-update.sh` — updater installed as `minafox-update` for rebuilding/upgrading the Arch package.
   - `scripts/validate-minafox-standalone.py` — validates the `minafox` launcher, desktop entry, installer wiring, and docs.
   - `scripts/validate-minafox-arch-package.py` — validates the Arch package skeleton and simulates the `package()` function without requiring an Arch host.
   - `scripts/validate-minafox-ui.py` — validates theme/start-page structure.
   - `scripts/validate-no-host-paths.py` — validates that source files do not contain author-machine paths like hardcoded home directories.
   - `scripts/validate-no-firefox-telemetry.py` — validates telemetry prefs/policies.
   - `scripts/validate-minafox-searxng.py` — validates the SearXNG overlay.
+  - `scripts/validate-minafox-ai.py` — validates the static AI Den UI and no-secrets architecture guardrails.
 - `packaging/` — distro packaging experiments.
   - `packaging/arch/minafox-profile-git/` — Arch VCS package skeleton for the standalone wrapper.
 - `searxng/` — local private search overlay.
@@ -84,6 +87,14 @@ makepkg -si
 ```
 
 The package installs `minafox`, the desktop entry, icons, docs, and packaged assets under `/usr/share/minafox`. On first launch, `/usr/bin/minafox` automatically syncs the packaged profile, start page, desktop entry, and icons into your user-local MinaFox paths before starting Firefox.
+
+Upgrade an installed Arch package from the MinaFox git package skeleton:
+
+```bash
+minafox-update
+```
+
+The updater uses `~/Minafox` by default, pulls the repo, then runs `makepkg -si` from `packaging/arch/minafox-profile-git`. It does not store GitHub tokens; configure GitHub HTTPS auth with `gh` or git credentials first if the repo is private.
 
 You can still run the full setup helper manually when you want an explicit refresh or want it to attempt enterprise-policy installation:
 
@@ -137,6 +148,26 @@ Implemented theme files:
 - `profile/user.js` — enables `toolkit.legacyUserProfileCustomizations.stylesheets` so Firefox loads `userChrome.css`.
 - `scripts/validate-minafox-ui.py` — repeatable validation gate for the theme structure.
 
+## Mina AI Den
+
+MinaFox includes the first static **Mina AI Den** surface on the start page. It is intentionally calm and disabled for now: no network calls, no direct provider calls from browser JavaScript, and no secrets in static files.
+
+Provider placeholders shown in the UI:
+
+- Local: Ollama
+- Cloud: OpenAI / ChatGPT-compatible APIs, Gemini, Claude, and OpenRouter
+- LAN / advanced: Hermes Gateway
+
+The future architecture is a localhost-only broker bound to `127.0.0.1`, with user-local config at `~/.config/minafox/ai.yaml` and provider keys read from environment variables or a future keyring integration. Hermes Gateway is labeled separately because it may connect to tool-capable Hermes agents and will require explicit pairing/auth before implementation.
+
+Architecture notes: `docs/ai-provider-architecture.md`
+
+Validate the AI surface and privacy guardrails:
+
+```bash
+python3 scripts/validate-minafox-ai.py
+```
+
 Validate the theme, standalone wrapper, package skeleton, and host-path checks:
 
 ```bash
@@ -167,7 +198,7 @@ Implemented SearXNG files:
 
 - `searxng/Dockerfile` — builds from upstream `searxng/searxng` and copies the MinaFox overlay.
 - `searxng/docker-compose.yml` — runs the search service on localhost only: `127.0.0.1:8888:8080`.
-- `searxng/settings.yml` — privacy-first local defaults, POST search submission, safe-search default, local base URL, and `simple_style: minafox`.
+- `searxng/settings.yml` — privacy-first local defaults, POST search submission, safe-search default, local base URL, and upstream-compatible `simple_style: dark` with MinaFox CSS installed over the active dark stylesheet.
 - `searxng/uwsgi.ini` — local container runtime config.
 - `searxng/theme/minafox.css` — MinaFox theme for SearXNG’s Simple UI.
 - `searxng/README.md` — run/update/manual verification notes.

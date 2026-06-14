@@ -9,11 +9,13 @@ This directory is the first Arch packaging sprint for MinaFox's standalone-wrapp
 It installs:
 
 - `/usr/bin/minafox` — Wayland-friendly standalone launcher.
+- `/usr/bin/minafox-update` — rebuild and upgrade the installed package from the git package skeleton.
 - `/usr/share/applications/minafox.desktop` — desktop app entry.
 - `/usr/share/icons/hicolor/.../apps/minafox.png` — icon-theme assets.
 - `/usr/share/minafox/` — profile, start page, branding assets, policy, SearXNG overlay, and helper scripts.
 - `/usr/lib/systemd/user/minafox-searxng.service` — optional local search user service.
 - `/usr/share/doc/minafox/README.md` and `/usr/share/doc/minafox/brand-lore.md` — project documentation and Mina mascot lore.
+- `/usr/share/doc/minafox/ai-provider-architecture.md` — Mina AI Den provider and privacy architecture notes.
 
 It does **not** compile Firefox or turn MinaFox into a source fork yet.
 
@@ -48,6 +50,16 @@ To force a full refresh, or to attempt installing Firefox enterprise policies, r
 ```
 
 Note: the user setup script may ask for `sudo` when it tries to install Firefox enterprise policies under `/usr/lib/firefox/distribution`. The launcher's automatic first-run sync is user-local only and does not use `sudo`.
+
+## Updating the installed package
+
+After installing the package, upgrade from the MinaFox git package skeleton with:
+
+```bash
+minafox-update
+```
+
+By default this uses `~/Minafox`, pulls the repo, and runs `makepkg -si` from this package directory. Use `minafox-update --repo /path/to/Minafox` or `MINAFOX_REPO_DIR=/path/to/Minafox minafox-update` for another checkout.
 
 ## Optional local SearXNG user service
 

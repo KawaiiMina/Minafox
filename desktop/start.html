@@ -362,6 +362,57 @@
       min-width: 0;
     }
 
+    .ai-den-card {
+      display: grid;
+      gap: 14px;
+      background:
+        radial-gradient(circle at 88% 0%, rgba(245, 194, 231, 0.18), transparent 34%),
+        linear-gradient(145deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.04)),
+        var(--panel-strong);
+    }
+
+    .ai-den-card select,
+    .ai-den-card textarea {
+      width: 100%;
+      border: 1px solid rgba(203, 166, 247, 0.24);
+      border-radius: 18px;
+      background: rgba(13, 10, 22, 0.58);
+      color: var(--ink);
+      font: inherit;
+      padding: 12px 14px;
+    }
+
+    .ai-den-card textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    .ai-provider-row,
+    .ai-privacy-row {
+      display: grid;
+      gap: 10px;
+    }
+
+    .ai-privacy-row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .privacy-pill,
+    .ai-status-text {
+      border: 1px solid rgba(245, 194, 231, 0.22);
+      border-radius: 999px;
+      padding: 8px 10px;
+      color: var(--muted);
+      background: rgba(13, 10, 22, 0.34);
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .ai-status-text {
+      border-radius: 18px;
+      line-height: 1.5;
+    }
+
     .widget-card p,
     .dashboard-card p {
       color: var(--muted);
@@ -471,6 +522,8 @@
     }
 
     input[name="q"]:focus-visible,
+    .ai-den-card select:focus-visible,
+    .ai-den-card textarea:focus-visible,
     button:focus-visible,
     .quick-card:focus-visible,
     .workspace-bubble:focus-visible,
@@ -656,6 +709,30 @@
       </div>
 
       <aside class="dashboard-grid" aria-label="Dashboard cards">
+        <article class="dashboard-card ai-den-card" aria-labelledby="ai-den-title">
+          <h2 id="ai-den-title">Mina AI Den</h2>
+          <p>Optional local helper space for future chat. It stays quiet until a localhost-only broker is running.</p>
+          <div class="ai-provider-row">
+            <label for="ai-provider-select">Choose AI provider</label>
+            <select id="ai-provider-select" class="ai-provider-select" disabled>
+              <option>Ollama — Local</option>
+              <option>OpenAI / ChatGPT-compatible — Cloud</option>
+              <option>Gemini — Cloud</option>
+              <option>Claude — Cloud</option>
+              <option>OpenRouter — Cloud</option>
+              <option>Hermes Gateway — LAN / advanced</option>
+            </select>
+          </div>
+          <div class="ai-privacy-row" aria-label="AI privacy modes">
+            <span class="privacy-pill" data-privacy-mode="local">Local: Ollama</span>
+            <span class="privacy-pill" data-privacy-mode="cloud">Cloud: API provider</span>
+            <span class="privacy-pill" data-privacy-mode="lan">LAN: Hermes Gateway</span>
+          </div>
+          <label for="ai-prompt-input">AI prompt</label>
+          <textarea id="ai-prompt-input" class="ai-prompt-input" disabled placeholder="Mina is curled up until the local AI broker exists…"></textarea>
+          <button class="ai-send-button" type="button" disabled>Ask Mina later</button>
+          <p class="ai-status-text">No API keys live in this static page. Cloud keys will belong in a future local config/keyring-backed broker. Hermes Gateway can trigger tool-capable agents, so LAN mode will require explicit pairing and warnings.</p>
+        </article>
         <article class="dashboard-card roadmap-card">
           <h2>MinaFox roadmap</h2>
           <p>Wrapper → Arch package → source fork → native workspace UI.</p>

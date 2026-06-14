@@ -30,13 +30,16 @@ REQUIRED_PKGBUILD_SNIPPETS = (
     "makedepends=('git')",
     "source=('git+https://github.com/KawaiiMina/Minafox.git')",
     "install -Dm755 scripts/minafox-launcher.sh \"$pkgdir/usr/bin/minafox\"",
+    "install -Dm755 scripts/minafox-update.sh \"$pkgdir/usr/bin/minafox-update\"",
     "install -Dm644 desktop/minafox.desktop \"$pkgdir/usr/share/applications/minafox.desktop\"",
     "install -Dm644 README.md \"$pkgdir/usr/share/doc/minafox/README.md\"",
     "install -Dm644 docs/brand-lore.md \"$pkgdir/usr/share/doc/minafox/brand-lore.md\"",
+    "install -Dm644 docs/ai-provider-architecture.md \"$pkgdir/usr/share/doc/minafox/ai-provider-architecture.md\"",
     "cp -a assets \"$pkgdir/usr/share/minafox/\"",
     "install -Dm644 profile/user.js \"$pkgdir/usr/share/minafox/profile/user.js\"",
     "install -Dm755 scripts/install-minafox-arch.sh \"$pkgdir/usr/share/minafox/scripts/install-minafox-arch.sh\"",
     "install -Dm755 scripts/install-minafox-searxng-arch.sh \"$pkgdir/usr/share/minafox/scripts/install-minafox-searxng-arch.sh\"",
+    "install -Dm755 scripts/minafox-update.sh \"$pkgdir/usr/share/minafox/scripts/minafox-update.sh\"",
     "install -Dm644 systemd/user/minafox-searxng.service \"$pkgdir/usr/lib/systemd/user/minafox-searxng.service\"",
 )
 
@@ -55,6 +58,7 @@ REQUIRED_SRCINFO_SNIPPETS = (
 
 REQUIRED_STAGED_FILES = (
     "usr/bin/minafox",
+    "usr/bin/minafox-update",
     "usr/share/applications/minafox.desktop",
     "usr/share/icons/hicolor/16x16/apps/minafox.png",
     "usr/share/icons/hicolor/1024x1024/apps/minafox.png",
@@ -68,11 +72,13 @@ REQUIRED_STAGED_FILES = (
     "usr/share/minafox/scripts/install-minafox-arch.sh",
     "usr/share/minafox/scripts/install-minafox-searxng-arch.sh",
     "usr/share/minafox/scripts/minafox-launcher.sh",
+    "usr/share/minafox/scripts/minafox-update.sh",
     "usr/lib/systemd/user/minafox-searxng.service",
     "usr/share/minafox/searxng/docker-compose.yml",
     "usr/share/minafox/searxng/theme/minafox.css",
     "usr/share/doc/minafox/README.md",
     "usr/share/doc/minafox/brand-lore.md",
+    "usr/share/doc/minafox/ai-provider-architecture.md",
 )
 
 
@@ -141,9 +147,11 @@ def validate_package_simulation(failures: list[str]) -> None:
 
         for rel in (
             "usr/bin/minafox",
+            "usr/bin/minafox-update",
             "usr/share/minafox/scripts/install-minafox-arch.sh",
             "usr/share/minafox/scripts/install-minafox-searxng-arch.sh",
             "usr/share/minafox/scripts/minafox-launcher.sh",
+            "usr/share/minafox/scripts/minafox-update.sh",
         ):
             path = pkgdir / rel
             if path.exists() and not os.access(path, os.X_OK):
@@ -154,6 +162,12 @@ def validate_package_simulation(failures: list[str]) -> None:
         if launcher.exists() and source_launcher.exists():
             if launcher.read_text(encoding="utf-8") != source_launcher.read_text(encoding="utf-8"):
                 failures.append("staged /usr/bin/minafox differs from scripts/minafox-launcher.sh")
+
+        updater = pkgdir / "usr/bin/minafox-update"
+        source_updater = ROOT / "scripts" / "minafox-update.sh"
+        if updater.exists() and source_updater.exists():
+            if updater.read_text(encoding="utf-8") != source_updater.read_text(encoding="utf-8"):
+                failures.append("staged /usr/bin/minafox-update differs from scripts/minafox-update.sh")
 
 
 def shlex_quote(value: str) -> str:
