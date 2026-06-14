@@ -117,16 +117,32 @@ def validate_start_html(failures: list[str]) -> str:
         failures.append("desktop/start.html: missing minafox-shell class or id")
 
     has_search_form = any(
-        form.get("action", "").lower().startswith("https://duckduckgo.com")
-        or form.get("role") == "search"
-        or "search" in form.get("class", "").lower()
+        form.get("method", "").lower() == "post"
+        and form.get("action") == "http://127.0.0.1:8888/search"
+        and (form.get("role") == "search" or "search" in form.get("class", "").lower())
         for form in parser.forms
     )
-    has_query_input = any(input_attrs.get("name") == "q" for input_attrs in parser.inputs)
+    has_query_input = any(input_attrs.get("name") == "q" and input_attrs.get("type") == "search" for input_attrs in parser.inputs)
     if not (has_search_form and has_query_input):
-        failures.append("desktop/start.html: missing search form with query input")
+        failures.append("desktop/start.html: missing local SearXNG POST search form with search query input")
 
-    required_classes = {"workspace-bubbles", "workspace-bubble", "quick-card"}
+    required_classes = {
+        "minafox-desktop",
+        "workspace-rail",
+        "workspace-bubbles",
+        "workspace-bubble",
+        "soft-tabs",
+        "soft-tab-list",
+        "command-bar",
+        "quick-card",
+        "dashboard-grid",
+        "widget-grid",
+        "focus-timer-card",
+        "notes-card",
+        "lofi-card",
+        "roadmap-card",
+        "design-system-card",
+    }
     for class_name in sorted(required_classes - parser.classes):
         failures.append(f"desktop/start.html: missing required class {class_name!r}")
 

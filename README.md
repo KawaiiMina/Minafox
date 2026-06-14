@@ -128,7 +128,7 @@ The current visual direction is a hybrid of calm Zen-like minimalism and Arc-lik
 Implemented theme files:
 
 - `profile/userChrome.css` — Firefox chrome theme: dark lavender glass, rounded URL bar, soft tab pills, pink/violet active glow, and sidebar/bookmarks styling.
-- `desktop/start.html` — cozy local start page with a centered MinaFox SearXNG search bar, workspace bubbles, and quick-link cards.
+- `desktop/start.html` — cosmic Arc/Zen-inspired local start page with a floating workspace rail, soft tab preview, centered MinaFox SearXNG command/search bar, quick app cards, focus/notes/lofi widgets, roadmap card, and design-system palette card.
 - `profile/userContent.css` — scoped support styling for `about:home`, `about:newtab`, and the local MinaFox start page only.
 - `profile/user.js` — enables `toolkit.legacyUserProfileCustomizations.stylesheets` so Firefox loads `userChrome.css`.
 - `scripts/validate-minafox-ui.py` — repeatable validation gate for the theme structure.
