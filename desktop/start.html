@@ -307,7 +307,9 @@
     .quick-card,
     .workspace-bubble,
     .soft-tab,
-    .new-tab-pill {
+    .new-tab-pill,
+    .search-mode-pill,
+    .status-action {
       transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
     }
 
@@ -321,6 +323,32 @@
       cursor: pointer;
       font: inherit;
       font-weight: 900;
+    }
+
+    .search-mode-pills {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .search-mode-pill,
+    .status-action {
+      min-height: 38px;
+      border: 1px solid rgba(203, 166, 247, 0.22);
+      border-radius: 999px;
+      padding: 0 14px;
+      background: rgba(13, 10, 22, 0.40);
+      color: var(--ink);
+      box-shadow: none;
+      font-size: 0.9rem;
+    }
+
+    .search-mode-pill:hover,
+    .status-action:hover {
+      background: linear-gradient(135deg, rgba(245, 194, 231, 0.22), rgba(139, 92, 246, 0.18));
     }
 
     .quick-apps,
@@ -440,6 +468,44 @@
       line-height: 1.5;
     }
 
+    .service-status-card {
+      display: grid;
+      gap: 12px;
+    }
+
+    .service-status-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: var(--soft);
+      box-shadow: 0 0 18px rgba(216, 201, 234, 0.20);
+      flex: 0 0 auto;
+    }
+
+    .status-dot.is-online {
+      background: #a6e3a1;
+      box-shadow: 0 0 18px rgba(166, 227, 161, 0.42);
+    }
+
+    .status-dot.is-offline {
+      background: var(--peach);
+      box-shadow: 0 0 18px rgba(255, 159, 138, 0.36);
+    }
+
+    .status-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
     .widget-card p,
     .dashboard-card p {
       color: var(--muted);
@@ -542,7 +608,9 @@
     .workspace-bubble:hover,
     .soft-tab:hover,
     .new-tab-pill:hover,
-    .mini-button:hover {
+    .mini-button:hover,
+    .search-mode-pill:hover,
+    .status-action:hover {
       transform: translateY(-2px);
       border-color: var(--border-strong);
       box-shadow: 0 18px 48px rgba(7, 4, 18, 0.34), 0 0 28px rgba(245, 194, 231, 0.16);
@@ -556,7 +624,9 @@
     .workspace-bubble:focus-visible,
     .soft-tab:focus-visible,
     .new-tab-pill:focus-visible,
-    .mini-button:focus-visible {
+    .mini-button:focus-visible,
+    .search-mode-pill:focus-visible,
+    .status-action:focus-visible {
       outline: 3px solid rgba(245, 194, 231, 0.52);
       outline-offset: 4px;
       border-color: rgba(245, 194, 231, 0.74);
@@ -687,13 +757,20 @@
           <p class="eyebrow">Cosmic Arc mode</p>
           <h1 id="minafox-greeting">Good evening, Mina ✨</h1>
           <p class="subtitle">A calm private launchpad for search, cozy focus, and your most-used browser spaces. Local search stays on MinaFox SearXNG at 127.0.0.1.</p>
-          <form class="command-bar" role="search" method="post" action="http://127.0.0.1:8888/search">
+          <form id="minafox-search-form" class="command-bar" role="search" method="post" action="http://127.0.0.1:8888/search">
             <span class="sparkle" aria-hidden="true">✧</span>
             <label for="search-q">Search MinaFox SearXNG privately</label>
             <input id="search-q" name="q" type="search" autocomplete="off" placeholder="Search privately or type a cozy command…" />
             <span class="shortcut-hint" aria-hidden="true">Ctrl K</span>
             <button type="submit" aria-label="Search">Paw</button>
           </form>
+          <div class="search-mode-pills" aria-label="Search modes">
+            <button class="search-mode-pill" type="button" data-search-category="general">✦ Web</button>
+            <button class="search-mode-pill" type="button" data-search-category="images">🖼 Images</button>
+            <button class="search-mode-pill" type="button" data-search-category="videos">▶ Videos</button>
+            <button class="search-mode-pill" type="button" data-search-category="news">🗞 News</button>
+            <button class="search-mode-pill" type="button" data-search-category="map">🗺 Map</button>
+          </div>
         </section>
 
         <nav class="quick-apps quicklinks" aria-label="Quick links">
@@ -761,6 +838,19 @@
           <button class="ai-send-button" type="button" disabled>Ask Mina later</button>
           <p class="ai-status-text" data-ai-status>No API keys live in this static page. Cloud keys will belong in a future local config/keyring-backed broker. Hermes Gateway can trigger tool-capable agents, so LAN mode will require explicit pairing and warnings. Start minafox-ai-broker to detect http://127.0.0.1:8765.</p>
         </article>
+        <article class="dashboard-card service-status-card" aria-labelledby="search-status-title">
+          <h2 id="search-status-title">Search service</h2>
+          <div class="service-status-row">
+            <span class="status-dot" data-search-status-dot aria-hidden="true"></span>
+            <span data-search-status>Checking MinaFox Search on 127.0.0.1:8888…</span>
+          </div>
+          <div class="status-actions" aria-label="Search service actions">
+            <a class="status-action mini-button" href="http://127.0.0.1:8888/">Open Search</a>
+            <button class="status-action" type="button" data-copy-command="systemctl --user status minafox-searxng.service">Copy status cmd</button>
+            <button class="status-action" type="button" data-copy-command="journalctl --user -u minafox-searxng.service -f">Copy logs cmd</button>
+          </div>
+          <p>Local-only metasearch. If it is offline, start it with the packaged MinaFox SearXNG user service.</p>
+        </article>
         <article class="dashboard-card roadmap-card">
           <h2>MinaFox roadmap</h2>
           <p>Wrapper → Arch package → source fork → native workspace UI.</p>
@@ -790,6 +880,36 @@
   </main>
   <script>
     const actionStatus = document.querySelector("[data-action-status]");
+    const searchForm = document.querySelector("#minafox-search-form");
+    const searchInput = document.querySelector("#search-q");
+
+    function setSearchCategory(category) {
+      if (!searchForm || !category) return;
+      searchForm.querySelectorAll('input[name^="category_"]').forEach((input) => input.remove());
+      const hidden = document.createElement("input");
+      hidden.type = "hidden";
+      hidden.name = `category_${category}`;
+      hidden.value = "on";
+      searchForm.appendChild(hidden);
+    }
+
+    document.querySelectorAll("[data-search-category]").forEach((control) => {
+      control.addEventListener("click", () => {
+        const category = control.getAttribute("data-search-category");
+        setSearchCategory(category);
+        if (searchInput && !searchInput.value.trim()) searchInput.focus();
+        if (searchInput?.value.trim()) searchForm?.requestSubmit();
+      });
+    });
+
+    document.querySelectorAll("[data-copy-command]").forEach((control) => {
+      control.addEventListener("click", async () => {
+        const command = control.getAttribute("data-copy-command");
+        if (!command) return;
+        const copied = await copyAboutCommand(command);
+        if (actionStatus) actionStatus.textContent = copied ? `Copied: ${command}` : `Run this command: ${command}`;
+      });
+    });
 
     async function copyAboutCommand(target) {
       try {
@@ -834,6 +954,20 @@
         }
       });
     });
+
+    (async () => {
+      const status = document.querySelector("[data-search-status]");
+      const dot = document.querySelector("[data-search-status-dot]");
+      if (!status || !dot) return;
+      try {
+        await fetch("http://127.0.0.1:8888/", { cache: "no-store", mode: "no-cors" });
+        dot.classList.add("is-online");
+        status.textContent = "MinaFox Search is reachable locally.";
+      } catch (error) {
+        dot.classList.add("is-offline");
+        status.textContent = "MinaFox Search is offline. Copy the status command or start the user service.";
+      }
+    })();
 
     (async () => {
       const status = document.querySelector("[data-ai-status]");

@@ -128,6 +128,7 @@ def main() -> int:
     start_page = read("desktop/start.html")
     readme = read("README.md")
     overlay_readme = read("searxng/README.md")
+    pkgbuild = read("packaging/arch/minafox-profile-git/PKGBUILD")
 
     checks: list[tuple[str, str, str]] = []
     checks += [(theme, token, "theme") for token in REQUIRED_THEME_TOKENS]
@@ -200,6 +201,23 @@ def main() -> int:
         (start_page, "method=\"post\"", "start page"),
         (start_page, "http://127.0.0.1:8888/search", "start page"),
         (start_page, "Search MinaFox SearXNG", "start page"),
+        (start_page, "data-search-category=\"images\"", "start page"),
+        (start_page, "data-search-category=\"videos\"", "start page"),
+        (start_page, "data-search-status", "start page"),
+        (start_page, "systemctl --user status minafox-searxng.service", "start page"),
+        (start_page, "journalctl --user -u minafox-searxng.service -f", "start page"),
+        (start_page, "setSearchCategory", "start page"),
+        (start_page, "category_${category}", "start page"),
+        (theme, "Results polish", "theme"),
+        (theme, "#main_results #results.only_template_images #urls", "theme"),
+        (theme, "#categories .category_checkbox input:checked + label", "theme"),
+        (theme, "grid-template-columns: minmax(160px, 240px) minmax(0, 1fr)", "theme"),
+        (pkgbuild, "desktop/start.html", "PKGBUILD"),
+        (pkgbuild, "searxng/theme/minafox.css", "PKGBUILD"),
+        (pkgbuild, "searxng/theme/minafox-categories.js", "PKGBUILD"),
+        (pkgbuild, "searxng/patch-base-template.py", "PKGBUILD"),
+        (pkgbuild, "docker-compose", "PKGBUILD"),
+        (pkgbuild, "podman-compose", "PKGBUILD"),
         (readme, "## MinaFox SearXNG search", "README"),
         (readme, "install-service", "README"),
         (readme, "systemctl --user status minafox-searxng.service", "README"),
