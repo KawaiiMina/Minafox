@@ -35,6 +35,8 @@ REQUIRED_PKGBUILD_SNIPPETS = (
     "cp -a assets \"$pkgdir/usr/share/minafox/\"",
     "install -Dm644 profile/user.js \"$pkgdir/usr/share/minafox/profile/user.js\"",
     "install -Dm755 scripts/install-minafox-arch.sh \"$pkgdir/usr/share/minafox/scripts/install-minafox-arch.sh\"",
+    "install -Dm755 scripts/install-minafox-searxng-arch.sh \"$pkgdir/usr/share/minafox/scripts/install-minafox-searxng-arch.sh\"",
+    "install -Dm644 systemd/user/minafox-searxng.service \"$pkgdir/usr/lib/systemd/user/minafox-searxng.service\"",
 )
 
 REQUIRED_SRCINFO_SNIPPETS = (
@@ -45,6 +47,8 @@ REQUIRED_SRCINFO_SNIPPETS = (
     "depends = hicolor-icon-theme",
     "depends = python",
     "makedepends = git",
+    "optdepends = docker-compose: provide Docker Compose for the optional local MinaFox SearXNG service",
+    "optdepends = podman-compose: provide Podman Compose for the optional local MinaFox SearXNG service",
     "source = git+https://github.com/KawaiiMina/Minafox.git",
 )
 
@@ -61,7 +65,9 @@ REQUIRED_STAGED_FILES = (
     "usr/share/minafox/profile/userChrome.css",
     "usr/share/minafox/profile/userContent.css",
     "usr/share/minafox/scripts/install-minafox-arch.sh",
+    "usr/share/minafox/scripts/install-minafox-searxng-arch.sh",
     "usr/share/minafox/scripts/minafox-launcher.sh",
+    "usr/lib/systemd/user/minafox-searxng.service",
     "usr/share/minafox/searxng/docker-compose.yml",
     "usr/share/minafox/searxng/theme/minafox.css",
     "usr/share/doc/minafox/README.md",
@@ -134,6 +140,7 @@ def validate_package_simulation(failures: list[str]) -> None:
         for rel in (
             "usr/bin/minafox",
             "usr/share/minafox/scripts/install-minafox-arch.sh",
+            "usr/share/minafox/scripts/install-minafox-searxng-arch.sh",
             "usr/share/minafox/scripts/minafox-launcher.sh",
         ):
             path = pkgdir / rel

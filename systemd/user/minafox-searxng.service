@@ -1,0 +1,15 @@
+[Unit]
+Description=MinaFox local SearXNG search service
+Documentation=file:///usr/share/doc/minafox/README.md
+After=default.target
+
+[Service]
+Type=simple
+ExecStart=/usr/share/minafox/scripts/install-minafox-searxng-arch.sh service
+ExecStop=/usr/share/minafox/scripts/install-minafox-searxng-arch.sh stop
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=30
+
+[Install]
+WantedBy=default.target

@@ -19,11 +19,17 @@ Design goals:
 
 ## Run locally
 
-From the repo root, prefer the helper so the local SearXNG secret is generated safely:
+From the repo root or from the packaged install, prefer the helper so the local SearXNG secret is generated safely and the writable runtime files live under `~/.local/share/minafox/searxng`:
 
 ```bash
 cd ~/Minafox
-./scripts/install-minafox-searxng-arch.sh
+./scripts/install-minafox-searxng-arch.sh start
+```
+
+After installing the Arch package, the same helper is available at:
+
+```bash
+/usr/share/minafox/scripts/install-minafox-searxng-arch.sh start
 ```
 
 Then open:
@@ -34,12 +40,19 @@ http://127.0.0.1:8888/
 
 ### Manual Compose run
 
-If you want to run Compose directly, create a local runtime settings file first so SearXNG does not use the checked-in placeholder secret:
+If you want to run Compose directly, still keep generated runtime files outside the repo checkout:
 
 ```bash
-cd ~/Minafox/searxng
-printf 'SEARXNG_SECRET_KEY=%s\n' "$(openssl rand -hex 32)" > .env
-sed "s/MINAFOX_CHANGE_ME_WITH_INSTALLER/$(cut -d= -f2- .env)/g" settings.yml > settings.yml.local
+cd ~/Minafox
+./scripts/install-minafox-searxng-arch.sh start
+cd ~/.local/share/minafox/searxng
+# inspect or manage the generated runtime files here
+```
+
+Or, after the helper has prepared `~/.local/share/minafox/searxng/settings.yml.local`, run Compose manually from the runtime directory:
+
+```bash
+cd ~/.local/share/minafox/searxng
 MINAFOX_SEARXNG_SETTINGS=./settings.yml.local docker compose up -d --build
 ```
 
@@ -49,20 +62,30 @@ For Podman Compose, replace the last command with:
 MINAFOX_SEARXNG_SETTINGS=./settings.yml.local podman compose up -d --build
 ```
 
-## Arch helper
+## Arch helper and user service
 
 From the repo root:
 
 ```bash
-./scripts/install-minafox-searxng-arch.sh
+./scripts/install-minafox-searxng-arch.sh start
+```
+
+From the Arch package:
+
+```bash
+/usr/share/minafox/scripts/install-minafox-searxng-arch.sh install-service
+systemctl --user status minafox-searxng.service
+journalctl --user -u minafox-searxng.service -f
 ```
 
 The helper:
 
-1. chooses `docker compose` or `podman compose`,
-2. creates a local `.env` file with a generated secret when possible,
-3. starts the local MinaFox SearXNG container,
-4. prints the local URL.
+1. copies the read-only overlay into the writable user runtime directory `~/.local/share/minafox/searxng`,
+2. chooses `docker compose` or `podman compose`,
+3. creates a local `.env` file with a generated secret when possible,
+4. renders `settings.yml.local` without committing secrets,
+5. starts the local MinaFox SearXNG container or runs it in the foreground for the systemd user service,
+6. prints the local URL.
 
 ## Firefox / MinaFox manual verification
 
@@ -78,12 +101,20 @@ The helper:
 ## Stop / update
 
 ```bash
-cd ~/Minafox/searxng
-docker compose down
-# or: podman compose down
+/usr/share/minafox/scripts/install-minafox-searxng-arch.sh stop
+# or from a repo checkout:
+cd ~/Minafox
+./scripts/install-minafox-searxng-arch.sh stop
 
+cd ~/.local/share/minafox/searxng
 docker compose pull
 docker compose up -d --build
+```
+
+If you installed the user service, prefer:
+
+```bash
+systemctl --user restart minafox-searxng.service
 ```
 
 ## Notes

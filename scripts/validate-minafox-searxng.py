@@ -19,6 +19,7 @@ REQUIRED_FILES = [
     "searxng/theme/minafox.css",
     "searxng/README.md",
     "scripts/install-minafox-searxng-arch.sh",
+    "systemd/user/minafox-searxng.service",
 ]
 
 REQUIRED_THEME_TOKENS = [
@@ -90,6 +91,7 @@ def main() -> int:
     compose = read("searxng/docker-compose.yml")
     dockerfile = read("searxng/Dockerfile")
     installer = read("scripts/install-minafox-searxng-arch.sh")
+    systemd_unit = read("systemd/user/minafox-searxng.service")
     start_page = read("desktop/start.html")
     readme = read("README.md")
     overlay_readme = read("searxng/README.md")
@@ -110,12 +112,32 @@ def main() -> int:
         (installer, "grep -E '^SEARXNG_SECRET_KEY='", "installer"),
         (installer, "^[A-Za-z0-9._~+=:@-]{32,128}$", "installer"),
         (installer, "http://127.0.0.1:8888/", "installer"),
+        (installer, "SOURCE_SEARXNG_DIR=\"/usr/share/minafox/searxng\"", "installer"),
+        (installer, "DATA_HOME=\"${XDG_DATA_HOME:-$HOME/.local/share}\"", "installer"),
+        (installer, "RUNTIME_SEARXNG_DIR=\"$DATA_HOME/minafox/searxng\"", "installer"),
+        (installer, "install-service", "installer"),
+        (installer, "sed \"s|/usr/share/minafox/scripts/install-minafox-searxng-arch.sh|$SCRIPT_DIR/install-minafox-searxng-arch.sh|g\"", "installer"),
+        (installer, "systemctl --user enable --now minafox-searxng.service", "installer"),
+        (installer, "service)", "installer"),
+        (installer, "\"${compose_cmd[@]}\" up --build", "installer"),
+        (installer, "stop|down)", "installer"),
+        (installer, "\"${compose_cmd[@]}\" down", "installer"),
+        (installer, "logs)", "installer"),
+        (installer, "journalctl --user -u minafox-searxng.service", "installer"),
+        (systemd_unit, "[Unit]", "systemd unit"),
+        (systemd_unit, "Description=MinaFox local SearXNG search service", "systemd unit"),
+        (systemd_unit, "ExecStart=/usr/share/minafox/scripts/install-minafox-searxng-arch.sh service", "systemd unit"),
+        (systemd_unit, "ExecStop=/usr/share/minafox/scripts/install-minafox-searxng-arch.sh stop", "systemd unit"),
+        (systemd_unit, "WantedBy=default.target", "systemd unit"),
         (start_page, "method=\"post\"", "start page"),
         (start_page, "http://127.0.0.1:8888/search", "start page"),
         (start_page, "Search MinaFox SearXNG", "start page"),
         (readme, "## MinaFox SearXNG search", "README"),
+        (readme, "install-service", "README"),
+        (readme, "systemctl --user status minafox-searxng.service", "README"),
         (overlay_readme, "docker compose", "searxng README"),
         (overlay_readme, "http://127.0.0.1:8888/", "searxng README"),
+        (overlay_readme, "~/.local/share/minafox/searxng", "searxng README"),
     ]
 
     for text, needle, label in checks:

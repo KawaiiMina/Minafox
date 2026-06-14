@@ -12,6 +12,7 @@ It installs:
 - `/usr/share/applications/minafox.desktop` — desktop app entry.
 - `/usr/share/icons/hicolor/.../apps/minafox.png` — icon-theme assets.
 - `/usr/share/minafox/` — profile, start page, branding assets, policy, SearXNG overlay, and helper scripts.
+- `/usr/lib/systemd/user/minafox-searxng.service` — optional local search user service.
 - `/usr/share/doc/minafox/README.md` — project documentation.
 
 It does **not** compile Firefox or turn MinaFox into a source fork yet.
@@ -47,6 +48,18 @@ To force a full refresh, or to attempt installing Firefox enterprise policies, r
 ```
 
 Note: the user setup script may ask for `sudo` when it tries to install Firefox enterprise policies under `/usr/lib/firefox/distribution`. The launcher's automatic first-run sync is user-local only and does not use `sudo`.
+
+## Optional local SearXNG user service
+
+The package installs the unit file, but it does not automatically start containers. To enable local private search for your user:
+
+```bash
+/usr/share/minafox/scripts/install-minafox-searxng-arch.sh install-service
+systemctl --user status minafox-searxng.service
+journalctl --user -u minafox-searxng.service -f
+```
+
+The helper copies the packaged read-only overlay into `~/.local/share/minafox/searxng`, generates the local secret/config there, and keeps SearXNG bound to `127.0.0.1:8888`. Install either the Docker stack (`docker` + `docker-compose`) or the Podman stack (`podman` + `podman-compose`) first.
 
 ## Local validation from this repo
 

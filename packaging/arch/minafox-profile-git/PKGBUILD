@@ -9,8 +9,10 @@ license=('MIT')
 depends=('firefox' 'desktop-file-utils' 'hicolor-icon-theme' 'python')
 makedepends=('git')
 optdepends=(
-  'docker: run the optional local MinaFox SearXNG service'
+  'docker: run the optional local MinaFox SearXNG service with Docker Engine'
+  'docker-compose: provide Docker Compose for the optional local MinaFox SearXNG service'
   'podman: run the optional local MinaFox SearXNG service without Docker'
+  'podman-compose: provide Podman Compose for the optional local MinaFox SearXNG service'
 )
 provides=('minafox-profile')
 conflicts=('minafox-profile')
@@ -44,6 +46,7 @@ package() {
   install -Dm755 scripts/install-minafox-arch.sh "$pkgdir/usr/share/minafox/scripts/install-minafox-arch.sh"
   install -Dm755 scripts/minafox-launcher.sh "$pkgdir/usr/share/minafox/scripts/minafox-launcher.sh"
   install -Dm755 scripts/install-minafox-searxng-arch.sh "$pkgdir/usr/share/minafox/scripts/install-minafox-searxng-arch.sh"
+  install -Dm644 systemd/user/minafox-searxng.service "$pkgdir/usr/lib/systemd/user/minafox-searxng.service"
 
   install -Dm644 searxng/README.md "$pkgdir/usr/share/minafox/searxng/README.md"
   install -Dm644 searxng/Dockerfile "$pkgdir/usr/share/minafox/searxng/Dockerfile"

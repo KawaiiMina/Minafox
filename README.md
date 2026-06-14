@@ -27,7 +27,7 @@ The GitHub repo is organized around the installable pieces:
 - `scripts/` — install and validation helpers.
   - `scripts/install-minafox-arch.sh` — installs/updates the MinaFox Firefox profile assets and the user-local `minafox` launcher.
   - `scripts/minafox-launcher.sh` — Wayland-friendly standalone wrapper around the system Firefox binary.
-  - `scripts/install-minafox-searxng-arch.sh` — starts the local MinaFox SearXNG service with Docker/Podman Compose.
+  - `scripts/install-minafox-searxng-arch.sh` — prepares and starts the local MinaFox SearXNG service with Docker/Podman Compose, including the packaged systemd user-service path.
   - `scripts/validate-minafox-standalone.py` — validates the `minafox` launcher, desktop entry, installer wiring, and docs.
   - `scripts/validate-minafox-arch-package.py` — validates the Arch package skeleton and simulates the `package()` function without requiring an Arch host.
   - `scripts/validate-minafox-ui.py` — validates theme/start-page structure.
@@ -54,6 +54,7 @@ The GitHub repo is organized around the installable pieces:
 - Desktop launcher: `desktop/minafox.desktop`
 - MinaFox app icons and logo assets: `assets/`
 - Local SearXNG overlay: `searxng/`
+- Packaged SearXNG user unit: `systemd/user/minafox-searxng.service`
 - Arch install helpers: `scripts/install-minafox-arch.sh` and `scripts/install-minafox-searxng-arch.sh`
 
 ## Install on Arch
@@ -169,12 +170,22 @@ Implemented SearXNG files:
 - `scripts/install-minafox-searxng-arch.sh` — Arch-friendly helper using `docker compose` or `podman compose`.
 - `scripts/validate-minafox-searxng.py` — repeatable validation gate for the SearXNG overlay.
 
-Start local search:
+Start local search from a repo checkout:
 
 ```bash
 cd ~/Minafox
-./scripts/install-minafox-searxng-arch.sh
+./scripts/install-minafox-searxng-arch.sh start
 ```
+
+Start and enable local search from the Arch package as a systemd user service:
+
+```bash
+/usr/share/minafox/scripts/install-minafox-searxng-arch.sh install-service
+systemctl --user status minafox-searxng.service
+journalctl --user -u minafox-searxng.service -f
+```
+
+The packaged helper copies the read-only overlay into the writable runtime directory `~/.local/share/minafox/searxng`, generates a private `.env`, renders `settings.yml.local`, then runs Compose locally. Install either `docker` + `docker-compose` or `podman` + `podman-compose`. The service stays bound to `127.0.0.1:8888`.
 
 Then open:
 
