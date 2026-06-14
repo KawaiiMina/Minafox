@@ -241,7 +241,7 @@ Note: `userChrome.css` relies on Firefox internal selectors, so keep future chro
 
 ## MinaFox SearXNG search
 
-MinaFox now includes a local SearXNG overlay that follows the same design philosophy as the browser shell: calm Zen-like minimalism, Arc-like glass panels, and a soft pink/purple MinaFox identity.
+MinaFox now includes a local SearXNG overlay that says **MinaFox** first and follows the same design philosophy as the browser shell: calm Zen-like minimalism, Arc-like glass panels, soft pink/purple identity, privacy-minded defaults, and gentle focus states instead of noisy search chrome.
 
 Implemented SearXNG files:
 

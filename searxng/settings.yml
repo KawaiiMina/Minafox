@@ -5,7 +5,7 @@ use_default_settings: true
 
 general:
   debug: false
-  instance_name: "MinaFox Search"
+  instance_name: "MinaFox"
   privacypolicy_url: ""
   donation_url: ""
   contact_url: ""
