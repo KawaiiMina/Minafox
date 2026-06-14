@@ -109,7 +109,15 @@ systemctl --user enable --now minafox-mobile-harness.service
 systemctl --user status minafox-mobile-harness.service
 ```
 
-It serves the MinaFox start page on `0.0.0.0:8766` for trusted LAN/Tailscale testing. Only enable it on trusted networks, and keep port `8766` blocked from untrusted networks. Use a user-service override for `MINAFOX_MOBILE_SEARCH_BASE_URL`, `MINAFOX_MOBILE_SEARCH_ACTION_URL`, and `MINAFOX_MOBILE_AI_BROKER_URL` when Android should call a specific LAN/Tailscale host.
+It serves the MinaFox start page on `0.0.0.0:8766` for trusted LAN/Tailscale testing. Only enable it on trusted networks, and keep port `8766` blocked from untrusted networks. Use a user-service override for `MINAFOX_MOBILE_SEARCH_BASE_URL`, `MINAFOX_MOBILE_SEARCH_ACTION_URL`, `MINAFOX_MOBILE_AI_BROKER_URL`, and `MINAFOX_MOBILE_HARNESS_URL` when Android should call a specific LAN/Tailscale host.
+
+Diagnostics are available from the phone on the same host:
+
+```text
+http://<desktop-lan-ip>:8766/health
+http://<desktop-lan-ip>:8766/config
+http://<desktop-lan-ip>:8766/android-checklist
+```
 
 ## Local validation from this repo
 

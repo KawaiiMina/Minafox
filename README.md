@@ -87,6 +87,8 @@ systemctl --user status minafox-mobile-harness.service
 
 Harness URL: `http://<desktop-lan-ip>:8766/`
 
+Diagnostics from Android: `/health`, `/config`, and `/android-checklist` on the same harness host. The start page includes an Android/LAN test companion card that shows the active endpoints and touch checklist.
+
 Only enable the LAN harness on trusted LAN/Tailscale networks. Keep port `8766` blocked from untrusted networks.
 
 ## Repository map

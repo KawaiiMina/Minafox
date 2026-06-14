@@ -145,6 +145,8 @@ def validate_static(failures: list[str]) -> None:
             "/usr/share/licenses/minafox-profile-git/LICENSE",
             "/usr/share/doc/minafox/THIRD_PARTY_LICENSES.md",
             "/usr/share/doc/minafox/licensing-and-source-fork.md",
+            "MINAFOX_MOBILE_HARNESS_URL",
+            "/android-checklist",
         ),
         failures,
     )

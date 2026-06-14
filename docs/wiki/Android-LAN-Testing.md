@@ -13,6 +13,7 @@ cd ~/Minafox
 python3 scripts/serve-minafox-mobile.py \
   --host 0.0.0.0 \
   --mode lan-test \
+  --harness-url http://<desktop-lan-ip>:8766 \
   --search-base-url http://<desktop-lan-ip>:8888 \
   --search-action-url http://<desktop-lan-ip>:8888/search \
   --ai-broker-url http://<desktop-lan-ip>:8765
@@ -23,6 +24,16 @@ Open on Android:
 ```text
 http://<desktop-lan-ip>:8766/
 ```
+
+Useful diagnostics from the phone:
+
+```text
+http://<desktop-lan-ip>:8766/health
+http://<desktop-lan-ip>:8766/config
+http://<desktop-lan-ip>:8766/android-checklist
+```
+
+The start page also shows an **Android/LAN test companion** card with the active mode, search URL, AI broker URL, harness health URL, and a short touch checklist. The harness prefers the phone-visible `Host` header for these links unless you set `--harness-url` / `MINAFOX_MOBILE_HARNESS_URL` explicitly.
 
 ## Run from the packaged service
 
@@ -42,6 +53,7 @@ systemctl --user edit minafox-mobile-harness.service
 Environment=MINAFOX_MOBILE_SEARCH_BASE_URL=http://<desktop-lan-ip>:8888
 Environment=MINAFOX_MOBILE_SEARCH_ACTION_URL=http://<desktop-lan-ip>:8888/search
 Environment=MINAFOX_MOBILE_AI_BROKER_URL=http://<desktop-lan-ip>:8765
+Environment=MINAFOX_MOBILE_HARNESS_URL=http://<desktop-lan-ip>:8766
 ```
 
 Apply:
@@ -70,4 +82,4 @@ MINAFOX_AI_BROKER_HOST=0.0.0.0 \
 
 ## UX checklist
 
-Check 360 px, 390 px, 430 px, and 768 px widths. Verify readable search, stacked AI Den cards, no ugly panning, calm offline copy, visible focus states, and no console errors.
+Check 360 px, 390 px, 430 px, and 768 px widths. Verify readable search, stacked AI Den cards, no ugly panning, calm offline copy, visible focus states, and no console errors. Use `/android-checklist` for a phone-friendly checklist you can keep open while testing.

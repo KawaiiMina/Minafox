@@ -52,6 +52,7 @@ REQUIRED_README_SNIPPETS = (
     "scripts/validate-minafox-standalone.py",
     "BRANDING.md",
     "not affiliated with or endorsed by Mozilla",
+    "/android-checklist",
 )
 
 REQUIRED_BRANDING_SNIPPETS = (

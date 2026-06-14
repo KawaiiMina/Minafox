@@ -39,9 +39,13 @@ Enable only on a trusted LAN/Tailscale network:
 systemctl --user enable --now minafox-mobile-harness.service
 systemctl --user status minafox-mobile-harness.service
 curl http://127.0.0.1:8766/health
+curl http://127.0.0.1:8766/config
+curl http://127.0.0.1:8766/android-checklist
 ```
 
 The packaged service defaults to `0.0.0.0:8766` for phone testing. Keep your firewall/router from exposing this to untrusted networks.
+
+For a stable phone-visible URL, override `MINAFOX_MOBILE_HARNESS_URL=http://<desktop-lan-ip>:8766` or use a Tailscale hostname. If it is not set, the harness uses the incoming `Host` header for generated `/health`, `/config`, and `/android-checklist` links.
 
 ## Updating services
 

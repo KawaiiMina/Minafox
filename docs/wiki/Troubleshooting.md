@@ -68,12 +68,21 @@ On Android, `127.0.0.1` means the phone. Use the mobile harness and configure de
 python3 scripts/serve-minafox-mobile.py \
   --host 0.0.0.0 \
   --mode lan-test \
+  --harness-url http://<desktop-lan-ip>:8766 \
   --search-base-url http://<desktop-lan-ip>:8888 \
   --search-action-url http://<desktop-lan-ip>:8888/search \
   --ai-broker-url http://<desktop-lan-ip>:8765
 ```
 
-Open `http://<desktop-lan-ip>:8766/`.
+Open `http://<desktop-lan-ip>:8766/`. If the page loads but the companion card shows a bad harness URL, set `MINAFOX_MOBILE_HARNESS_URL=http://<desktop-lan-ip>:8766` in the user-service override or pass `--harness-url` manually.
+
+Diagnostics:
+
+```bash
+curl http://<desktop-lan-ip>:8766/health
+curl http://<desktop-lan-ip>:8766/config
+curl http://<desktop-lan-ip>:8766/android-checklist
+```
 
 ## LAN broker refuses to start
 

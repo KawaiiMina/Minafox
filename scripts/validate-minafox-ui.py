@@ -154,6 +154,8 @@ def validate_start_html(failures: list[str]) -> str:
         "lofi-card",
         "roadmap-card",
         "design-system-card",
+        "android-test-card",
+        "android-endpoint-list",
     }
     for class_name in sorted(required_classes - parser.classes):
         failures.append(f"desktop/start.html: missing required class {class_name!r}")
@@ -180,7 +182,17 @@ def validate_start_html(failures: list[str]) -> str:
     require_contains(
         "desktop/start.html",
         html,
-        ["data-action-status", "copyAboutCommand", "data-about-target"],
+        [
+            "data-action-status",
+            "copyAboutCommand",
+            "data-about-target",
+            "data-runtime-mode",
+            "data-harness-health-url",
+            "data-android-checklist",
+            "Android/LAN test companion",
+            "Open harness health",
+            "Copy Android checklist",
+        ],
         failures,
     )
 
