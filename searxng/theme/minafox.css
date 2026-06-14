@@ -52,6 +52,36 @@ body {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+body {
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::before {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.22) 0 1px, transparent 1.4px),
+    radial-gradient(circle, rgba(245, 194, 231, 0.24) 0 1px, transparent 1.5px);
+  background-size: 132px 132px, 196px 196px;
+  background-position: 18px 26px, 74px 94px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.82), transparent 88%);
+}
+
+body::after {
+  background:
+    radial-gradient(circle at 84% 18%, rgba(245, 194, 231, 0.14), transparent 18%),
+    radial-gradient(circle at 12% 72%, rgba(139, 92, 246, 0.12), transparent 24%);
+  filter: blur(2px);
+}
+
 body,
 main,
 #main_index,
@@ -63,6 +93,57 @@ main,
 #main_results {
   width: min(1080px, calc(100% - 28px));
   margin-inline: auto;
+}
+
+.index,
+#main_index > .index,
+#main_results {
+  position: relative;
+  z-index: 1;
+}
+
+.title {
+  text-align: center;
+  margin-block: 0 24px;
+}
+
+.title h1 {
+  display: inline-grid;
+  gap: 0.4rem;
+  justify-items: center;
+  margin: 0;
+  font-size: 0 !important;
+  letter-spacing: normal !important;
+}
+
+.title h1::before {
+  content: "🦊 MinaFox Search";
+  font-size: clamp(2.5rem, 7vw, 5.6rem);
+  line-height: 0.95;
+  letter-spacing: -0.07em;
+  color: var(--mf-ink);
+  text-shadow: 0 0 38px rgba(245, 194, 231, 0.30);
+}
+
+.title h1::after {
+  content: "Quiet local metasearch · soft paws, no tracking";
+  max-width: 68ch;
+  font-size: clamp(0.95rem, 2vw, 1.08rem);
+  line-height: 1.65;
+  letter-spacing: 0;
+  color: var(--mf-muted);
+}
+
+#links_on_top {
+  margin-block: 8px 20px !important;
+}
+
+#links_on_top a {
+  border: 1px solid rgba(203, 166, 247, 0.18) !important;
+  border-radius: 999px !important;
+  background: rgba(13, 10, 22, 0.30) !important;
+  color: var(--mf-muted) !important;
+  font-weight: 800 !important;
 }
 
 #main_index {

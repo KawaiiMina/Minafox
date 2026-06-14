@@ -78,6 +78,7 @@ prepare_runtime_dir() {
   copy_overlay_file docker-compose.yml
   copy_overlay_file settings.yml
   copy_overlay_file uwsgi.ini
+  copy_overlay_file patch-base-template.py
   copy_overlay_file README.md
   copy_overlay_file theme/minafox.css
 
@@ -125,11 +126,15 @@ EOF
 }
 
 install_user_service() {
-  if [[ -f "$ROOT_DIR/systemd/user/minafox-searxng.service" && ! -f /usr/lib/systemd/user/minafox-searxng.service ]]; then
+  if [[ -f "$ROOT_DIR/systemd/user/minafox-searxng.service" ]]; then
     mkdir -p "$HOME/.config/systemd/user"
-    sed "s|/usr/share/minafox/scripts/install-minafox-searxng-arch.sh|$SCRIPT_DIR/install-minafox-searxng-arch.sh|g" \
+    escaped_script_path="$SCRIPT_DIR/install-minafox-searxng-arch.sh"
+    escaped_script_path="${escaped_script_path//\\/\\\\}"
+    escaped_script_path="${escaped_script_path//&/\\&}"
+    escaped_script_path="${escaped_script_path//|/\\|}"
+    sed "s|/usr/share/minafox/scripts/install-minafox-searxng-arch.sh|$escaped_script_path|g" \
       "$ROOT_DIR/systemd/user/minafox-searxng.service" > "$HOME/.config/systemd/user/minafox-searxng.service"
-    echo "Installed user unit copy to: $HOME/.config/systemd/user/minafox-searxng.service"
+    echo "Installed user unit override to: $HOME/.config/systemd/user/minafox-searxng.service"
   fi
 
   systemctl --user daemon-reload

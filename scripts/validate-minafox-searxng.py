@@ -17,6 +17,7 @@ REQUIRED_FILES = [
     "searxng/settings.yml",
     "searxng/uwsgi.ini",
     "searxng/theme/minafox.css",
+    "searxng/patch-base-template.py",
     "searxng/README.md",
     "scripts/install-minafox-searxng-arch.sh",
     "systemd/user/minafox-searxng.service",
@@ -37,6 +38,12 @@ REQUIRED_THEME_TOKENS = [
     "cosmic fox",
     "privacy-minded",
     "gentle",
+    "MinaFox Search",
+    "Quiet local metasearch",
+    "body::before",
+    "body::after",
+    ".title h1::before",
+    ".title h1::after",
 ]
 
 REQUIRED_THEME_SELECTORS = [
@@ -94,6 +101,7 @@ def main() -> int:
     settings = read("searxng/settings.yml")
     compose = read("searxng/docker-compose.yml")
     dockerfile = read("searxng/Dockerfile")
+    patcher = read("searxng/patch-base-template.py")
     installer = read("scripts/install-minafox-searxng-arch.sh")
     systemd_unit = read("systemd/user/minafox-searxng.service")
     start_page = read("desktop/start.html")
@@ -113,11 +121,21 @@ def main() -> int:
         (dockerfile, "searxng/searxng", "Dockerfile"),
         (dockerfile, "minafox.min.css", "Dockerfile"),
         (dockerfile, "dark.min.css", "Dockerfile"),
+        (dockerfile, "sxng-ltr.min.css", "Dockerfile"),
+        (dockerfile, "sxng-rtl.min.css", "Dockerfile"),
+        (dockerfile, "bundled stylesheet files", "Dockerfile"),
+        (dockerfile, "patch-base-template.py", "Dockerfile"),
+        (dockerfile, "base.html", "Dockerfile"),
+        (dockerfile, "themes/simple/css/minafox.min.css", "Dockerfile"),
+        (patcher, "expected limiter/client CSS anchor not found", "base template patcher"),
+        (patcher, "themes/simple/css/minafox.min.css", "base template patcher"),
+        (patcher, "if MINAFOX_LINK not in text", "base template patcher"),
         (dockerfile, "Use the upstream-compatible dark style name", "Dockerfile"),
         (installer, "docker compose", "installer"),
         (installer, "podman compose", "installer"),
         (installer, "grep -E '^SEARXNG_SECRET_KEY='", "installer"),
         (installer, "^[A-Za-z0-9._~+=:@-]{32,128}$", "installer"),
+        (installer, "copy_overlay_file patch-base-template.py", "installer"),
         (installer, "cp settings.yml.local etc/settings.yml", "installer"),
         (installer, "chmod 644 settings.yml.local etc/settings.yml etc/uwsgi.ini", "installer"),
         (installer, "http://127.0.0.1:8888/", "installer"),
@@ -125,7 +143,11 @@ def main() -> int:
         (installer, "DATA_HOME=\"${XDG_DATA_HOME:-$HOME/.local/share}\"", "installer"),
         (installer, "RUNTIME_SEARXNG_DIR=\"$DATA_HOME/minafox/searxng\"", "installer"),
         (installer, "install-service", "installer"),
-        (installer, "sed \"s|/usr/share/minafox/scripts/install-minafox-searxng-arch.sh|$SCRIPT_DIR/install-minafox-searxng-arch.sh|g\"", "installer"),
+        (installer, "escaped_script_path", "installer"),
+        (installer, "${escaped_script_path//&/", "installer"),
+        (installer, "${escaped_script_path//|/", "installer"),
+        (installer, "sed \"s|/usr/share/minafox/scripts/install-minafox-searxng-arch.sh|$escaped_script_path|g\"", "installer"),
+        (installer, "Installed user unit override", "installer"),
         (installer, "systemctl --user enable --now minafox-searxng.service", "installer"),
         (installer, "service)", "installer"),
         (installer, "\"${compose_cmd[@]}\" up --build", "installer"),

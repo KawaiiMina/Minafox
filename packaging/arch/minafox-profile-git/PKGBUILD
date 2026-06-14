@@ -61,5 +61,6 @@ package() {
   install -Dm644 searxng/docker-compose.yml "$pkgdir/usr/share/minafox/searxng/docker-compose.yml"
   install -Dm644 searxng/settings.yml "$pkgdir/usr/share/minafox/searxng/settings.yml"
   install -Dm644 searxng/uwsgi.ini "$pkgdir/usr/share/minafox/searxng/uwsgi.ini"
+  install -Dm755 searxng/patch-base-template.py "$pkgdir/usr/share/minafox/searxng/patch-base-template.py"
   install -Dm644 searxng/theme/minafox.css "$pkgdir/usr/share/minafox/searxng/theme/minafox.css"
 }
