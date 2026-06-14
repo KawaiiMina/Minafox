@@ -11,8 +11,7 @@ services:
       - BASE_URL=http://127.0.0.1:8888/
       - INSTANCE_NAME=MinaFox SearXNG
     volumes:
-      - ${MINAFOX_SEARXNG_SETTINGS:-./settings.yml}:/etc/searxng/settings.yml:ro
-      - ./uwsgi.ini:/etc/searxng/uwsgi.ini:ro
+      - ./etc:/etc/searxng:ro
     cap_drop:
       - ALL
     security_opt:

@@ -114,11 +114,14 @@ EOF
     exit 1
   fi
 
+  mkdir -p etc
   tmp_settings="$(mktemp)"
   sed "s/MINAFOX_CHANGE_ME_WITH_INSTALLER/$SEARXNG_SECRET_KEY/g" settings.yml > "$tmp_settings"
   mv "$tmp_settings" settings.yml.local
-  chmod 600 .env settings.yml.local
-  export MINAFOX_SEARXNG_SETTINGS=./settings.yml.local
+  cp settings.yml.local etc/settings.yml
+  cp uwsgi.ini etc/uwsgi.ini
+  chmod 600 .env
+  chmod 644 settings.yml.local etc/settings.yml etc/uwsgi.ini
 }
 
 install_user_service() {

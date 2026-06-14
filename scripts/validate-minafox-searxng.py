@@ -51,7 +51,7 @@ REQUIRED_THEME_SELECTORS = [
 REQUIRED_SETTINGS_SNIPPETS = [
     "instance_name: \"MinaFox Search\"",
     "default_theme: simple",
-    "simple_style: minafox",
+    "simple_style: dark",
     "search_on_category_select: false",
     "method: POST",
     "safe_search: 1",
@@ -102,6 +102,7 @@ def main() -> int:
     checks += [(settings, snippet, "settings") for snippet in REQUIRED_SETTINGS_SNIPPETS]
     checks += [
         (compose, "127.0.0.1:8888:8080", "compose"),
+        (compose, "./etc:/etc/searxng:ro", "compose"),
         (compose, "no-new-privileges:true", "compose"),
         (compose, "cap_drop:", "compose"),
         (compose, "MinaFox SearXNG", "compose"),
@@ -111,6 +112,8 @@ def main() -> int:
         (installer, "podman compose", "installer"),
         (installer, "grep -E '^SEARXNG_SECRET_KEY='", "installer"),
         (installer, "^[A-Za-z0-9._~+=:@-]{32,128}$", "installer"),
+        (installer, "cp settings.yml.local etc/settings.yml", "installer"),
+        (installer, "chmod 644 settings.yml.local etc/settings.yml etc/uwsgi.ini", "installer"),
         (installer, "http://127.0.0.1:8888/", "installer"),
         (installer, "SOURCE_SEARXNG_DIR=\"/usr/share/minafox/searxng\"", "installer"),
         (installer, "DATA_HOME=\"${XDG_DATA_HOME:-$HOME/.local/share}\"", "installer"),

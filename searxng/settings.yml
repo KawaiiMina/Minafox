@@ -6,16 +6,16 @@ use_default_settings: true
 general:
   debug: false
   instance_name: "MinaFox Search"
-  privacypolicy_url: false
-  donation_url: false
-  contact_url: false
+  privacypolicy_url: ""
+  donation_url: ""
+  contact_url: ""
   enable_metrics: false
 
 brand:
-  issue_url: false
+  issue_url: ""
   docs_url: https://docs.searxng.org/
-  public_instances: false
-  wiki_url: false
+  public_instances: ""
+  wiki_url: ""
 
 search:
   safe_search: 1
@@ -41,13 +41,13 @@ ui:
   default_locale: "en"
   default_theme: simple
   center_alignment: true
-  cache_url: false
+  cache_url: ""
   hotkeys: default
   query_in_title: false
   infinite_scroll: false
   search_on_category_select: false
   theme_args:
-    simple_style: minafox
+    simple_style: dark
 
 outgoing:
   request_timeout: 3.0
