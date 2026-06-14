@@ -31,22 +31,22 @@ The package installs the launcher system-wide, so this should work immediately:
 minafox
 ```
 
-To sync the full profile/start-page assets into the current user's Firefox profile namespace, run:
-
-```bash
-/usr/share/minafox/scripts/install-minafox-arch.sh
-```
-
-Note: the user setup script may ask for `sudo` when it tries to install Firefox enterprise policies under `/usr/lib/firefox/distribution`. The profile, start page, launcher, desktop entry, and icons are still user-local copies.
-
-That script writes user-local assets under:
+On first launch, `/usr/bin/minafox` auto-syncs packaged assets from `/usr/share/minafox` into the current user's MinaFox paths:
 
 ```text
 ~/.mozilla/firefox/minafox
 ~/.local/share/minafox
 ~/.local/share/applications/minafox.desktop
-~/.local/bin/minafox
+~/.local/share/icons/hicolor
 ```
+
+To force a full refresh, or to attempt installing Firefox enterprise policies, run:
+
+```bash
+/usr/share/minafox/scripts/install-minafox-arch.sh
+```
+
+Note: the user setup script may ask for `sudo` when it tries to install Firefox enterprise policies under `/usr/lib/firefox/distribution`. The launcher's automatic first-run sync is user-local only and does not use `sudo`.
 
 ## Local validation from this repo
 

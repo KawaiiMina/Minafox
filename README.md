@@ -80,7 +80,9 @@ cd ~/Minafox/packaging/arch/minafox-profile-git
 makepkg -si
 ```
 
-The package installs `minafox`, the desktop entry, icons, docs, and packaged assets under `/usr/share/minafox`. After package install, run this once as your user to sync the full profile/start-page assets:
+The package installs `minafox`, the desktop entry, icons, docs, and packaged assets under `/usr/share/minafox`. On first launch, `/usr/bin/minafox` automatically syncs the packaged profile, start page, desktop entry, and icons into your user-local MinaFox paths before starting Firefox.
+
+You can still run the full setup helper manually when you want an explicit refresh or want it to attempt enterprise-policy installation:
 
 ```bash
 /usr/share/minafox/scripts/install-minafox-arch.sh
@@ -244,7 +246,7 @@ bind = $mod, B, exec, minafox
 
 ## Next steps
 
-1. Make the packaged launcher auto-sync `/usr/share/minafox` assets into the dedicated user profile on first run.
+1. Package installs now work immediately: `minafox` auto-syncs `/usr/share/minafox` assets into the dedicated user profile/local share paths on first launch.
 2. Continue the cosmic Arc/Zen-inspired start-page and chrome polish.
 3. Decide whether Sidebery should be force-installed by policy or documented as recommended.
 4. Decide whether local SearXNG should remain optional or become a packaged user service.

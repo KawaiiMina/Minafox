@@ -9,8 +9,11 @@ from __future__ import annotations
 
 import os
 import re
+import shutil
 import stat
+import subprocess
 import sys
+import tempfile
 from configparser import ConfigParser
 from pathlib import Path
 
@@ -26,6 +29,11 @@ REQUIRED_LAUNCHER_SNIPPETS = (
     "--name minafox",
     "--class MinaFox",
     'PROFILE_DIR="${MINAFOX_PROFILE_DIR:-$HOME/.mozilla/firefox/minafox}"',
+    'SHARE_DIR="${MINAFOX_SHARE_DIR:-/usr/share/minafox}"',
+    "sync_packaged_assets()",
+    "render_template",
+    'SYNC_MARKER="$PROFILE_DIR/.minafox-packaged-sync.done"',
+    'Path.home() / ".local/share/minafox/start.html"',
     'exec "${MINAFOX_FIREFOX_BIN:-firefox}"',
 )
 
@@ -140,11 +148,105 @@ def validate_no_placeholders_or_host_paths(contents: dict[str, str], failures: l
                 "profile/userContent.css",
                 "distribution/policies.json",
                 "scripts/install-minafox-arch.sh",
+                "scripts/minafox-launcher.sh",
             }:
                 failures.append(f"{label}:{line_no}: unexpected MinaFox template placeholder")
             for marker in forbidden:
                 if marker in line:
                     failures.append(f"{label}:{line_no}: contains author-machine path {marker!r}")
+
+
+def validate_packaged_first_run_smoke(failures: list[str]) -> None:
+    """Run the launcher against temp HOME/share/fake Firefox to prove first-run sync."""
+    with tempfile.TemporaryDirectory(prefix="minafox-home-") as home_s, tempfile.TemporaryDirectory(
+        prefix="minafox-share-"
+    ) as share_s, tempfile.TemporaryDirectory(prefix="minafox-bin-") as bin_s:
+        home = Path(home_s)
+        share = Path(share_s)
+        fake_bin = Path(bin_s) / "fakefox"
+        fake_bin.write_text(
+            "#!/usr/bin/env bash\n"
+            "if [[ \"${1:-}\" == \"--CreateProfile\" ]]; then "
+            "printf 'CreateProfile %s\\n' \"$*\" >> \"$HOME/fakefox.log\"; exit 0; fi\n"
+            "printf 'fakefox %s\\n' \"$*\" >> \"$HOME/fakefox.log\"\n"
+            "printf 'fakefox %s\\n' \"$*\"\n",
+            encoding="utf-8",
+        )
+        fake_bin.chmod(0o755)
+
+        shutil.copytree(ROOT / "profile", share / "profile")
+        shutil.copytree(ROOT / "desktop", share / "desktop")
+        shutil.copytree(ROOT / "assets", share / "assets")
+
+        env = os.environ.copy()
+        env.update(
+            {
+                "HOME": str(home),
+                "PATH": f"{bin_s}:{env.get('PATH', '')}",
+                "MINAFOX_FIREFOX_BIN": "fakefox",
+                "MINAFOX_SHARE_DIR": str(share),
+            }
+        )
+        result = subprocess.run(
+            [str(LAUNCHER), "--version"],
+            cwd=ROOT,
+            env=env,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            timeout=30,
+        )
+        if result.returncode != 0:
+            failures.append("packaged first-run smoke failed:\n" + result.stdout.strip())
+            return
+
+        expected_files = (
+            home / ".mozilla/firefox/minafox/user.js",
+            home / ".mozilla/firefox/minafox/chrome/userChrome.css",
+            home / ".mozilla/firefox/minafox/chrome/userContent.css",
+            home / ".local/share/minafox/start.html",
+            home / ".local/share/applications/minafox.desktop",
+            home / ".local/share/icons/hicolor/16x16/apps/minafox.png",
+        )
+        for path in expected_files:
+            if not path.exists():
+                failures.append(f"packaged first-run smoke: missing {path.relative_to(home)}")
+
+        for rel in (
+            ".mozilla/firefox/minafox/user.js",
+            ".mozilla/firefox/minafox/chrome/userContent.css",
+        ):
+            path = home / rel
+            text = path.read_text(encoding="utf-8") if path.exists() else ""
+            if "__MINAFOX_START_URL__" in text:
+                failures.append(f"packaged first-run smoke: placeholder not rendered in {rel}")
+            if "file://" not in text:
+                failures.append(f"packaged first-run smoke: missing file:// start URL in {rel}")
+
+        fake_log = (home / "fakefox.log").read_text(encoding="utf-8") if (home / "fakefox.log").exists() else ""
+        if "CreateProfile" not in fake_log:
+            failures.append("packaged first-run smoke: launcher did not call --CreateProfile for fresh profile")
+
+        marker = home / ".mozilla/firefox/minafox/.minafox-packaged-sync.done"
+        if not marker.exists():
+            failures.append("packaged first-run smoke: missing packaged-sync marker")
+
+        user_js = home / ".mozilla/firefox/minafox/user.js"
+        if user_js.exists():
+            user_js.write_text(user_js.read_text(encoding="utf-8") + "\n// local customization sentinel\n", encoding="utf-8")
+            second = subprocess.run(
+                [str(LAUNCHER), "--version"],
+                cwd=ROOT,
+                env=env,
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                timeout=30,
+            )
+            if second.returncode != 0:
+                failures.append("packaged second-run smoke failed:\n" + second.stdout.strip())
+            elif "local customization sentinel" not in user_js.read_text(encoding="utf-8"):
+                failures.append("packaged second-run smoke: first-run sync overwrote user.js on second launch")
 
 
 def main() -> int:
@@ -156,6 +258,7 @@ def main() -> int:
         "README.md": validate_readme(failures),
     }
     validate_no_placeholders_or_host_paths(contents, failures)
+    validate_packaged_first_run_smoke(failures)
 
     if failures:
         print("MinaFox standalone validation: FAIL")
