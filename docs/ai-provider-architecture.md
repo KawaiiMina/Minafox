@@ -12,7 +12,35 @@ MinaFox AI is optional. The browser start page may show a calm **Mina AI Den**, 
 
 ## Provider modes
 
-- Local: **Ollama** at `http://127.0.0.1:11434`.
+## Local broker and Hermes API Server
+
+MinaFox uses a localhost-only broker boundary before it talks to Hermes or any
+cloud provider:
+
+```text
+MinaFox start page
+  -> http://127.0.0.1:8765
+MinaFox AI broker
+  -> http://127.0.0.1:8642
+Hermes API Server gateway
+  -> Hermes Agent
+```
+
+The first broker sprint exposes only safe discovery endpoints:
+
+- `GET /health`
+- `GET /providers`
+- `GET /hermes/health`
+- `POST /chat` returns a disabled/safety response until explicit Hermes chat
+  UX exists.
+
+Hermes itself is expected to run the API Server gateway on loopback with
+`API_SERVER_ENABLED=true` and an `API_SERVER_KEY` stored in a user-local secret
+file or environment, never in this repository and never in `desktop/start.html`.
+The broker reads that key through `HERMES_API_SERVER_KEY` or `API_SERVER_KEY`
+when it needs to call authenticated Hermes endpoints.
+
+- **Local:** Ollama, local-only by default.
 - Cloud: **OpenAI**, **ChatGPT-compatible** APIs, **Gemini**, **Claude**, and **OpenRouter**.
 - LAN: **Hermes Gateway** after explicit host configuration, pairing, and warning copy.
 

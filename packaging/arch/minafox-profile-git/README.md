@@ -10,10 +10,12 @@ It installs:
 
 - `/usr/bin/minafox` — Wayland-friendly standalone launcher.
 - `/usr/bin/minafox-update` — rebuild and upgrade the installed package from the git package skeleton.
+- `/usr/bin/minafox-ai-broker` — localhost-only Mina AI Den broker.
 - `/usr/share/applications/minafox.desktop` — desktop app entry.
 - `/usr/share/icons/hicolor/.../apps/minafox.png` — icon-theme assets.
 - `/usr/share/minafox/` — profile, start page, branding assets, policy, SearXNG overlay, and helper scripts.
 - `/usr/lib/systemd/user/minafox-searxng.service` — optional local search user service.
+- `/usr/lib/systemd/user/minafox-ai-broker.service` — optional local AI broker user service.
 - `/usr/share/doc/minafox/README.md` and `/usr/share/doc/minafox/brand-lore.md` — project documentation and Mina mascot lore.
 - `/usr/share/doc/minafox/ai-provider-architecture.md` — Mina AI Den provider and privacy architecture notes.
 
@@ -60,6 +62,26 @@ minafox-update
 ```
 
 By default this uses `~/Minafox`, pulls the repo, and runs `makepkg -si` from this package directory. Use `minafox-update --repo /path/to/Minafox` or `MINAFOX_REPO_DIR=/path/to/Minafox minafox-update` for another checkout.
+
+## Optional Mina AI Den broker
+
+The package installs the broker command and unit file, but does not enable it
+automatically. To run it once:
+
+```bash
+minafox-ai-broker
+```
+
+To keep it running as a user service:
+
+```bash
+systemctl --user enable --now minafox-ai-broker.service
+systemctl --user status minafox-ai-broker.service
+```
+
+It binds to `127.0.0.1:8765`, exposes `/health`, `/providers`, and
+`/hermes/health`, and leaves `/chat` disabled until the Hermes safety UX is
+implemented.
 
 ## Optional local SearXNG user service
 

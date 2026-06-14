@@ -1,0 +1,15 @@
+[Unit]
+Description=MinaFox local AI broker
+Documentation=file:/usr/share/doc/minafox/ai-provider-architecture.md
+After=network.target
+
+[Service]
+Type=simple
+Environment=MINAFOX_AI_BROKER_HOST=127.0.0.1
+Environment=MINAFOX_AI_BROKER_PORT=8765
+ExecStart=/usr/bin/minafox-ai-broker
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

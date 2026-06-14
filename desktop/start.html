@@ -731,7 +731,7 @@
           <label for="ai-prompt-input">AI prompt</label>
           <textarea id="ai-prompt-input" class="ai-prompt-input" disabled placeholder="Mina is curled up until the local AI broker exists…"></textarea>
           <button class="ai-send-button" type="button" disabled>Ask Mina later</button>
-          <p class="ai-status-text">No API keys live in this static page. Cloud keys will belong in a future local config/keyring-backed broker. Hermes Gateway can trigger tool-capable agents, so LAN mode will require explicit pairing and warnings.</p>
+          <p class="ai-status-text" data-ai-status>No API keys live in this static page. Cloud keys will belong in a future local config/keyring-backed broker. Hermes Gateway can trigger tool-capable agents, so LAN mode will require explicit pairing and warnings. Start minafox-ai-broker to detect http://127.0.0.1:8765.</p>
         </article>
         <article class="dashboard-card roadmap-card">
           <h2>MinaFox roadmap</h2>
@@ -760,5 +760,27 @@
       <span>⌂</span><span>⌘</span><span>✦</span><span>☾</span><span>♪</span>
     </div>
   </main>
+  <script>
+    (async () => {
+      const status = document.querySelector("[data-ai-status]");
+      if (!status) return;
+      try {
+        const [providersResponse, hermesResponse] = await Promise.all([
+          fetch("http://127.0.0.1:8765/providers", { cache: "no-store" }),
+          fetch("http://127.0.0.1:8765/hermes/health", { cache: "no-store" }),
+        ]);
+        if (!providersResponse.ok) throw new Error("providers unavailable");
+        const providers = await providersResponse.json();
+        const hermes = hermesResponse.ok ? await hermesResponse.json() : null;
+        const hermesAvailable = Boolean(hermes?.hermes?.available);
+        const count = Array.isArray(providers.providers) ? providers.providers.length : 0;
+        status.textContent = hermesAvailable
+          ? `minafox-ai-broker is awake on 127.0.0.1:8765. ${count} providers known. Hermes API Server is reachable on localhost; chat remains safety-disabled.`
+          : `minafox-ai-broker is awake on 127.0.0.1:8765. ${count} providers known. Hermes API Server is not reachable yet; chat remains safety-disabled.`;
+      } catch (error) {
+        status.textContent = "No API keys live in this static page. Start minafox-ai-broker for provider detection. Hermes Gateway can trigger tool-capable agents, so chat stays disabled until explicit safety UX is added.";
+      }
+    })();
+  </script>
 </body>
 </html>

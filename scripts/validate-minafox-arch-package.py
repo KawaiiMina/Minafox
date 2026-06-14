@@ -31,6 +31,7 @@ REQUIRED_PKGBUILD_SNIPPETS = (
     "source=('git+https://github.com/KawaiiMina/Minafox.git')",
     "install -Dm755 scripts/minafox-launcher.sh \"$pkgdir/usr/bin/minafox\"",
     "install -Dm755 scripts/minafox-update.sh \"$pkgdir/usr/bin/minafox-update\"",
+    "install -Dm755 scripts/minafox-ai-broker.sh \"$pkgdir/usr/bin/minafox-ai-broker\"",
     "install -Dm644 desktop/minafox.desktop \"$pkgdir/usr/share/applications/minafox.desktop\"",
     "install -Dm644 README.md \"$pkgdir/usr/share/doc/minafox/README.md\"",
     "install -Dm644 docs/brand-lore.md \"$pkgdir/usr/share/doc/minafox/brand-lore.md\"",
@@ -40,7 +41,10 @@ REQUIRED_PKGBUILD_SNIPPETS = (
     "install -Dm755 scripts/install-minafox-arch.sh \"$pkgdir/usr/share/minafox/scripts/install-minafox-arch.sh\"",
     "install -Dm755 scripts/install-minafox-searxng-arch.sh \"$pkgdir/usr/share/minafox/scripts/install-minafox-searxng-arch.sh\"",
     "install -Dm755 scripts/minafox-update.sh \"$pkgdir/usr/share/minafox/scripts/minafox-update.sh\"",
+    "install -Dm755 scripts/minafox-ai-broker.py \"$pkgdir/usr/share/minafox/scripts/minafox-ai-broker.py\"",
+    "install -Dm755 scripts/minafox-ai-broker.sh \"$pkgdir/usr/share/minafox/scripts/minafox-ai-broker.sh\"",
     "install -Dm644 systemd/user/minafox-searxng.service \"$pkgdir/usr/lib/systemd/user/minafox-searxng.service\"",
+    "install -Dm644 systemd/user/minafox-ai-broker.service \"$pkgdir/usr/lib/systemd/user/minafox-ai-broker.service\"",
 )
 
 REQUIRED_SRCINFO_SNIPPETS = (
@@ -59,6 +63,7 @@ REQUIRED_SRCINFO_SNIPPETS = (
 REQUIRED_STAGED_FILES = (
     "usr/bin/minafox",
     "usr/bin/minafox-update",
+    "usr/bin/minafox-ai-broker",
     "usr/share/applications/minafox.desktop",
     "usr/share/icons/hicolor/16x16/apps/minafox.png",
     "usr/share/icons/hicolor/1024x1024/apps/minafox.png",
@@ -73,7 +78,10 @@ REQUIRED_STAGED_FILES = (
     "usr/share/minafox/scripts/install-minafox-searxng-arch.sh",
     "usr/share/minafox/scripts/minafox-launcher.sh",
     "usr/share/minafox/scripts/minafox-update.sh",
+    "usr/share/minafox/scripts/minafox-ai-broker.py",
+    "usr/share/minafox/scripts/minafox-ai-broker.sh",
     "usr/lib/systemd/user/minafox-searxng.service",
+    "usr/lib/systemd/user/minafox-ai-broker.service",
     "usr/share/minafox/searxng/docker-compose.yml",
     "usr/share/minafox/searxng/theme/minafox.css",
     "usr/share/doc/minafox/README.md",
@@ -148,10 +156,16 @@ def validate_package_simulation(failures: list[str]) -> None:
         for rel in (
             "usr/bin/minafox",
             "usr/bin/minafox-update",
+            "usr/bin/minafox-ai-broker",
+    "usr/bin/minafox-ai-broker",
             "usr/share/minafox/scripts/install-minafox-arch.sh",
             "usr/share/minafox/scripts/install-minafox-searxng-arch.sh",
             "usr/share/minafox/scripts/minafox-launcher.sh",
             "usr/share/minafox/scripts/minafox-update.sh",
+            "usr/share/minafox/scripts/minafox-ai-broker.py",
+            "usr/share/minafox/scripts/minafox-ai-broker.sh",
+    "usr/share/minafox/scripts/minafox-ai-broker.py",
+    "usr/share/minafox/scripts/minafox-ai-broker.sh",
         ):
             path = pkgdir / rel
             if path.exists() and not os.access(path, os.X_OK):

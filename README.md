@@ -150,7 +150,7 @@ Implemented theme files:
 
 ## Mina AI Den
 
-MinaFox includes the first static **Mina AI Den** surface on the start page. It is intentionally calm and disabled for now: no network calls, no direct provider calls from browser JavaScript, and no secrets in static files.
+MinaFox includes the first **Mina AI Den** surface on the start page. It is intentionally calm and safety-disabled for now: it only calls the localhost `minafox-ai-broker` at `http://127.0.0.1:8765`, makes no direct provider calls from browser JavaScript, and stores no secrets in static files.
 
 Provider placeholders shown in the UI:
 
@@ -159,6 +159,29 @@ Provider placeholders shown in the UI:
 - LAN / advanced: Hermes Gateway
 
 The future architecture is a localhost-only broker bound to `127.0.0.1`, with user-local config at `~/.config/minafox/ai.yaml` and provider keys read from environment variables or a future keyring integration. Hermes Gateway is labeled separately because it may connect to tool-capable Hermes agents and will require explicit pairing/auth before implementation.
+
+Run the local broker from a checkout:
+
+```bash
+cd ~/Minafox
+./scripts/minafox-ai-broker.sh
+```
+
+Run the broker from the installed Arch package:
+
+```bash
+minafox-ai-broker
+systemctl --user enable --now minafox-ai-broker.service
+```
+
+The broker exposes:
+
+- `GET /health`
+- `GET /providers`
+- `GET /hermes/health`
+- `POST /chat` — currently returns a disabled safety response.
+
+Hermes API Server should stay on loopback at `http://127.0.0.1:8642`. Store `API_SERVER_KEY` or `HERMES_API_SERVER_KEY` only in local env/secret files, not in MinaFox.
 
 Architecture notes: `docs/ai-provider-architecture.md`
 
