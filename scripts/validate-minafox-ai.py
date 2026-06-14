@@ -46,6 +46,8 @@ START_SNIPPETS = (
     "data-ai-chat-state",
     "POST",
     "/chat",
+    "friendlyAiError",
+    "Ollama is offline. Start Ollama locally",
 )
 
 DOC_SNIPPETS = (
@@ -77,6 +79,7 @@ BROKER_SNIPPETS = (
     "8765",
     "ALLOWED_CORS_ORIGINS",
     "assert_loopback_url",
+    "Ollama is offline. Start Ollama locally",
 )
 
 WRAPPER_SNIPPETS = (

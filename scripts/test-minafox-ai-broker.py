@@ -67,6 +67,19 @@ class MinaFoxAIBrokerTests(unittest.TestCase):
             "stream": False,
         })
 
+    def test_ollama_chat_offline_returns_friendly_message(self) -> None:
+        with mock.patch.dict(os.environ, {"MINAFOX_AI_ENABLE_OLLAMA_CHAT": "1"}, clear=False), \
+             mock.patch.object(self.broker, "ollama_request", return_value={"available": False, "error": "ConnectionRefusedError"}):
+            status, body = self.broker.handle_chat_payload({
+                "provider": "ollama",
+                "prompt": "say hi",
+            })
+
+        self.assertEqual(status, 503)
+        self.assertEqual(body["error"], "ollama_unavailable")
+        self.assertIn("Ollama is offline", body["message"])
+        self.assertNotIn("ollama_unavailable", body["message"])
+
     def test_chat_rejects_hermes_gateway_even_when_chat_flag_is_enabled(self) -> None:
         with mock.patch.dict(os.environ, {"MINAFOX_AI_ENABLE_OLLAMA_CHAT": "1"}, clear=False):
             status, body = self.broker.handle_chat_payload({

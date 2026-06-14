@@ -1000,6 +1000,13 @@
       if (aiChatState) aiChatState.textContent = message;
     }
 
+    function friendlyAiError(payload, fallback) {
+      if (payload?.message) return payload.message;
+      if (payload?.error === "chat_disabled") return "Local Ollama chat is safely paused. Start the broker with MINAFOX_AI_ENABLE_OLLAMA_CHAT=1 when you want to test it.";
+      if (payload?.error === "provider_disabled") return "That provider is still safety-disabled in this MinaFox phase.";
+      return fallback || "Ollama is offline. Start Ollama locally, make sure a model is pulled, then try Mina AI Den again.";
+    }
+
     async function askLocalOllama() {
       const prompt = aiPromptInput?.value.trim();
       if (!prompt || !aiResponse) return;
@@ -1012,7 +1019,7 @@
           body: JSON.stringify({ provider: "ollama", prompt }),
         });
         const payload = await response.json();
-        if (!response.ok) throw new Error(payload.message || payload.error || "Local Ollama chat failed");
+        if (!response.ok) throw new Error(friendlyAiError(payload, "Local Ollama chat failed safely."));
         aiResponse.textContent = payload.message || "Mina replied with an empty message.";
       } catch (error) {
         aiResponse.textContent = `AI Den stayed safe: ${error.message}`;

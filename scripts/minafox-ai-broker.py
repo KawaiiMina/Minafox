@@ -250,7 +250,11 @@ def handle_chat_payload(payload: dict[str, Any]) -> tuple[int, dict[str, Any]]:
     }
     result = ollama_request("/api/chat", payload=ollama_payload)
     if not result.get("available"):
-        return 503, {"error": "ollama_unavailable", "health": result}
+        return 503, {
+            "error": "ollama_unavailable",
+            "message": "Ollama is offline. Start Ollama locally, make sure a model is pulled, then try Mina AI Den again.",
+            "health": result,
+        }
     data = result.get("data", {})
     message = data.get("message", {}).get("content") if isinstance(data, dict) else None
     if not isinstance(message, str):
