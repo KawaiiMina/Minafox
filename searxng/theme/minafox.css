@@ -268,10 +268,26 @@ input[type="submit"]:hover,
 
 #main_results #categories {
   order: 3 !important;
-  flex: 0 0 calc(100% - clamp(64px, 7vw, 78px)) !important;
-  margin: 10px 0 12px clamp(64px, 7vw, 78px) !important;
-  max-width: min(100% - clamp(64px, 7vw, 78px), 1040px) !important;
+  flex: 0 0 auto !important;
+  width: fit-content !important;
+  max-width: min(calc(100% - 28px), 1040px) !important;
+  margin: 12px auto !important;
   overflow-x: auto !important;
+}
+
+#main_results #categories_container,
+#categories_container {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 6px !important;
+  width: max-content !important;
+  min-width: 100% !important;
+}
+
+.autocomplete .help {
+  display: none !important;
 }
 
 #main_results .search_filters {

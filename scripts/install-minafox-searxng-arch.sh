@@ -81,6 +81,7 @@ prepare_runtime_dir() {
   copy_overlay_file patch-base-template.py
   copy_overlay_file README.md
   copy_overlay_file theme/minafox.css
+  copy_overlay_file theme/minafox-categories.js
 
   cd "$RUNTIME_SEARXNG_DIR"
 

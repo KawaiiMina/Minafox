@@ -63,4 +63,5 @@ package() {
   install -Dm644 searxng/uwsgi.ini "$pkgdir/usr/share/minafox/searxng/uwsgi.ini"
   install -Dm755 searxng/patch-base-template.py "$pkgdir/usr/share/minafox/searxng/patch-base-template.py"
   install -Dm644 searxng/theme/minafox.css "$pkgdir/usr/share/minafox/searxng/theme/minafox.css"
+  install -Dm644 searxng/theme/minafox-categories.js "$pkgdir/usr/share/minafox/searxng/theme/minafox-categories.js"
 }

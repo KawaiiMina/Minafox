@@ -16,6 +16,7 @@ COPY theme/minafox.css /usr/local/searxng/searx/static/themes/simple/css/dark.mi
 # base.html so the visible search page actually inherits the cosmic fox
 # glass/pink/lavender design even if upstream rebuilds bundled CSS on startup.
 COPY theme/minafox.css /tmp/minafox.css
+COPY theme/minafox-categories.js /usr/local/searxng/searx/static/themes/simple/js/minafox-categories.js
 COPY patch-base-template.py /tmp/patch-base-template.py
 RUN cat /tmp/minafox.css >> /usr/local/searxng/searx/static/themes/simple/sxng-ltr.min.css \
     && cat /tmp/minafox.css >> /usr/local/searxng/searx/static/themes/simple/sxng-rtl.min.css \

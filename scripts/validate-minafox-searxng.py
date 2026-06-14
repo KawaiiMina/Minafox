@@ -17,6 +17,7 @@ REQUIRED_FILES = [
     "searxng/settings.yml",
     "searxng/uwsgi.ini",
     "searxng/theme/minafox.css",
+    "searxng/theme/minafox-categories.js",
     "searxng/patch-base-template.py",
     "searxng/README.md",
     "scripts/install-minafox-searxng-arch.sh",
@@ -55,6 +56,10 @@ REQUIRED_THEME_SELECTORS = [
     "#main_results #search_view",
     "#main_results .search_box",
     "#main_results #categories",
+    "margin: 12px auto",
+    "justify-content: center",
+    ".autocomplete .help",
+    "display: none",
     "order: 3",
     "#q",
     ".result",
@@ -105,6 +110,7 @@ def main() -> int:
         return 1
 
     theme = read("searxng/theme/minafox.css")
+    categories_js = read("searxng/theme/minafox-categories.js")
     settings = read("searxng/settings.yml")
     compose = read("searxng/docker-compose.yml")
     dockerfile = read("searxng/Dockerfile")
@@ -134,15 +140,25 @@ def main() -> int:
         (dockerfile, "patch-base-template.py", "Dockerfile"),
         (dockerfile, "base.html", "Dockerfile"),
         (dockerfile, "themes/simple/css/minafox.min.css", "Dockerfile"),
+        (dockerfile, "theme/minafox-categories.js", "Dockerfile"),
+        (dockerfile, "themes/simple/js/minafox-categories.js", "Dockerfile"),
         (patcher, "expected limiter/client CSS anchor not found", "base template patcher"),
         (patcher, "themes/simple/css/minafox.min.css", "base template patcher"),
+        (patcher, "themes/simple/js/minafox-categories.js", "base template patcher"),
+        (patcher, "MINAFOX_SCRIPT", "base template patcher"),
         (patcher, "if MINAFOX_LINK not in text", "base template patcher"),
+        (patcher, "if MINAFOX_SCRIPT not in text", "base template patcher"),
+        (categories_js, "categoryInputs", "category script"),
+        (categories_js, "checked = false", "category script"),
+        (categories_js, "At least one MinaFox category stays selected", "category script"),
+        (categories_js, "change", "category script"),
         (dockerfile, "Use the upstream-compatible dark style name", "Dockerfile"),
         (installer, "docker compose", "installer"),
         (installer, "podman compose", "installer"),
         (installer, "grep -E '^SEARXNG_SECRET_KEY='", "installer"),
         (installer, "^[A-Za-z0-9._~+=:@-]{32,128}$", "installer"),
         (installer, "copy_overlay_file patch-base-template.py", "installer"),
+        (installer, "copy_overlay_file theme/minafox-categories.js", "installer"),
         (installer, "cp settings.yml.local etc/settings.yml", "installer"),
         (installer, "chmod 644 settings.yml.local etc/settings.yml etc/uwsgi.ini", "installer"),
         (installer, "http://127.0.0.1:8888/", "installer"),
