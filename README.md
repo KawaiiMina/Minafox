@@ -143,18 +143,18 @@ python3 scripts/validate-minafox-ai.py
 
 ## Documentation
 
-The GitHub wiki is the main documentation hub:
+The GitHub wiki is the main documentation hub. A versioned mirror is also kept under [`docs/wiki/`](docs/wiki/) so the docs remain reviewable from the repository checkout.
 
-- [Home](../../wiki)
-- [Getting Started](../../wiki/Getting-Started)
-- [Architecture](../../wiki/Architecture)
-- [Services](../../wiki/Services)
-- [Android/LAN Testing](../../wiki/Android-LAN-Testing)
-- [Mina AI Den](../../wiki/Mina-AI-Den)
-- [MinaFox Search](../../wiki/MinaFox-Search)
-- [Packaging and Updating](../../wiki/Packaging-and-Updating)
-- [Development Guide](../../wiki/Development-Guide)
-- [Troubleshooting](../../wiki/Troubleshooting)
+- [Home](../../wiki) / [`docs/wiki/Home.md`](docs/wiki/Home.md)
+- [Getting Started](../../wiki/Getting-Started) / [`docs/wiki/Getting-Started.md`](docs/wiki/Getting-Started.md)
+- [Architecture](../../wiki/Architecture) / [`docs/wiki/Architecture.md`](docs/wiki/Architecture.md)
+- [Services](../../wiki/Services) / [`docs/wiki/Services.md`](docs/wiki/Services.md)
+- [Android/LAN Testing](../../wiki/Android-LAN-Testing) / [`docs/wiki/Android-LAN-Testing.md`](docs/wiki/Android-LAN-Testing.md)
+- [Mina AI Den](../../wiki/Mina-AI-Den) / [`docs/wiki/Mina-AI-Den.md`](docs/wiki/Mina-AI-Den.md)
+- [MinaFox Search](../../wiki/MinaFox-Search) / [`docs/wiki/MinaFox-Search.md`](docs/wiki/MinaFox-Search.md)
+- [Packaging and Updating](../../wiki/Packaging-and-Updating) / [`docs/wiki/Packaging-and-Updating.md`](docs/wiki/Packaging-and-Updating.md)
+- [Development Guide](../../wiki/Development-Guide) / [`docs/wiki/Development-Guide.md`](docs/wiki/Development-Guide.md)
+- [Troubleshooting](../../wiki/Troubleshooting) / [`docs/wiki/Troubleshooting.md`](docs/wiki/Troubleshooting.md)
 
 In-repo docs remain available for versioned details:
 
