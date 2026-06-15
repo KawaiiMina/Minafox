@@ -132,6 +132,8 @@ def main() -> int:
     start_page = read("desktop/start.html")
     readme = read("README.md")
     overlay_readme = read("searxng/README.md")
+    search_wiki = read("docs/wiki/MinaFox-Search.md")
+    repository_map = read("docs/wiki/Repository-Map.md")
     pkgbuild = read("packaging/arch/minafox-profile-git/PKGBUILD")
 
     checks: list[tuple[str, str, str]] = []
@@ -212,6 +214,8 @@ def main() -> int:
         (start_page, "journalctl --user -u minafox-searxng.service -f", "start page"),
         (start_page, "setSearchCategory", "start page"),
         (start_page, "category_${category}", "start page"),
+        (start_page, "Default search: MinaFox SearXNG", "start page"),
+        (start_page, "Engines are managed through SearXNG", "start page"),
         (theme, "Results polish", "theme"),
         (theme, "#main_results #results.only_template_images #urls", "theme"),
         (theme, "#categories .category_checkbox input:checked + label", "theme"),
@@ -223,9 +227,19 @@ def main() -> int:
         (pkgbuild, "docker-compose", "PKGBUILD"),
         (pkgbuild, "podman-compose", "PKGBUILD"),
         (readme, "## MinaFox SearXNG search", "README"),
+        (readme, "MinaFox uses local SearXNG as the default MinaFox search layer", "README"),
+        (readme, "Future search-engine support is configured through SearXNG", "README"),
         (readme, "install-service", "README"),
         (readme, "systemctl --user status minafox-searxng.service", "README"),
+        (search_wiki, "# MinaFox Search", "Search wiki"),
+        (search_wiki, "MinaFox uses local SearXNG as the default MinaFox search layer", "Search wiki"),
+        (search_wiki, "MinaFox UI → local SearXNG → upstream engines", "Search wiki"),
+        (search_wiki, "Future search-engine support is configured through SearXNG", "Search wiki"),
+        (search_wiki, "Do not add direct browser-side search integrations", "Search wiki"),
+        (repository_map, "MinaFox-Search.md", "Repository map"),
         (overlay_readme, "docker compose", "searxng README"),
+        (overlay_readme, "default MinaFox search layer", "searxng README"),
+        (overlay_readme, "engines are managed through SearXNG", "searxng README"),
         (overlay_readme, "http://127.0.0.1:8888/", "searxng README"),
         (overlay_readme, "~/.local/share/minafox/searxng", "searxng README"),
     ]
@@ -241,6 +255,21 @@ def main() -> int:
 
     if "source .env" in installer or ". .env" in installer:
         failures.append("installer must parse .env as data, not source it as shell code")
+
+    forbidden_start_page_search_patterns = [
+        r"(?i)(?:https?:)?//(?:www\.)?google\.",
+        r"(?i)(?:https?:)?//(?:www\.)?duckduckgo\.com(?:/|$)",
+        r"(?i)(?:https?:)?//search\.brave\.com(?:/|$)",
+        r"(?i)(?:https?:)?//(?:www\.)?startpage\.com(?:/|$)",
+        r"(?i)(?:https?:)?//(?:www\.)?bing\.com(?:/|$)",
+        r"(?i)(?:https?:)?//search\.yahoo\.com(?:/|$)",
+    ]
+    for forbidden in forbidden_start_page_search_patterns:
+        if re.search(forbidden, start_page):
+            failures.append(
+                "start page must route searches through local SearXNG, "
+                f"not direct external search endpoint matching: {forbidden}"
+            )
 
     if re.search(r"(?m)^#search,\s*\n\s*\.search_box\s*\{", theme):
         failures.append("theme must not style the whole results-page #search form as a glass card; style #main_index #search and .search_box separately")

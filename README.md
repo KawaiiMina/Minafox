@@ -16,7 +16,7 @@ MinaFox currently ships:
 - a dedicated Firefox profile namespace and profile prefs;
 - `userChrome.css` / `userContent.css` theme files;
 - a local MinaFox start page;
-- optional localhost MinaFox SearXNG search;
+- default localhost MinaFox SearXNG search;
 - optional localhost Mina AI Den broker for local Ollama experiments;
 - an Android/LAN harness for responsive UX testing without building a browser APK;
 - Arch packaging and systemd user services.
@@ -105,7 +105,9 @@ Only enable the LAN harness on trusted LAN/Tailscale networks. Keep port `8766` 
 
 ## MinaFox SearXNG search
 
-MinaFox includes a local SearXNG overlay for private search. The helper keeps generated runtime files under `~/.local/share/minafox/searxng`, binds the service to `127.0.0.1:8888`, and supports Docker Compose or Podman Compose.
+MinaFox uses local SearXNG as the default MinaFox search layer. The browser UI sends searches to `http://127.0.0.1:8888/search` with POST, and SearXNG handles upstream engine selection, categories, privacy settings, and result rendering. Future search-engine support is configured through SearXNG engine settings instead of adding direct browser-side Google/DuckDuckGo/Brave/Startpage integrations.
+
+The helper keeps generated runtime files under `~/.local/share/minafox/searxng`, binds the service to `127.0.0.1:8888`, and supports Docker Compose or Podman Compose.
 
 ```bash
 /usr/share/minafox/scripts/install-minafox-searxng-arch.sh install-service

@@ -63,5 +63,6 @@ Arch VCS package skeleton for the wrapper phase. It depends on the system `firef
 Versioned reference docs that should stay in the repo:
 
 - `brand-lore.md`
+- `MinaFox-Search.md` — default SearXNG search layer and engine-configuration plan.
 - `ai-provider-architecture.md`
 - `licensing-and-source-fork.md`

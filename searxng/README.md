@@ -1,6 +1,6 @@
 # MinaFox SearXNG
 
-A local MinaFox-flavoured SearXNG overlay for private search.
+A local MinaFox-flavoured SearXNG overlay for private search. It is the default MinaFox search layer: the browser UI talks to local SearXNG, and upstream engines are managed through SearXNG configuration rather than direct browser-side search integrations.
 
 Design goals:
 

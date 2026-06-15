@@ -1,6 +1,25 @@
 # MinaFox Search
 
-MinaFox Search is a local SearXNG overlay with MinaFox branding, privacy-first defaults, and a calm pink/purple glass style.
+MinaFox uses local SearXNG as the default MinaFox search layer.
+
+```text
+MinaFox UI → local SearXNG → upstream engines
+```
+
+The browser/start page sends searches to the local MinaFox SearXNG service at `http://127.0.0.1:8888/search` using POST. SearXNG then handles upstream engine selection, categories, autocomplete, safe-search defaults, result rendering, and privacy behavior.
+
+## Default architecture
+
+- **Browser UI:** `desktop/start.html` owns the search box and category shortcuts.
+- **Local search layer:** `searxng/` provides the MinaFox-flavoured SearXNG overlay.
+- **Runtime service:** `minafox-searxng.service` starts the local SearXNG container through `scripts/install-minafox-searxng-arch.sh`.
+- **Writable config/runtime:** generated files live under `~/.local/share/minafox/searxng`, not in the repo checkout or `/usr/share`.
+
+## Engine support plan
+
+Future search-engine support is configured through SearXNG engine settings. Support for DuckDuckGo, Brave, Startpage, Google, Wikipedia, or other engines should be added by changing SearXNG settings/categories, not by adding direct browser-side search integrations.
+
+Do not add direct browser-side search integrations for upstream engines. MinaFox should not grow separate hardcoded form actions or JavaScript fetch paths for Google, DuckDuckGo, Brave, Startpage, Bing, or similar engines. Keep the browser UI pointed at local SearXNG so search privacy and engine behavior stay centralized.
 
 ## Files
 
@@ -42,6 +61,24 @@ The helper keeps generated runtime config outside the repo:
 
 It copies the overlay, chooses Docker or Podman Compose, creates a local `.env`, renders `settings.yml.local`, and starts the service.
 
+## Where to configure engines
+
+Primary files:
+
+- `searxng/settings.yml` — checked-in privacy and UI defaults.
+- `scripts/install-minafox-searxng-arch.sh` — renders runtime settings and generated secrets.
+- `~/.local/share/minafox/searxng/settings.yml.local` — generated runtime settings on a user machine.
+
+When adding engine customization later, prefer documenting the desired SearXNG settings in this page and validating the checked-in template with `scripts/validate-minafox-searxng.py`.
+
+## Privacy rules
+
+- Keep the SearXNG service bound to `127.0.0.1:8888` by default.
+- Keep the start page search form using POST.
+- Do not commit generated SearXNG secrets.
+- Do not place upstream search API keys or provider credentials in static browser assets.
+- If LAN/mobile testing needs search, route through trusted local/Tailscale access rather than exposing SearXNG publicly.
+
 ## Stop/update
 
 ```bash
@@ -58,8 +95,16 @@ systemctl --user restart minafox-searxng.service
 5. Resize below 760px; layout should remain readable.
 6. Confirm the start page search form submits to `/search` on the configured SearXNG host.
 
+Runtime smoke checks, when Docker/Podman is available:
+
+```bash
+curl -fsS http://127.0.0.1:8888/
+curl -fsS http://127.0.0.1:8888/search -d 'q=minafox'
+```
+
 ## Validation
 
 ```bash
 python3 scripts/validate-minafox-searxng.py
+python3 scripts/validate-minafox-ui.py
 ```
