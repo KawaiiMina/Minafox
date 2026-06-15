@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Sample MinaFox vector logo</title>
+  <desc id="desc">Small test vector for MinaFox SVG export tooling.</desc>
+  <defs>
+    <linearGradient id="pink" x1="220" y1="180" x2="780" y2="820" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFD5EA"/>
+      <stop offset="1" stop-color="#D95AAE"/>
+    </linearGradient>
+    <radialGradient id="orb" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(600 590) scale(190)">
+      <stop offset="0" stop-color="#F5E8FF"/>
+      <stop offset="0.55" stop-color="#A77BFF"/>
+      <stop offset="1" stop-color="#4A2D9C"/>
+    </radialGradient>
+  </defs>
+  <path d="M260 480C245 345 337 230 476 222C612 214 714 311 717 440C720 560 626 650 491 651C357 652 274 601 260 480Z" fill="url(#pink)"/>
+  <path d="M330 303C322 229 348 166 390 112C407 181 444 232 497 268C443 274 389 286 330 303Z" fill="url(#pink)"/>
+  <path d="M608 267C652 213 702 174 762 150C754 224 730 281 696 326C669 298 640 279 608 267Z" fill="url(#pink)"/>
+  <path d="M375 500C386 440 432 407 490 409C552 411 595 453 600 513C606 583 552 623 485 624C420 625 363 565 375 500Z" fill="#FFEAF5"/>
+  <circle cx="610" cy="603" r="178" fill="url(#orb)"/>
+  <circle cx="610" cy="603" r="178" stroke="#F6E8FF" stroke-width="10" opacity="0.72"/>
+  <path d="M478 606C526 574 584 563 643 568C692 572 732 592 760 620" stroke="#F4DEFF" stroke-width="9" stroke-linecap="round" opacity="0.65"/>
+  <path d="M420 612C468 580 512 580 552 604C572 616 572 645 553 660C532 676 506 659 482 654C454 648 433 662 414 684C394 707 358 681 370 653C379 633 397 624 420 612Z" fill="url(#pink)"/>
+  <path d="M727 616C700 587 666 578 632 588C606 596 595 627 611 648C626 668 657 661 680 672C702 682 716 704 727 727C738 751 777 745 785 716C795 681 759 648 727 616Z" fill="url(#pink)"/>
+  <path d="M410 450C420 438 440 438 452 450" stroke="#4B244D" stroke-width="18" stroke-linecap="round"/>
+  <path d="M526 450C538 438 560 438 574 450" stroke="#4B244D" stroke-width="18" stroke-linecap="round"/>
+  <path d="M486 493C505 493 518 503 518 516C518 532 503 545 486 545C469 545 454 532 454 516C454 503 468 493 486 493Z" fill="#5A2758"/>
+</svg>
