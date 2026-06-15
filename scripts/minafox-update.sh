@@ -4,8 +4,15 @@ set -euo pipefail
 REPO_URL="${MINAFOX_REPO_URL:-https://github.com/KawaiiMina/Minafox.git}"
 REPO_DIR="${MINAFOX_REPO_DIR:-$HOME/Minafox}"
 PACKAGE_DIR="packaging/arch/minafox-profile-git"
+SHARE_DIR="${MINAFOX_SHARE_DIR:-/usr/share/minafox}"
+PROFILE_DIR="${MINAFOX_PROFILE_DIR:-$HOME/.mozilla/firefox/minafox}"
+START_DIR="$HOME/.local/share/minafox"
+DESKTOP_DIR="$HOME/.local/share/applications"
+ICON_DIR="$HOME/.local/share/icons/hicolor"
+SYNC_MARKER="$PROFILE_DIR/.minafox-packaged-sync.done"
 DO_PULL=1
 RESTART_SERVICES=1
+SYNC_PROFILE_ASSETS=1
 MINAFOX_SERVICES=(
   minafox-ai-broker.service
   minafox-searxng.service
@@ -14,24 +21,77 @@ MINAFOX_SERVICES=(
 
 usage() {
   cat <<'USAGE'
-Usage: minafox-update [--repo DIR] [--no-pull] [--restart-services] [--no-restart-services] [--help]
+Usage: minafox-update [--repo DIR] [--no-pull] [--sync-profile-assets] [--no-sync-profile-assets] [--restart-services] [--no-restart-services] [--help]
 
 Upgrade the installed MinaFox Arch package from the MinaFox git package skeleton.
 
 Defaults:
   repo: ~/Minafox
   remote: https://github.com/KawaiiMina/Minafox.git
+  share: /usr/share/minafox
+  profile: ~/.mozilla/firefox/minafox
 
 Examples:
   minafox-update
   minafox-update --repo ~/Minafox
+  minafox-update --no-sync-profile-assets
   minafox-update --no-restart-services
   MINAFOX_REPO_DIR=~/src/Minafox minafox-update
 
-After a successful package install, minafox-update reloads the systemd user manager and restarts the MinaFox user services by default:
+After a successful package install, minafox-update refreshes MinaFox profile/start-page assets by default.
+Use --no-sync-profile-assets if you intentionally keep local profile/start-page customizations.
+
+Then it reloads the systemd user manager and restarts MinaFox user services by default:
   minafox-ai-broker.service, minafox-searxng.service, minafox-mobile-harness.service
-Use --no-restart-services if you only want to rebuild/install the package.
+Use --no-restart-services if you only want to rebuild/install the package and sync assets.
 USAGE
+}
+
+render_template() {
+  local src="$1"
+  local dest="$2"
+  local start_url
+  start_url="$(python3 -c 'from pathlib import Path; print((Path.home() / ".local/share/minafox/start.html").as_uri())')"
+  sed "s|__MINAFOX_START_URL__|$start_url|g" "$src" > "$dest"
+}
+
+sync_profile_assets() {
+  if [[ ! -d "$SHARE_DIR" ]]; then
+    echo "Warning: MinaFox packaged share directory missing: $SHARE_DIR" >&2
+    echo "Profile/start-page assets were not synced." >&2
+    return 0
+  fi
+
+  echo "Syncing MinaFox profile and start-page assets from $SHARE_DIR ..."
+  mkdir -p "$PROFILE_DIR/chrome" "$START_DIR" "$DESKTOP_DIR" "$ICON_DIR"
+
+  if [[ -f "$SHARE_DIR/profile/user.js" ]]; then
+    render_template "$SHARE_DIR/profile/user.js" "$PROFILE_DIR/user.js"
+  fi
+  if [[ -f "$SHARE_DIR/profile/userChrome.css" ]]; then
+    cp "$SHARE_DIR/profile/userChrome.css" "$PROFILE_DIR/chrome/userChrome.css"
+  fi
+  if [[ -f "$SHARE_DIR/profile/userContent.css" ]]; then
+    render_template "$SHARE_DIR/profile/userContent.css" "$PROFILE_DIR/chrome/userContent.css"
+  fi
+  if [[ -f "$SHARE_DIR/desktop/start.html" ]]; then
+    cp "$SHARE_DIR/desktop/start.html" "$START_DIR/start.html"
+  fi
+  if [[ -f "$SHARE_DIR/desktop/minafox.desktop" ]]; then
+    cp "$SHARE_DIR/desktop/minafox.desktop" "$DESKTOP_DIR/minafox.desktop"
+  fi
+  if [[ -d "$SHARE_DIR/assets/icons/hicolor" ]]; then
+    shopt -s nullglob
+    local icon_sources=("$SHARE_DIR/assets/icons/hicolor/"*)
+    shopt -u nullglob
+    if (( ${#icon_sources[@]} > 0 )); then
+      cp -R "${icon_sources[@]}" "$ICON_DIR/"
+    fi
+  fi
+
+  update-desktop-database "$DESKTOP_DIR" >/dev/null 2>&1 || true
+  gtk-update-icon-cache "$ICON_DIR" >/dev/null 2>&1 || true
+  touch "$SYNC_MARKER"
 }
 
 while (($#)); do
@@ -51,6 +111,14 @@ while (($#)); do
       ;;
     --no-restart-services)
       RESTART_SERVICES=0
+      shift
+      ;;
+    --sync-profile-assets)
+      SYNC_PROFILE_ASSETS=1
+      shift
+      ;;
+    --no-sync-profile-assets)
+      SYNC_PROFILE_ASSETS=0
       shift
       ;;
     -h|--help)
@@ -104,6 +172,12 @@ cd "$PACKAGE_DIR"
 echo "Building and installing minafox-profile-git ..."
 echo "makepkg may ask for your password through pacman when installing."
 makepkg -si
+
+if (( SYNC_PROFILE_ASSETS )); then
+  sync_profile_assets
+else
+  echo "Skipping MinaFox profile/start-page asset sync (--no-sync-profile-assets)."
+fi
 
 if (( RESTART_SERVICES )); then
   if command -v systemctl >/dev/null 2>&1; then

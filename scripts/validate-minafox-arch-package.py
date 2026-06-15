@@ -24,6 +24,7 @@ PKGBUILD = PKG_DIR / "PKGBUILD"
 SRCINFO = PKG_DIR / ".SRCINFO"
 INSTALL = PKG_DIR / "minafox-profile-git.install"
 PKG_README = PKG_DIR / "README.md"
+UPDATER = ROOT / "scripts" / "minafox-update.sh"
 LICENSE = ROOT / "LICENSE"
 BRANDING = ROOT / "BRANDING.md"
 THIRD_PARTY = ROOT / "THIRD_PARTY_LICENSES.md"
@@ -127,6 +128,7 @@ def validate_static(failures: list[str]) -> None:
     srcinfo = read(SRCINFO, failures)
     install = read(INSTALL, failures)
     readme = read(PKG_README, failures)
+    updater = read(UPDATER, failures)
 
     require("PKGBUILD", pkgbuild, REQUIRED_PKGBUILD_SNIPPETS, failures)
     require(".SRCINFO", srcinfo, REQUIRED_SRCINFO_SNIPPETS, failures)
@@ -147,6 +149,23 @@ def validate_static(failures: list[str]) -> None:
             "/usr/share/doc/minafox/licensing-and-source-fork.md",
             "MINAFOX_MOBILE_HARNESS_URL",
             "/android-checklist",
+            "minafox-update --no-sync-profile-assets",
+            "refreshes the installed profile/start-page assets from `/usr/share/minafox`",
+        ),
+        failures,
+    )
+    require(
+        "minafox-update",
+        updater,
+        (
+            "SYNC_PROFILE_ASSETS=1",
+            "MINAFOX_SHARE_DIR",
+            "MINAFOX_PROFILE_DIR",
+            "--no-sync-profile-assets",
+            "sync_profile_assets()",
+            "render_template",
+            'Path.home() / ".local/share/minafox/start.html"',
+            "Syncing MinaFox profile and start-page assets",
         ),
         failures,
     )

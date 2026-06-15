@@ -48,10 +48,11 @@ After package installation, update with:
 minafox-update
 ```
 
-`minafox-update` pulls the repo, rebuilds/reinstalls the package, reloads the systemd user manager, and restarts MinaFox user services that are already active or enabled. Use this when changing browser assets, search, AI broker, or harness code:
+`minafox-update` pulls the repo, rebuilds/reinstalls the package, refreshes the installed profile/start-page assets from `/usr/share/minafox`, reloads the systemd user manager, and restarts MinaFox user services that are already active or enabled. Use this when changing browser assets, search, AI broker, or harness code:
 
 ```bash
-minafox-update --no-restart-services  # package update only
+minafox-update --no-sync-profile-assets  # preserve local profile/start-page customizations
+minafox-update --no-restart-services     # package update + asset sync only
 ```
 
 ## Optional services

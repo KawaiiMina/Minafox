@@ -32,7 +32,7 @@ Logo and icon assets:
 
 - `install-minafox-arch.sh` — user-local setup and refresh helper.
 - `minafox-launcher.sh` — Wayland-friendly launcher around Firefox.
-- `minafox-update.sh` — package update/restart helper.
+- `minafox-update.sh` — package update helper that refreshes profile/start-page assets and restarts active/enabled services.
 - `install-minafox-searxng-arch.sh` — local SearXNG runtime/service helper.
 - `minafox-ai-broker.py` / `.sh` — local AI broker.
 - `serve-minafox-mobile.py` — Android/LAN UX harness.

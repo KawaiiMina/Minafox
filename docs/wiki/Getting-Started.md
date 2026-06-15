@@ -38,7 +38,7 @@ minafox
 
 The package installs `/usr/bin/minafox`, `/usr/bin/minafox-update`, the desktop entry, icons, docs, assets, and optional systemd user units.
 
-On first launch, `/usr/bin/minafox` syncs packaged assets into user-local paths:
+On first launch, `/usr/bin/minafox` syncs packaged assets into user-local paths. Later `minafox-update` refreshes the same profile/start-page assets after package upgrades unless you pass `--no-sync-profile-assets`:
 
 ```text
 ~/.mozilla/firefox/minafox

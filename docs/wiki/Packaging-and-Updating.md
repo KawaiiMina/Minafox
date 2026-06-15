@@ -48,10 +48,28 @@ Default behavior:
 1. Use `~/Minafox` or `MINAFOX_REPO_DIR`.
 2. Pull the repo unless `--no-pull` is passed.
 3. Run `makepkg -si` from `packaging/arch/minafox-profile-git`.
-4. Run `systemctl --user daemon-reload`.
-5. Restart MinaFox services that are already active or enabled.
+4. Refresh installed profile/start-page assets from `/usr/share/minafox` into the current user's MinaFox paths.
+5. Run `systemctl --user daemon-reload`.
+6. Restart MinaFox services that are already active or enabled.
 
-Skip service reload/restarts:
+The asset refresh updates these files after package upgrades, so UI/profile changes do not wait for a fresh first launch marker:
+
+```text
+~/.mozilla/firefox/minafox/user.js
+~/.mozilla/firefox/minafox/chrome/userChrome.css
+~/.mozilla/firefox/minafox/chrome/userContent.css
+~/.local/share/minafox/start.html
+~/.local/share/applications/minafox.desktop
+~/.local/share/icons/hicolor
+```
+
+Preserve local profile/start-page customizations:
+
+```bash
+minafox-update --no-sync-profile-assets
+```
+
+Skip service reload/restarts while still rebuilding/installing and syncing profile/start-page assets:
 
 ```bash
 minafox-update --no-restart-services

@@ -64,7 +64,16 @@ After installing the package, upgrade from the MinaFox git package skeleton with
 minafox-update
 ```
 
-By default this uses `~/Minafox`, pulls the repo, runs `makepkg -si` from this package directory, reloads the systemd user manager, and restarts `minafox-ai-broker.service`, `minafox-searxng.service`, and `minafox-mobile-harness.service` when they are already active or enabled. Use `minafox-update --no-restart-services` to skip service reload/restart, and use `minafox-update --repo /path/to/Minafox` or `MINAFOX_REPO_DIR=/path/to/Minafox minafox-update` for another checkout.
+By default this uses `~/Minafox`, pulls the repo, runs `makepkg -si` from this package directory, refreshes the installed profile/start-page assets from `/usr/share/minafox`, reloads the systemd user manager, and restarts `minafox-ai-broker.service`, `minafox-searxng.service`, and `minafox-mobile-harness.service` when they are already active or enabled.
+
+Useful variants:
+
+```bash
+minafox-update --no-sync-profile-assets  # preserve local profile/start-page customizations
+minafox-update --no-restart-services     # rebuild/install + sync assets, but skip service reload/restart
+minafox-update --repo /path/to/Minafox
+MINAFOX_REPO_DIR=/path/to/Minafox minafox-update
+```
 
 ## Optional Mina AI Den broker
 

@@ -49,7 +49,7 @@ For a stable phone-visible URL, override `MINAFOX_MOBILE_HARNESS_URL=http://<des
 
 ## Updating services
 
-`minafox-update` runs `systemctl --user daemon-reload` after package installation, then restarts MinaFox services that are already active or enabled:
+`minafox-update` refreshes the installed profile/start-page assets after package installation, then runs `systemctl --user daemon-reload` and restarts MinaFox services that are already active or enabled:
 
 ```bash
 minafox-update
