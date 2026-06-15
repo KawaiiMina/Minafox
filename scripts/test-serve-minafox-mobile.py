@@ -120,6 +120,24 @@ class MinaFoxMobileHarnessTests(unittest.TestCase):
         self.assertEqual(request_config.as_dict()["harnessUrl"], "http://192.0.2.55:8766")
         self.assertEqual(request_config.as_dict()["healthUrl"], "http://192.0.2.55:8766/health")
 
+    def test_request_host_drives_search_and_ai_urls_for_lan_or_tailscale(self) -> None:
+        config = self.harness.RuntimeConfig(
+            ai_broker_url="http://192.168.31.67:8765",
+            search_base_url="http://192.168.31.67:8888",
+            search_action_url="http://192.168.31.67:8888/search",
+            harness_url="http://192.168.31.67:8766",
+            mode="tailscale-test",
+        )
+
+        request_config = self.harness.config_for_request(config, "100.64.12.34:8766")
+        runtime = request_config.as_dict()
+
+        self.assertEqual(runtime["harnessUrl"], "http://100.64.12.34:8766")
+        self.assertEqual(runtime["healthUrl"], "http://100.64.12.34:8766/health")
+        self.assertEqual(runtime["searchBaseUrl"], "http://100.64.12.34:8888")
+        self.assertEqual(runtime["searchActionUrl"], "http://100.64.12.34:8888/search")
+        self.assertEqual(runtime["aiBrokerUrl"], "http://100.64.12.34:8765")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

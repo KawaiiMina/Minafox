@@ -95,15 +95,43 @@ def config_script(config: RuntimeConfig) -> str:
     return f"  <script>\n    window.MINAFOX_RUNTIME_CONFIG = {payload};\n  </script>\n"
 
 
-def config_for_request(config: RuntimeConfig, host_header: str | None) -> RuntimeConfig:
-    """Prefer the phone-visible Host header for harness links when no URL was configured."""
-    if config.harness_url or not host_header:
-        return config
+def request_host_from_header(host_header: str | None) -> tuple[str, str] | None:
+    """Return (host header netloc, hostname) when a request Host is safe to reuse."""
+    if not host_header:
+        return None
     host = host_header.strip()
     allowed = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.-:[]"
     if not host or any(char not in allowed for char in host):
+        return None
+    parsed = urllib.parse.urlsplit(f"//{host}")
+    if not parsed.hostname:
+        return None
+    return host, parsed.hostname
+
+
+def url_with_request_host(url: str, request_hostname: str) -> str:
+    """Keep a service URL's scheme, port, path, and query but use the request host."""
+    parsed = urllib.parse.urlparse(url)
+    hostname = f"[{request_hostname}]" if ":" in request_hostname and not request_hostname.startswith("[") else request_hostname
+    netloc = f"{hostname}:{parsed.port}" if parsed.port else hostname
+    return urllib.parse.urlunparse(parsed._replace(netloc=netloc))
+
+
+def config_for_request(config: RuntimeConfig, host_header: str | None) -> RuntimeConfig:
+    """Prefer the phone-visible Host header for LAN/Tailscale runtime links."""
+    request_host = request_host_from_header(host_header)
+    if request_host is None:
         return config
-    return replace(config, harness_url=f"http://{host}")
+    host, hostname = request_host
+    updates: dict[str, str] = {"harness_url": f"http://{host}"}
+    if config.mode in {"lan-test", "tailscale-test"}:
+        updates["ai_broker_url"] = url_with_request_host(config.ai_broker_url, hostname)
+        updates["search_base_url"] = url_with_request_host(config.search_base_url, hostname)
+        if config.search_action_url is not None:
+            updates["search_action_url"] = url_with_request_host(config.search_action_url, hostname)
+    if not updates:
+        return config
+    return replace(config, **updates)
 
 
 def render_start_page(config: RuntimeConfig) -> str:
