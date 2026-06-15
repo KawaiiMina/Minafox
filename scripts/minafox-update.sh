@@ -55,6 +55,65 @@ render_template() {
   sed "s|__MINAFOX_START_URL__|$start_url|g" "$src" > "$dest"
 }
 
+merge_managed_text_asset() {
+  local src="$1"
+  local dest="$2"
+  local begin_marker="$3"
+  local end_marker="$4"
+  local rendered
+  rendered="$(mktemp)"
+  render_template "$src" "$rendered"
+  python3 - "$dest" "$rendered" "$begin_marker" "$end_marker" <<'PY'
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+
+dest = Path(sys.argv[1])
+rendered = Path(sys.argv[2])
+begin = sys.argv[3]
+end = sys.argv[4]
+managed = rendered.read_text(encoding="utf-8")
+existing = dest.read_text(encoding="utf-8") if dest.exists() else ""
+
+secret_name = re.compile(r"(?i)(api[_-]?key|token|password|passwd|secret|credential|connection[_-]?string)")
+managed_block = re.compile(re.escape(begin) + r".*?" + re.escape(end) + r"\n?", re.DOTALL)
+user_pref_secret = re.compile(
+    r'(?i)(user_pref\(\s*"[^"]*(?:api[_-]?key|token|password|passwd|secret|credential|connection[_-]?string)[^"]*"\s*,\s*)"[^"]*"(\s*\)\s*;?)'
+)
+quoted_assignment_secret = re.compile(
+    r'(?i)((?:api[_-]?key|token|password|passwd|secret|credential|connection[_-]?string)[^=:\n]*[=:]\s*)["\']?[^"\'\n;]+["\']?'
+)
+
+
+def redact_line(line: str) -> str:
+    if not secret_name.search(line):
+        return line
+    line = user_pref_secret.sub(r'\1"[REDACTED]"\2', line)
+    line = quoted_assignment_secret.sub(r'\1[REDACTED]', line)
+    if secret_name.search(line) and "[REDACTED]" not in line:
+        return "[REDACTED]\n" if line.endswith("\n") else "[REDACTED]"
+    return line
+
+
+def redact(text: str) -> str:
+    return "".join(redact_line(line) for line in text.splitlines(keepends=True))
+
+
+preserved = managed_block.sub("", existing)
+preserved = redact(preserved).rstrip()
+managed = redact(managed).rstrip()
+parts = []
+if preserved:
+    parts.append(preserved)
+parts.append(f"{begin}\n{managed}\n{end}")
+dest.write_text("\n\n".join(parts) + "\n", encoding="utf-8")
+PY
+  rm -f "$rendered"
+}
+
 sync_profile_assets() {
   if [[ ! -d "$SHARE_DIR" ]]; then
     echo "Warning: MinaFox packaged share directory missing: $SHARE_DIR" >&2
@@ -66,13 +125,25 @@ sync_profile_assets() {
   mkdir -p "$PROFILE_DIR/chrome" "$START_DIR" "$DESKTOP_DIR" "$ICON_DIR"
 
   if [[ -f "$SHARE_DIR/profile/user.js" ]]; then
-    render_template "$SHARE_DIR/profile/user.js" "$PROFILE_DIR/user.js"
+    merge_managed_text_asset \
+      "$SHARE_DIR/profile/user.js" \
+      "$PROFILE_DIR/user.js" \
+      "// BEGIN MINAFOX PACKAGED ASSETS" \
+      "// END MINAFOX PACKAGED ASSETS"
   fi
   if [[ -f "$SHARE_DIR/profile/userChrome.css" ]]; then
-    cp "$SHARE_DIR/profile/userChrome.css" "$PROFILE_DIR/chrome/userChrome.css"
+    merge_managed_text_asset \
+      "$SHARE_DIR/profile/userChrome.css" \
+      "$PROFILE_DIR/chrome/userChrome.css" \
+      "/* BEGIN MINAFOX PACKAGED ASSETS */" \
+      "/* END MINAFOX PACKAGED ASSETS */"
   fi
   if [[ -f "$SHARE_DIR/profile/userContent.css" ]]; then
-    render_template "$SHARE_DIR/profile/userContent.css" "$PROFILE_DIR/chrome/userContent.css"
+    merge_managed_text_asset \
+      "$SHARE_DIR/profile/userContent.css" \
+      "$PROFILE_DIR/chrome/userContent.css" \
+      "/* BEGIN MINAFOX PACKAGED ASSETS */" \
+      "/* END MINAFOX PACKAGED ASSETS */"
   fi
   if [[ -f "$SHARE_DIR/desktop/start.html" ]]; then
     cp "$SHARE_DIR/desktop/start.html" "$START_DIR/start.html"

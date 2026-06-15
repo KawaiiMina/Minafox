@@ -206,12 +206,85 @@ exit 0
         assert "__MINAFOX_START_URL__" not in user_js.read_text(encoding="utf-8")
         assert "file://" in user_js.read_text(encoding="utf-8")
         assert "__MINAFOX_START_URL__" not in user_content.read_text(encoding="utf-8")
-        assert (profile / "chrome" / "userChrome.css").read_text(encoding="utf-8") == "/* packaged chrome css */\n"
+        assert "/* packaged chrome css */" in (profile / "chrome" / "userChrome.css").read_text(encoding="utf-8")
         assert (home / ".local" / "share" / "minafox" / "start.html").read_text(encoding="utf-8") == "<main>MinaFox packaged start page</main>\n"
         assert (home / ".local" / "share" / "applications" / "minafox.desktop").exists()
         assert (home / ".local" / "share" / "icons" / "hicolor" / "16x16" / "apps" / "minafox.png").exists()
         assert (profile / ".minafox-packaged-sync.done").exists()
         assert "Syncing MinaFox profile and start-page assets" in result.stdout
+
+
+def test_update_merges_profile_assets_without_preserving_secrets() -> None:
+    with tempfile.TemporaryDirectory(prefix="minafox-update-test-") as tmp_s:
+        tmp = Path(tmp_s)
+        fakebin = tmp / "bin"
+        fakebin.mkdir()
+        repo = make_fake_repo(tmp)
+        share = make_fake_share(tmp)
+        home = tmp / "home"
+        profile = home / ".mozilla" / "firefox" / "minafox"
+        chrome = profile / "chrome"
+        chrome.mkdir(parents=True)
+        profile.mkdir(parents=True, exist_ok=True)
+        log = tmp / "commands.log"
+
+        (profile / "user.js").write_text(
+            'user_pref("minafox.local.preference", "keep me");\n'
+            'user_pref("minafox.api_token", "super-secret-token");\n',
+            encoding="utf-8",
+        )
+        (chrome / "userChrome.css").write_text(
+            "/* personal chrome tweak */\n#navigator-toolbox { border: 0; }\n",
+            encoding="utf-8",
+        )
+        (chrome / "userContent.css").write_text(
+            "/* personal content tweak */\nbody { letter-spacing: 0.01em; }\n",
+            encoding="utf-8",
+        )
+
+        write_executable(fakebin / "git", f"""#!/usr/bin/env bash
+printf 'git %s\n' "$*" >> {log}
+exit 0
+""")
+        write_executable(fakebin / "makepkg", f"""#!/usr/bin/env bash
+printf 'makepkg %s\n' "$*" >> {log}
+exit 0
+""")
+        write_executable(fakebin / "systemctl", f"""#!/usr/bin/env bash
+printf 'systemctl %s\n' "$*" >> {log}
+exit 0
+""")
+        write_executable(fakebin / "update-desktop-database", "#!/usr/bin/env bash\nexit 0\n")
+        write_executable(fakebin / "gtk-update-icon-cache", "#!/usr/bin/env bash\nexit 0\n")
+
+        env = os.environ.copy()
+        env.update(
+            {
+                "PATH": f"{fakebin}:{env['PATH']}",
+                "HOME": str(home),
+                "MINAFOX_REPO_DIR": str(repo),
+                "MINAFOX_SHARE_DIR": str(share),
+                "MINAFOX_PROFILE_DIR": str(profile),
+            }
+        )
+        result = run_updater([], env)
+
+        assert result.returncode == 0, result.stdout
+        user_js_text = (profile / "user.js").read_text(encoding="utf-8")
+        chrome_text = (chrome / "userChrome.css").read_text(encoding="utf-8")
+        content_text = (chrome / "userContent.css").read_text(encoding="utf-8")
+        all_profile_text = "\n".join(path.read_text(encoding="utf-8") for path in profile.rglob("*") if path.is_file())
+
+        assert 'user_pref("minafox.local.preference", "keep me");' in user_js_text
+        assert 'user_pref("minafox.api_token", "[REDACTED]");' in user_js_text
+        assert "super-secret-token" not in all_profile_text
+        assert "browser.startup.homepage" in user_js_text
+        assert "__MINAFOX_START_URL__" not in user_js_text
+        assert "/* personal chrome tweak */" in chrome_text
+        assert "/* packaged chrome css */" in chrome_text
+        assert "/* personal content tweak */" in content_text
+        assert "body { color: #f7a8ff; }" in content_text
+        assert "BEGIN MINAFOX PACKAGED ASSETS" in user_js_text
 
 
 def test_update_can_skip_profile_asset_sync() -> None:
@@ -261,5 +334,6 @@ if __name__ == "__main__":
     test_update_can_skip_service_restarts()
     test_update_does_not_start_inactive_disabled_optional_services()
     test_update_syncs_profile_and_start_page_assets_by_default()
+    test_update_merges_profile_assets_without_preserving_secrets()
     test_update_can_skip_profile_asset_sync()
     print("minafox-update smoke tests: PASS")
