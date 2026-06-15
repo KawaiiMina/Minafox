@@ -215,6 +215,11 @@ def validate_start_html(failures: list[str]) -> str:
             ".status-action",
             ".rounded-detail-row",
             "border-radius: var(--radius-pill)",
+            ".search-input-shell",
+            "input[name=\"q\"]",
+            ".ai-den-card textarea",
+            "border-radius: var(--radius-chip)",
+            "box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08)",
         ],
         failures,
     )

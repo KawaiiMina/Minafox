@@ -284,12 +284,12 @@
       position: relative;
       z-index: 1;
       display: grid;
-      grid-template-columns: auto 1fr auto auto;
-      gap: 12px;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 10px;
       align-items: center;
       margin-top: 28px;
-      padding: 10px 10px 10px 16px;
-      border-radius: 999px;
+      padding: 8px;
+      border-radius: var(--radius-pill);
       background: rgba(13, 10, 22, 0.58);
     }
 
@@ -307,9 +307,31 @@
 
     .sparkle { color: var(--pink); }
 
-    input[name="q"] {
+    .search-input-shell {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: 10px;
       min-width: 0;
+      min-height: 46px;
+      padding: 0 14px;
+      border: 1px solid rgba(203, 166, 247, 0.20);
+      border-radius: var(--radius-pill);
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02)), rgba(13, 10, 22, 0.42);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .search-input-shell:focus-within {
+      border-color: rgba(245, 194, 231, 0.58);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 0 4px rgba(139, 92, 246, 0.14);
+    }
+
+    input[name="q"] {
+      width: 100%;
+      min-width: 0;
+      min-height: 42px;
       border: 0;
+      border-radius: var(--radius-pill);
       background: transparent;
       color: var(--ink);
       font: inherit;
@@ -458,8 +480,9 @@
     .ai-den-card textarea {
       width: 100%;
       border: 1px solid rgba(203, 166, 247, 0.24);
-      border-radius: 18px;
-      background: rgba(13, 10, 22, 0.58);
+      border-radius: var(--radius-chip);
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.052), rgba(255, 255, 255, 0.018)), rgba(13, 10, 22, 0.58);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
       color: var(--ink);
       font: inherit;
       padding: 12px 14px;
@@ -711,6 +734,7 @@
     }
 
     input[name="q"]:focus-visible,
+    .search-input-shell:focus-within,
     .ai-den-card select:focus-visible,
     .ai-den-card textarea:focus-visible,
     button:focus-visible,
@@ -797,7 +821,7 @@
       }
 
       .command-bar {
-        grid-template-columns: auto 1fr auto;
+        grid-template-columns: 1fr auto;
         border-radius: 24px;
       }
 
@@ -987,9 +1011,11 @@
           <h1 id="minafox-greeting">Good evening, Mina ✨</h1>
           <p class="subtitle">A calm private launchpad for search, cozy focus, and your most-used browser spaces. Local search stays on MinaFox SearXNG at 127.0.0.1.</p>
           <form id="minafox-search-form" class="command-bar" role="search" method="post" action="http://127.0.0.1:8888/search">
-            <span class="sparkle" aria-hidden="true">✧</span>
             <label for="search-q">Search MinaFox SearXNG privately</label>
-            <input id="search-q" name="q" type="search" autocomplete="off" placeholder="Search privately or type a cozy command…" />
+            <div class="search-input-shell">
+              <span class="sparkle" aria-hidden="true">✧</span>
+              <input id="search-q" name="q" type="search" autocomplete="off" placeholder="Search privately or type a cozy command…" />
+            </div>
             <span class="shortcut-hint" aria-hidden="true">Ctrl K</span>
             <button type="submit" aria-label="Search">Paw</button>
           </form>
