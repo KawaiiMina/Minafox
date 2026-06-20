@@ -164,6 +164,37 @@ exit 0
         assert str(wrong_repo) not in calls
 
 
+def test_update_can_skip_pull_for_explicit_repo() -> None:
+    with tempfile.TemporaryDirectory(prefix="minafox-update-test-") as tmp_s:
+        tmp = Path(tmp_s)
+        fakebin = tmp / "bin"
+        fakebin.mkdir()
+        repo = make_fake_repo(tmp)
+        log = tmp / "commands.log"
+
+        write_executable(fakebin / "git", f"""#!/usr/bin/env bash
+printf 'git %s\n' "$*" >> {log}
+exit 0
+""")
+        write_executable(fakebin / "makepkg", f"""#!/usr/bin/env bash
+printf 'makepkg %s\n' "$*" >> {log}
+exit 0
+""")
+        write_executable(fakebin / "systemctl", f"""#!/usr/bin/env bash
+printf 'systemctl %s\n' "$*" >> {log}
+exit 0
+""")
+
+        env = os.environ.copy()
+        env.update({"PATH": f"{fakebin}:{env['PATH']}"})
+        result = run_updater(["--repo", str(repo), "--no-pull", "--no-restart-services"], env)
+
+        assert result.returncode == 0, result.stdout
+        calls = log.read_text(encoding="utf-8")
+        assert "git pull --ff-only" not in calls
+        assert "makepkg -si" in calls
+
+
 def test_update_does_not_start_inactive_disabled_optional_services() -> None:
     with tempfile.TemporaryDirectory(prefix="minafox-update-test-") as tmp_s:
         tmp = Path(tmp_s)
@@ -419,6 +450,7 @@ if __name__ == "__main__":
     test_update_reloads_and_restarts_minafox_user_services_by_default()
     test_update_can_skip_service_restarts()
     test_update_repo_argument_overrides_environment_repo()
+    test_update_can_skip_pull_for_explicit_repo()
     test_update_does_not_start_inactive_disabled_optional_services()
     test_update_restarts_only_enabled_or_active_services()
     test_update_syncs_profile_and_start_page_assets_by_default()
