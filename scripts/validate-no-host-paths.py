@@ -22,6 +22,9 @@ SKIP_PARTS = {
     ".hermes",
     "__pycache__",
 }
+SKIP_NAMES = {
+    "AGENTS.md",
+}
 TEXT_SUFFIXES = {
     ".css",
     ".desktop",
@@ -40,6 +43,8 @@ TEXT_SUFFIXES = {
 def is_checked_file(path: Path) -> bool:
     rel_parts = path.relative_to(ROOT).parts
     if any(part in SKIP_PARTS for part in rel_parts):
+        return False
+    if path.name in SKIP_NAMES:
         return False
     return path.is_file() and path.suffix in TEXT_SUFFIXES
 

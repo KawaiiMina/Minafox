@@ -48,6 +48,7 @@ REQUIRED_PKGBUILD_SNIPPETS = (
     "install -Dm644 docs/ai-provider-architecture.md \"$pkgdir/usr/share/doc/minafox/ai-provider-architecture.md\"",
     "install -Dm644 docs/licensing-and-source-fork.md \"$pkgdir/usr/share/doc/minafox/licensing-and-source-fork.md\"",
     "cp -a assets \"$pkgdir/usr/share/minafox/\"",
+    "install -Dm644 desktop/minafox.desktop \"$pkgdir/usr/share/minafox/desktop/minafox.desktop\"",
     "install -Dm644 profile/user.js \"$pkgdir/usr/share/minafox/profile/user.js\"",
     "install -Dm755 scripts/install-minafox-arch.sh \"$pkgdir/usr/share/minafox/scripts/install-minafox-arch.sh\"",
     "install -Dm755 scripts/install-minafox-searxng-arch.sh \"$pkgdir/usr/share/minafox/scripts/install-minafox-searxng-arch.sh\"",
@@ -84,6 +85,7 @@ REQUIRED_STAGED_FILES = (
     "usr/share/minafox/assets/icons/hicolor/16x16/apps/minafox.png",
     "usr/share/minafox/assets/icons/hicolor/1024x1024/apps/minafox.png",
     "usr/share/minafox/desktop/start.html",
+    "usr/share/minafox/desktop/minafox.desktop",
     "usr/share/minafox/distribution/policies.json",
     "usr/share/minafox/profile/user.js",
     "usr/share/minafox/profile/userChrome.css",
@@ -199,6 +201,27 @@ def srcinfo_has_relation(srcinfo: str, key: str, token: str) -> bool:
     return any(arch_relation_is_token(match.group(1), token) for match in pattern.finditer(srcinfo))
 
 
+def scalar_value(text: str, key: str) -> str | None:
+    match = re.search(rf"(?m)^\s*{re.escape(key)}\s*=\s*['\"]?([^'\"\n]+)['\"]?\s*$", text)
+    return match.group(1).strip() if match else None
+
+
+def validate_pkgbuild_srcinfo_consistency(pkgbuild: str, srcinfo: str, failures: list[str]) -> None:
+    for key in ("pkgver", "pkgrel", "pkgdesc", "url"):
+        pkgbuild_value = scalar_value(pkgbuild, key)
+        srcinfo_value = scalar_value(srcinfo, key)
+        if pkgbuild_value and srcinfo_value and pkgbuild_value != srcinfo_value:
+            failures.append(f"PKGBUILD/.SRCINFO: {key} mismatch ({pkgbuild_value!r} != {srcinfo_value!r})")
+
+    pkgname = scalar_value(pkgbuild, "pkgname")
+    pkgbase = scalar_value(srcinfo, "pkgbase")
+    srcinfo_pkgname = scalar_value(srcinfo, "pkgname")
+    if pkgname and pkgbase and pkgname != pkgbase:
+        failures.append(f"PKGBUILD/.SRCINFO: pkgname/pkgbase mismatch ({pkgname!r} != {pkgbase!r})")
+    if pkgname and srcinfo_pkgname and pkgname != srcinfo_pkgname:
+        failures.append(f"PKGBUILD/.SRCINFO: pkgname mismatch ({pkgname!r} != {srcinfo_pkgname!r})")
+
+
 def validate_license_guardrails(failures: list[str]) -> None:
     pkgbuild = read(PKGBUILD, failures)
     srcinfo = read(SRCINFO, failures)
@@ -206,6 +229,8 @@ def validate_license_guardrails(failures: list[str]) -> None:
     branding = read(BRANDING, failures)
     third_party = read(THIRD_PARTY, failures)
     licensing_doc = read(LICENSING_DOC, failures)
+
+    validate_pkgbuild_srcinfo_consistency(pkgbuild, srcinfo, failures)
 
     require("LICENSE", license_text, ("Mozilla Public License Version 2.0", "3.1. Distribution of Source Form"), failures)
     require(

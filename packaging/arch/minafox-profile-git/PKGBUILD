@@ -1,7 +1,7 @@
 # Maintainer: MinaFox maintainers
 pkgname=minafox-profile-git
 pkgver=0.1.0.r5.gbe77521
-pkgrel=1
+pkgrel=2
 pkgdesc="MinaFox standalone Firefox profile wrapper for Arch/Hyprland"
 arch=('any')
 url="https://github.com/KawaiiMina/Minafox"
@@ -46,6 +46,7 @@ package() {
   install -d "$pkgdir/usr/share/minafox"
   cp -a assets "$pkgdir/usr/share/minafox/"
   install -Dm644 desktop/start.html "$pkgdir/usr/share/minafox/desktop/start.html"
+  install -Dm644 desktop/minafox.desktop "$pkgdir/usr/share/minafox/desktop/minafox.desktop"
   install -Dm644 distribution/policies.json "$pkgdir/usr/share/minafox/distribution/policies.json"
   install -Dm644 profile/user.js "$pkgdir/usr/share/minafox/profile/user.js"
   install -Dm644 profile/userChrome.css "$pkgdir/usr/share/minafox/profile/userChrome.css"

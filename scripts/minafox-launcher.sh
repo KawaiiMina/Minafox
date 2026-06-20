@@ -19,6 +19,41 @@ render_template() {
   sed "s|__MINAFOX_START_URL__|$start_url|g" "$src" > "$dest"
 }
 
+merge_packaged_text_asset() {
+  local src="$1"
+  local dest="$2"
+  local begin_marker="$3"
+  local end_marker="$4"
+  local rendered
+  rendered="$(mktemp)"
+  render_template "$src" "$rendered"
+  python3 - "$dest" "$rendered" "$begin_marker" "$end_marker" <<'PY'
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+
+dest = Path(sys.argv[1])
+rendered = Path(sys.argv[2])
+begin = sys.argv[3]
+end = sys.argv[4]
+managed = rendered.read_text(encoding="utf-8")
+existing = dest.read_text(encoding="utf-8") if dest.exists() else ""
+managed_block = re.compile(re.escape(begin) + r".*?" + re.escape(end) + r"\n?", re.DOTALL)
+
+preserved = managed_block.sub("", existing).rstrip()
+managed = managed.rstrip()
+parts = []
+if preserved:
+    parts.append(preserved)
+parts.append(f"{begin}\n{managed}\n{end}")
+dest.write_text("\n\n".join(parts) + "\n", encoding="utf-8")
+PY
+  rm -f "$rendered"
+}
+
 sync_packaged_assets() {
   [[ -d "$SHARE_DIR" ]] || return 0
   [[ ! -e "$SYNC_MARKER" ]] || return 0
@@ -26,13 +61,25 @@ sync_packaged_assets() {
   mkdir -p "$PROFILE_DIR/chrome" "$START_DIR" "$DESKTOP_DIR" "$ICON_DIR"
 
   if [[ -f "$SHARE_DIR/profile/user.js" ]]; then
-    render_template "$SHARE_DIR/profile/user.js" "$PROFILE_DIR/user.js"
+    merge_packaged_text_asset \
+      "$SHARE_DIR/profile/user.js" \
+      "$PROFILE_DIR/user.js" \
+      "// BEGIN MINAFOX PACKAGED ASSETS" \
+      "// END MINAFOX PACKAGED ASSETS"
   fi
   if [[ -f "$SHARE_DIR/profile/userChrome.css" ]]; then
-    cp "$SHARE_DIR/profile/userChrome.css" "$PROFILE_DIR/chrome/userChrome.css"
+    merge_packaged_text_asset \
+      "$SHARE_DIR/profile/userChrome.css" \
+      "$PROFILE_DIR/chrome/userChrome.css" \
+      "/* BEGIN MINAFOX PACKAGED ASSETS */" \
+      "/* END MINAFOX PACKAGED ASSETS */"
   fi
   if [[ -f "$SHARE_DIR/profile/userContent.css" ]]; then
-    render_template "$SHARE_DIR/profile/userContent.css" "$PROFILE_DIR/chrome/userContent.css"
+    merge_packaged_text_asset \
+      "$SHARE_DIR/profile/userContent.css" \
+      "$PROFILE_DIR/chrome/userContent.css" \
+      "/* BEGIN MINAFOX PACKAGED ASSETS */" \
+      "/* END MINAFOX PACKAGED ASSETS */"
   fi
   if [[ -f "$SHARE_DIR/desktop/start.html" ]]; then
     cp "$SHARE_DIR/desktop/start.html" "$START_DIR/start.html"

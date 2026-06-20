@@ -125,6 +125,45 @@ exit 0
         assert "systemctl" not in calls
 
 
+def test_update_repo_argument_overrides_environment_repo() -> None:
+    with tempfile.TemporaryDirectory(prefix="minafox-update-test-") as tmp_s:
+        tmp = Path(tmp_s)
+        fakebin = tmp / "bin"
+        fakebin.mkdir()
+        repo = make_fake_repo(tmp)
+        wrong_repo = tmp / "wrong" / "Minafox"
+        share = make_fake_share(tmp)
+        log = tmp / "commands.log"
+
+        write_executable(fakebin / "git", f"""#!/usr/bin/env bash
+printf 'git %s cwd=%s\n' "$*" "$PWD" >> {log}
+exit 0
+""")
+        write_executable(fakebin / "makepkg", f"""#!/usr/bin/env bash
+printf 'makepkg %s cwd=%s\n' "$*" "$PWD" >> {log}
+exit 0
+""")
+        write_executable(fakebin / "systemctl", f"""#!/usr/bin/env bash
+printf 'systemctl %s\n' "$*" >> {log}
+exit 0
+""")
+
+        env = os.environ.copy()
+        env.update(
+            {
+                "PATH": f"{fakebin}:{env['PATH']}",
+                "MINAFOX_REPO_DIR": str(wrong_repo),
+                "MINAFOX_SHARE_DIR": str(share),
+            }
+        )
+        result = run_updater(["--repo", str(repo), "--no-sync-profile-assets", "--no-restart-services"], env)
+
+        assert result.returncode == 0, result.stdout
+        calls = log.read_text(encoding="utf-8")
+        assert f"cwd={repo}" in calls
+        assert str(wrong_repo) not in calls
+
+
 def test_update_does_not_start_inactive_disabled_optional_services() -> None:
     with tempfile.TemporaryDirectory(prefix="minafox-update-test-") as tmp_s:
         tmp = Path(tmp_s)
@@ -157,6 +196,47 @@ exit 0
         assert "systemctl --user daemon-reload" in calls
         assert "systemctl --user restart minafox-ai-broker.service" not in calls
         assert "systemctl --user restart minafox-searxng.service" not in calls
+        assert "systemctl --user restart minafox-mobile-harness.service" not in calls
+
+
+def test_update_restarts_only_enabled_or_active_services() -> None:
+    with tempfile.TemporaryDirectory(prefix="minafox-update-test-") as tmp_s:
+        tmp = Path(tmp_s)
+        fakebin = tmp / "bin"
+        fakebin.mkdir()
+        repo = make_fake_repo(tmp)
+        log = tmp / "commands.log"
+
+        write_executable(fakebin / "git", f"""#!/usr/bin/env bash
+printf 'git %s\n' "$*" >> {log}
+exit 0
+""")
+        write_executable(fakebin / "makepkg", f"""#!/usr/bin/env bash
+printf 'makepkg %s\n' "$*" >> {log}
+exit 0
+""")
+        write_executable(fakebin / "systemctl", f"""#!/usr/bin/env bash
+printf 'systemctl %s\n' "$*" >> {log}
+if [[ "$1" == "--user" && "$2" == "is-active" ]]; then
+  [[ "$4" == "minafox-ai-broker.service" ]] && exit 0
+  exit 3
+fi
+if [[ "$1" == "--user" && "$2" == "is-enabled" ]]; then
+  [[ "$4" == "minafox-searxng.service" ]] && exit 0
+  exit 1
+fi
+exit 0
+""")
+
+        env = os.environ.copy()
+        env.update({"PATH": f"{fakebin}:{env['PATH']}", "MINAFOX_REPO_DIR": str(repo)})
+        result = run_updater([], env)
+
+        assert result.returncode == 0, result.stdout
+        calls = log.read_text(encoding="utf-8")
+        assert "systemctl --user daemon-reload" in calls
+        assert "systemctl --user restart minafox-ai-broker.service" in calls
+        assert "systemctl --user restart minafox-searxng.service" in calls
         assert "systemctl --user restart minafox-mobile-harness.service" not in calls
 
 
@@ -296,7 +376,12 @@ def test_update_can_skip_profile_asset_sync() -> None:
         share = make_fake_share(tmp)
         home = tmp / "home"
         profile = home / ".mozilla" / "firefox" / "minafox"
+        chrome = profile / "chrome"
         log = tmp / "commands.log"
+        chrome.mkdir(parents=True)
+        profile.mkdir(parents=True, exist_ok=True)
+        (profile / "user.js").write_text('user_pref("minafox.local.skip_sync", true);\n', encoding="utf-8")
+        (chrome / "userChrome.css").write_text("/* skip-sync chrome customization */\n", encoding="utf-8")
 
         write_executable(fakebin / "git", f"""#!/usr/bin/env bash
 printf 'git %s\n' "$*" >> {log}
@@ -324,7 +409,8 @@ exit 0
         result = run_updater(["--no-sync-profile-assets"], env)
 
         assert result.returncode == 0, result.stdout
-        assert not (profile / "user.js").exists()
+        assert (profile / "user.js").read_text(encoding="utf-8") == 'user_pref("minafox.local.skip_sync", true);\n'
+        assert (chrome / "userChrome.css").read_text(encoding="utf-8") == "/* skip-sync chrome customization */\n"
         assert not (home / ".local" / "share" / "minafox" / "start.html").exists()
         assert "Skipping MinaFox profile/start-page asset sync" in result.stdout
 
@@ -332,7 +418,9 @@ exit 0
 if __name__ == "__main__":
     test_update_reloads_and_restarts_minafox_user_services_by_default()
     test_update_can_skip_service_restarts()
+    test_update_repo_argument_overrides_environment_repo()
     test_update_does_not_start_inactive_disabled_optional_services()
+    test_update_restarts_only_enabled_or_active_services()
     test_update_syncs_profile_and_start_page_assets_by_default()
     test_update_merges_profile_assets_without_preserving_secrets()
     test_update_can_skip_profile_asset_sync()
