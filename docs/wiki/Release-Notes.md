@@ -79,7 +79,7 @@ Known limitations:
 - Cloud provider chat and Hermes Gateway chat are not available in this release; Hermes remains detection-only.
 - No browser-side provider secrets ship in this release.
 
-See [Known Limitations](Known-Limitations), [Packaging and Updating](Packaging-and-Updating), [Services](Services), [Mina AI Den](Mina-AI-Den), [Android/LAN Testing](Android-LAN-Testing), and [Privacy and Licensing](Privacy-and-Licensing) for the maintained release boundaries.
+See [Known Limitations](https://github.com/KawaiiMina/Minafox/blob/v0.1.0-rc1/docs/wiki/Known-Limitations.md), [Packaging and Updating](https://github.com/KawaiiMina/Minafox/blob/v0.1.0-rc1/docs/wiki/Packaging-and-Updating.md), [Services](https://github.com/KawaiiMina/Minafox/blob/v0.1.0-rc1/docs/wiki/Services.md), [Mina AI Den](https://github.com/KawaiiMina/Minafox/blob/v0.1.0-rc1/docs/wiki/Mina-AI-Den.md), [Android/LAN Testing](https://github.com/KawaiiMina/Minafox/blob/v0.1.0-rc1/docs/wiki/Android-LAN-Testing.md), and [Privacy and Licensing](https://github.com/KawaiiMina/Minafox/blob/v0.1.0-rc1/docs/wiki/Privacy-and-Licensing.md) for the maintained release boundaries.
 
 MinaFox is independent and is not affiliated with, endorsed by, or approved by Mozilla. Firefox is a Mozilla trademark. This release configures and launches the distro Firefox package with MinaFox-owned wrapper/profile assets; it is not a Firefox replacement package and does not claim browser-engine ownership.
 
