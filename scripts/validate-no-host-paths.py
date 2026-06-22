@@ -20,10 +20,12 @@ ABSOLUTE_HOME_RE = re.compile(r"/home/[A-Za-z0-9._-]+")
 SKIP_PARTS = {
     ".git",
     ".hermes",
+    ".learnings",
     "__pycache__",
 }
 SKIP_NAMES = {
     "AGENTS.md",
+    "TICK.md",
 }
 TEXT_SUFFIXES = {
     ".css",

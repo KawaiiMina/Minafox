@@ -6,6 +6,13 @@
     --mf-content-ink: #fff7ff;
     --mf-content-lavender: #cba6f7;
     --mf-content-pink: #f5c2e7;
+    --mf-content-panel: rgba(36, 29, 51, 0.76);
+    --mf-content-border: rgba(245, 194, 231, 0.28);
+  }
+
+  html {
+    background: var(--mf-content-bg) !important;
+    scrollbar-color: rgba(203, 166, 247, 0.5) rgba(21, 17, 31, 0.84) !important;
   }
 
   body {
@@ -16,10 +23,28 @@
     color: var(--mf-content-ink) !important;
   }
 
+  ::selection {
+    background: rgba(245, 194, 231, 0.34) !important;
+    color: var(--mf-content-ink) !important;
+  }
+
+  input,
+  textarea,
+  select {
+    background-color: var(--mf-content-panel) !important;
+    border-color: var(--mf-content-border) !important;
+    color: var(--mf-content-ink) !important;
+    caret-color: var(--mf-content-pink) !important;
+  }
+
   a:focus-visible,
   button:focus-visible,
-  input:focus-visible {
-    outline: 3px solid rgba(245, 194, 231, 0.5) !important;
-    outline-offset: 3px !important;
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid rgba(245, 194, 231, 0.68) !important;
+    outline-offset: 4px !important;
+    box-shadow: 0 0 0 5px rgba(20, 17, 31, 0.82) !important;
   }
 }
