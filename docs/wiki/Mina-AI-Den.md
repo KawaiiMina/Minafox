@@ -1,13 +1,13 @@
 # Mina AI Den
 
-Mina AI Den is an optional start-page surface for local AI provider status and future chat. It is privacy-first and intentionally conservative.
+Mina AI Den is an optional start-page surface for local AI provider status and future chat. It is privacy-first and intentionally conservative. The Arch package installs the broker command and user service, but it does not auto-enable the service.
 
 ## Current status
 
 - Browser JavaScript calls only the MinaFox broker.
 - The broker binds to `127.0.0.1:8765` by default.
-- Local Ollama chat can be enabled explicitly.
-- Cloud providers are metadata-only.
+- Local Ollama chat is disabled unless `MINAFOX_AI_ENABLE_OLLAMA_CHAT=1` is set explicitly.
+- Cloud providers are metadata-only; cloud chat is not available in this release.
 - Hermes Gateway is detection-only until pairing/auth and tool-safety UX exist.
 
 ## Broker endpoints
@@ -25,6 +25,14 @@ cd ~/Minafox
 ./scripts/minafox-ai-broker.sh
 ```
 
+Check it from another shell:
+
+```bash
+curl http://127.0.0.1:8765/health
+curl http://127.0.0.1:8765/providers
+curl http://127.0.0.1:8765/hermes/health
+```
+
 Enable local Ollama chat:
 
 ```bash
@@ -36,13 +44,21 @@ MINAFOX_AI_ENABLE_OLLAMA_CHAT=1 ./scripts/minafox-ai-broker.sh
 ```bash
 systemctl --user enable --now minafox-ai-broker.service
 systemctl --user status minafox-ai-broker.service
+curl http://127.0.0.1:8765/health
+curl http://127.0.0.1:8765/providers
+```
+
+Stop it with:
+
+```bash
+systemctl --user disable --now minafox-ai-broker.service
 ```
 
 ## Provider modes
 
-- **Local** — Ollama, local-first.
-- **Cloud** — OpenAI / ChatGPT-compatible APIs, Gemini, Claude, OpenRouter. Metadata only for now.
-- **LAN / advanced** — Hermes Gateway detection. Chat is blocked until explicit safety UX exists.
+- **Local** — Ollama status is detectable on loopback. Chat works only when Ollama is reachable and `MINAFOX_AI_ENABLE_OLLAMA_CHAT=1` is set.
+- **Cloud** — OpenAI / ChatGPT-compatible APIs, Gemini, Claude, OpenRouter. Metadata only for now; no provider secrets or cloud chat flow ships in this release.
+- **LAN / advanced** — Hermes Gateway detection only. Chat is blocked until explicit safety UX exists.
 
 ## Secrets policy
 
@@ -52,9 +68,15 @@ Never store provider keys in `desktop/start.html`, `profile/user.js`, localStora
 
 Hermes Gateway can reach tool-capable agents, so it is treated as more powerful than a normal chat provider. It needs localhost-first operation, explicit pairing/auth, clear warnings, and no arbitrary tool toggles from browser UI before chat can be enabled.
 
+## LAN boundary
+
+The broker refuses non-loopback binds unless `MINAFOX_AI_BROKER_ALLOW_LAN=1` is set. LAN testing also requires explicit `MINAFOX_AI_BROKER_ALLOWED_ORIGINS`, and origins must be trusted harness URLs, never `*`, `null`, or `file://`.
+
 ## Validation
 
 ```bash
 python3 scripts/test-minafox-ai-broker.py
 python3 scripts/validate-minafox-ai.py
 ```
+
+For broker startup, Ollama opt-in, and LAN troubleshooting, see [Troubleshooting](Troubleshooting). For unavailable cloud/Hermes chat scope, see [Known Limitations](Known-Limitations).

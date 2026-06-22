@@ -8,7 +8,7 @@ MinaFox is a calm, private, kawaii Firefox wrapper for Arch/Hyprland. It gives t
 
 **Current phase:** Standalone wrapper / profile distribution.
 
-The roadmap is still: standalone wrapper now, packaged wrapper next, source fork later only after the wrapper distribution is reliable.
+The current release includes the standalone wrapper and Arch package skeleton. A Firefox ESR source fork remains a later, separate phase only after the wrapper distribution is reliable.
 
 MinaFox currently ships:
 
@@ -25,10 +25,12 @@ It does **not** bundle, replace, or compile Firefox yet. A future Firefox ESR so
 
 ## Quick install on Arch
 
+MinaFox uses the distro `firefox` package. The Arch package depends on `firefox`; it does not provide, conflict with, replace, bundle, or compile Firefox.
+
 ### From a clone
 
 ```bash
-git clone git@github.com:KawaiiMina/Minafox.git ~/Minafox
+git clone https://github.com/KawaiiMina/Minafox.git ~/Minafox
 cd ~/Minafox
 ./scripts/install-minafox-arch.sh
 minafox
@@ -42,22 +44,36 @@ makepkg -si
 minafox
 ```
 
-After package installation, update with:
+The package installs these commands on `PATH`:
+
+- `minafox`
+- `minafox-update`
+- `minafox-ai-broker`
+
+On first launch, `minafox` syncs packaged user-local assets from `/usr/share/minafox` into `~/.mozilla/firefox/minafox`, `~/.local/share/minafox`, `~/.local/share/applications`, and `~/.local/share/icons/hicolor`.
+
+After package installation, update from the package checkout with:
 
 ```bash
 minafox-update
 ```
 
-`minafox-update` pulls the repo, rebuilds/reinstalls the package, refreshes the installed profile/start-page assets from `/usr/share/minafox`, reloads the systemd user manager, and restarts MinaFox user services that are already active or enabled. Use this when changing browser assets, search, AI broker, or harness code:
+`minafox-update` uses `~/Minafox` by default, pulls the repo, rebuilds/reinstalls the package with `makepkg -si`, refreshes the installed profile/start-page assets from `/usr/share/minafox`, reloads the systemd user manager, and restarts only MinaFox user services that are already active or enabled. Use this when changing browser assets, search, AI broker, or harness code:
 
 ```bash
 minafox-update --no-sync-profile-assets  # preserve local profile/start-page customizations
 minafox-update --no-restart-services     # package update + asset sync only
+minafox-update --repo /path/to/Minafox    # use a different checkout
+MINAFOX_REPO_DIR=/path/to/Minafox minafox-update
 ```
+
+The package path has passed the local package validator, updater smoke tests, and a disposable Arch pacman install/remove smoke. Re-run the current checks from a checkout with `python3 scripts/validate-minafox-arch-package.py` and `python3 scripts/test-minafox-update.py`.
 
 ## Optional services
 
 ### Local search
+
+Installed but not auto-enabled. MinaFox search defaults to local SearXNG at `http://127.0.0.1:8888/search`; upstream engines are configured through SearXNG, not direct browser-side integrations.
 
 ```bash
 /usr/share/minafox/scripts/install-minafox-searxng-arch.sh install-service
@@ -67,6 +83,8 @@ systemctl --user status minafox-searxng.service
 Local URL: `http://127.0.0.1:8888/`
 
 ### Mina AI Den broker
+
+Installed but not auto-enabled. The broker defaults to loopback at `127.0.0.1:8765`.
 
 ```bash
 systemctl --user enable --now minafox-ai-broker.service
@@ -90,7 +108,7 @@ Harness URL: `http://<desktop-lan-ip>:8766/`
 
 Diagnostics from Android: `/health`, `/config`, and `/android-checklist` on the same harness host. The start page includes an Android/LAN test companion card that shows the active endpoints and touch checklist.
 
-Only enable the LAN harness on trusted LAN/Tailscale networks. Keep port `8766` blocked from untrusted networks.
+The harness is installed but not auto-enabled. Only enable it on trusted LAN/Tailscale networks, and keep port `8766` blocked from untrusted networks.
 
 ## Repository map
 
@@ -160,6 +178,9 @@ The GitHub wiki is the main documentation hub. A versioned mirror is also kept u
 - [Packaging and Updating](../../wiki/Packaging-and-Updating) / [`docs/wiki/Packaging-and-Updating.md`](docs/wiki/Packaging-and-Updating.md)
 - [Development Guide](../../wiki/Development-Guide) / [`docs/wiki/Development-Guide.md`](docs/wiki/Development-Guide.md)
 - [Troubleshooting](../../wiki/Troubleshooting) / [`docs/wiki/Troubleshooting.md`](docs/wiki/Troubleshooting.md)
+- [Known Limitations](../../wiki/Known-Limitations) / [`docs/wiki/Known-Limitations.md`](docs/wiki/Known-Limitations.md)
+- [Release Notes](../../wiki/Release-Notes) / [`docs/wiki/Release-Notes.md`](docs/wiki/Release-Notes.md)
+- [Publishing Checklist](../../wiki/Publishing-Checklist) / [`docs/wiki/Publishing-Checklist.md`](docs/wiki/Publishing-Checklist.md)
 
 In-repo docs remain available for versioned details:
 

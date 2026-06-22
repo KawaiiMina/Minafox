@@ -4,7 +4,7 @@ MinaFox currently packages as `minafox-profile-git`, an Arch VCS package for the
 
 ## Package intent
 
-The package installs MinaFox wrapper/profile assets while depending on the distro Firefox package. It does not compile Firefox or replace `/usr/bin/firefox`.
+The package installs MinaFox wrapper/profile assets while depending on the distro Firefox package. It does not compile Firefox, bundle a Firefox binary, replace `/usr/bin/firefox`, or declare `provides=('firefox')` / `conflicts=('firefox')`.
 
 Installed pieces include:
 
@@ -22,9 +22,12 @@ Installed pieces include:
 ## Build/install
 
 ```bash
+git clone https://github.com/KawaiiMina/Minafox.git ~/Minafox
 cd ~/Minafox/packaging/arch/minafox-profile-git
 makepkg -si
 ```
+
+If you already have the checkout, start from the existing `~/Minafox` path instead of cloning again.
 
 ## First launch sync
 
@@ -45,7 +48,7 @@ minafox-update
 
 Default behavior:
 
-1. Use `~/Minafox` or `MINAFOX_REPO_DIR`.
+1. Use `~/Minafox`, `MINAFOX_REPO_DIR`, or `--repo`.
 2. Pull the repo unless `--no-pull` is passed.
 3. Run `makepkg -si` from `packaging/arch/minafox-profile-git`.
 4. Refresh installed profile/start-page assets from `/usr/share/minafox` into the current user's MinaFox paths.
@@ -87,6 +90,8 @@ MINAFOX_REPO_DIR=/path/to/Minafox minafox-update
 The updater does not start inactive+disabled optional services. It only restarts services that are already active or enabled: `minafox-ai-broker.service`, `minafox-searxng.service`, and `minafox-mobile-harness.service`.
 
 ## Package validation
+
+The current release path has passed the package validator, updater smoke tests, and a disposable Arch pacman install/remove smoke for the wrapper package payload.
 
 ```bash
 python3 scripts/validate-minafox-arch-package.py
