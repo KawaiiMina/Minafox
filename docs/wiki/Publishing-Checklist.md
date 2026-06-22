@@ -1,11 +1,12 @@
 # Publishing Checklist
 
-This checklist is for MinaFox's current standalone wrapper/profile and Arch package skeleton release phase. It prepares a release candidate for review; it does not authorize public publishing by itself.
+This checklist is for MinaFox's current standalone wrapper/profile and Arch package skeleton release phase. It prepares channel copy and release evidence for review; it does not authorize public publishing by itself.
 
 ## Approval gates
 
 - [ ] Mina has explicitly approved public release preparation for the exact branch/commit.
-- [ ] Mina has explicitly approved any public release action: push, tag, GitHub release, package upload, wiki publish, announcement, or website update.
+- [ ] Mina has explicitly approved any public release action: push, tag, GitHub release, package upload, AUR update, wiki publish, announcement, or website update.
+- [ ] The exact channel title/body/tag/target commit has been approved before that channel is used.
 - [ ] No checklist item is treated as approval by implication.
 
 ## Local validation
@@ -62,6 +63,41 @@ python3 scripts/validate-minafox-arch-package.py
 python3 scripts/test-minafox-update.py
 ```
 
+## Release-channel copy review
+
+- [ ] Use [Release Notes](Release-Notes) as the source for channel copy.
+- [ ] Confirm the release title is present and conservative.
+- [ ] Confirm the GitHub release body draft is present.
+- [ ] Confirm the tag message draft is present.
+- [ ] Confirm the wiki update summary draft is present.
+- [ ] Confirm the package/AUR note draft is present.
+- [ ] Confirm the announcement draft is present.
+- [ ] Confirm install/update commands match [Getting Started](Getting-Started) and [Packaging and Updating](Packaging-and-Updating):
+
+```bash
+git clone https://github.com/KawaiiMina/Minafox.git ~/Minafox
+cd ~/Minafox/packaging/arch/minafox-profile-git
+makepkg -si
+minafox-update
+minafox-update --no-sync-profile-assets
+minafox-update --no-restart-services
+minafox-update --repo /path/to/Minafox
+MINAFOX_REPO_DIR=/path/to/Minafox minafox-update
+```
+
+- [ ] Confirm optional-service examples remain explicit opt-in commands, not default behavior:
+
+```bash
+/usr/share/minafox/scripts/install-minafox-searxng-arch.sh install-service
+systemctl --user enable --now minafox-ai-broker.service
+systemctl --user enable --now minafox-mobile-harness.service
+```
+
+- [ ] Confirm known limitations are included or linked.
+- [ ] Confirm source-fork boundaries are explicit.
+- [ ] Confirm Mozilla/Firefox trademark and non-affiliation language remains clear.
+- [ ] Confirm no release copy claims a compiled Firefox fork, bundled Firefox, browser-engine ownership, Firefox replacement package, or source-distributed Firefox build in this phase.
+
 ## Docs and wiki sync
 
 - [ ] README links point to the current wiki mirror pages.
@@ -104,6 +140,7 @@ python3 scripts/test-minafox-update.py
 
 - [ ] Command output summary for local validation.
 - [ ] Package/wrapper validation summary.
+- [ ] Release-channel copy review summary.
 - [ ] Docs/wiki pages changed.
 - [ ] Commit hash or branch name prepared for review.
 - [ ] Explicit Mina approval reference before public publishing.
