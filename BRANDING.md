@@ -48,7 +48,7 @@ Avoid names that look official, such as:
 
 ## Mozilla and Firefox notice
 
-Firefox is a trademark of Mozilla Foundation. MinaFox is independent and is not affiliated with or endorsed by Mozilla.
+Firefox is a trademark of Mozilla Foundation. MinaFox is independent and is not affiliated with or endorsed by Mozilla. It is also not sponsored by Mozilla.
 
 MinaFox currently wraps the system Firefox binary with a separate profile, launcher, policy, icon, start page, and helper services. It does not ship a modified Firefox binary in the current standalone-wrapper phase.
 

@@ -22,9 +22,14 @@ Installed pieces include:
 ## Build/install
 
 ```bash
+git clone https://github.com/KawaiiMina/Minafox.git ~/Minafox
+cd ~/Minafox
+git checkout v0.1.0-rc2
 cd ~/Minafox/packaging/arch/minafox-profile-git
 makepkg -si
 ```
+
+For rc2, `PKGBUILD` is pinned to `Minafox::git+https://github.com/KawaiiMina/Minafox.git#tag=v0.1.0-rc2` with `pkgver=0.1.0rc2` and `pkgrel=1`. The dynamic VCS `pkgver()` path is not used for this release candidate. Create/publish the `v0.1.0-rc2` tag before sharing this public install path; once the tag exists, `makepkg -si` fetches the rc2 source instead of following the repository default branch.
 
 ## First launch sync
 
@@ -42,6 +47,8 @@ On first launch, `/usr/bin/minafox` syncs packaged files into user-local paths:
 ```bash
 minafox-update
 ```
+
+If the repo was checked out directly at the `v0.1.0-rc2` tag for rc2 smoke testing, use `minafox-update --no-pull` because the default updater runs `git pull --ff-only`.
 
 Default behavior:
 
@@ -95,4 +102,4 @@ python3 scripts/test-minafox-update.py
 
 ## Wrapper/source-fork boundary
 
-The Arch package should keep `depends=('firefox' ...)`, avoid `provides=('firefox')` or `conflicts=('firefox')`, avoid bundled Firefox binaries, and remain honest as a standalone profile wrapper until a deliberate source-fork phase exists.
+The Arch package should keep `depends=('firefox' ...)`, avoid `provides=('firefox')` or `conflicts=('firefox')`, avoid installing `/usr/bin/firefox`, `/usr/lib/firefox`, or bundled Firefox binaries, and remain honest as a standalone profile wrapper until a deliberate source-fork phase exists. Package metadata and docs should not describe MinaFox as a Firefox replacement, rebranded Firefox binary, or compiled Firefox build during the wrapper phase.

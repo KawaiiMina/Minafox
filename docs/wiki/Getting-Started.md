@@ -14,8 +14,9 @@ This page gets MinaFox installed and running on Arch/Hyprland.
 ## Install from a clone
 
 ```bash
-git clone git@github.com:KawaiiMina/Minafox.git ~/Minafox
+git clone https://github.com/KawaiiMina/Minafox.git ~/Minafox
 cd ~/Minafox
+git checkout v0.1.0-rc2
 ./scripts/install-minafox-arch.sh
 minafox
 ```
@@ -24,6 +25,8 @@ If the repo already exists:
 
 ```bash
 cd ~/Minafox
+git fetch --tags
+git checkout v0.1.0-rc2
 ./scripts/install-minafox-arch.sh
 minafox
 ```
@@ -31,10 +34,15 @@ minafox
 ## Install with the Arch package skeleton
 
 ```bash
-cd ~/Minafox/packaging/arch/minafox-profile-git
+git clone https://github.com/KawaiiMina/Minafox.git ~/Minafox
+cd ~/Minafox
+git checkout v0.1.0-rc2
+cd packaging/arch/minafox-profile-git
 makepkg -si
 minafox
 ```
+
+For rc2, the package skeleton fetches `Minafox::git+https://github.com/KawaiiMina/Minafox.git#tag=v0.1.0-rc2` and uses the static candidate package version `pkgver=0.1.0rc2`, `pkgrel=1`. The `v0.1.0-rc2` tag must exist before this public `makepkg -si` path is published or used; after that, the package source remains pinned even if `main` advances.
 
 The package installs `/usr/bin/minafox`, `/usr/bin/minafox-update`, the desktop entry, icons, docs, assets, and optional systemd user units.
 

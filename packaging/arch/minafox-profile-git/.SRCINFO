@@ -1,6 +1,6 @@
 pkgbase = minafox-profile-git
 	pkgdesc = MinaFox standalone Firefox profile wrapper for Arch/Hyprland
-	pkgver = 0.1.0.r5.gbe77521
+	pkgver = 0.1.0rc2
 	pkgrel = 1
 	url = https://github.com/KawaiiMina/Minafox
 	install = minafox-profile-git.install
@@ -17,7 +17,7 @@ pkgbase = minafox-profile-git
 	optdepends = podman-compose: provide Podman Compose for the optional local MinaFox SearXNG service
 	provides = minafox-profile
 	conflicts = minafox-profile
-	source = git+https://github.com/KawaiiMina/Minafox.git
+	source = Minafox::git+https://github.com/KawaiiMina/Minafox.git#tag=v0.1.0-rc2
 	sha256sums = SKIP
 
 pkgname = minafox-profile-git
