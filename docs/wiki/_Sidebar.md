@@ -16,3 +16,6 @@
 - [Known Limitations](Known-Limitations)
 - [Brand and UX](Brand-and-UX)
 - [Troubleshooting](Troubleshooting)
+- [Known Limitations](Known-Limitations)
+- [Release Notes](Release-Notes)
+- [Publishing Checklist](Publishing-Checklist)

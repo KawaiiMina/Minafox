@@ -1,7 +1,7 @@
 pkgbase = minafox-profile-git
 	pkgdesc = MinaFox standalone Firefox profile wrapper for Arch/Hyprland
-	pkgver = 0.1.0rc2
-	pkgrel = 1
+	pkgver = 0.1.0.r5.gbe77521
+	pkgrel = 2
 	url = https://github.com/KawaiiMina/Minafox
 	install = minafox-profile-git.install
 	arch = any

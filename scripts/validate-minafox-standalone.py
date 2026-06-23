@@ -33,6 +33,7 @@ REQUIRED_LAUNCHER_SNIPPETS = (
     'PROFILE_DIR="${MINAFOX_PROFILE_DIR:-$HOME/.mozilla/firefox/minafox}"',
     'SHARE_DIR="${MINAFOX_SHARE_DIR:-/usr/share/minafox}"',
     "sync_packaged_assets()",
+    "merge_packaged_text_asset",
     "render_template",
     'SYNC_MARKER="$PROFILE_DIR/.minafox-packaged-sync.done"',
     'Path.home() / ".local/share/minafox/start.html"',
@@ -261,6 +262,8 @@ def validate_packaged_first_run_smoke(failures: list[str]) -> None:
         fake_log = (home / "fakefox.log").read_text(encoding="utf-8") if (home / "fakefox.log").exists() else ""
         if "CreateProfile" not in fake_log:
             failures.append("packaged first-run smoke: launcher did not call --CreateProfile for fresh profile")
+        if "fakefox --name minafox --class MinaFox --profile" not in fake_log:
+            failures.append("packaged first-run smoke: launcher did not exec MINAFOX_FIREFOX_BIN with MinaFox identity")
 
         marker = home / ".mozilla/firefox/minafox/.minafox-packaged-sync.done"
         if not marker.exists():
@@ -284,6 +287,110 @@ def validate_packaged_first_run_smoke(failures: list[str]) -> None:
                 failures.append("packaged second-run smoke: first-run sync overwrote user.js on second launch")
 
 
+def validate_packaged_existing_profile_smoke(failures: list[str]) -> None:
+    """Existing profiles should get packaged assets without losing local edits."""
+    with tempfile.TemporaryDirectory(prefix="minafox-home-") as home_s, tempfile.TemporaryDirectory(
+        prefix="minafox-share-"
+    ) as share_s, tempfile.TemporaryDirectory(prefix="minafox-bin-") as bin_s:
+        home = Path(home_s)
+        share = Path(share_s)
+        profile = home / ".mozilla/firefox/minafox"
+        chrome = profile / "chrome"
+        chrome.mkdir(parents=True)
+        fake_bin = Path(bin_s) / "fakefox"
+        fake_bin.write_text(
+            "#!/usr/bin/env bash\n"
+            "if [[ \"${1:-}\" == \"--CreateProfile\" ]]; then "
+            "printf 'CreateProfile %s\\n' \"$*\" >> \"$HOME/fakefox.log\"; exit 0; fi\n"
+            "printf 'fakefox %s\\n' \"$*\" >> \"$HOME/fakefox.log\"\n",
+            encoding="utf-8",
+        )
+        fake_bin.chmod(0o755)
+
+        (profile / "user.js").write_text('user_pref("minafox.local.existing", true);\n', encoding="utf-8")
+        (chrome / "userChrome.css").write_text("/* existing chrome customization */\n", encoding="utf-8")
+        (chrome / "userContent.css").write_text("/* existing content customization */\n", encoding="utf-8")
+
+        shutil.copytree(ROOT / "profile", share / "profile")
+        shutil.copytree(ROOT / "desktop", share / "desktop")
+        shutil.copytree(ROOT / "assets", share / "assets")
+
+        env = os.environ.copy()
+        env.update(
+            {
+                "HOME": str(home),
+                "PATH": f"{bin_s}:{env.get('PATH', '')}",
+                "MINAFOX_FIREFOX_BIN": "fakefox",
+                "MINAFOX_SHARE_DIR": str(share),
+            }
+        )
+        result = subprocess.run(
+            [str(LAUNCHER), "--version"],
+            cwd=ROOT,
+            env=env,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            timeout=30,
+        )
+        if result.returncode != 0:
+            failures.append("packaged existing-profile smoke failed:\n" + result.stdout.strip())
+            return
+
+        user_js = (profile / "user.js").read_text(encoding="utf-8")
+        user_chrome = (chrome / "userChrome.css").read_text(encoding="utf-8")
+        user_content = (chrome / "userContent.css").read_text(encoding="utf-8")
+        fake_log = (home / "fakefox.log").read_text(encoding="utf-8") if (home / "fakefox.log").exists() else ""
+
+        if "CreateProfile" in fake_log:
+            failures.append("packaged existing-profile smoke: launcher called --CreateProfile for existing profile")
+        if 'user_pref("minafox.local.existing", true);' not in user_js:
+            failures.append("packaged existing-profile smoke: user.js customization was not preserved")
+        if "browser.startup.homepage" not in user_js:
+            failures.append("packaged existing-profile smoke: packaged user.js prefs were not merged")
+        if "/* existing chrome customization */" not in user_chrome:
+            failures.append("packaged existing-profile smoke: userChrome.css customization was not preserved")
+        if "--mf-bg" not in user_chrome:
+            failures.append("packaged existing-profile smoke: packaged userChrome.css was not merged")
+        if "/* existing content customization */" not in user_content:
+            failures.append("packaged existing-profile smoke: userContent.css customization was not preserved")
+        if "__MINAFOX_START_URL__" in user_js or "__MINAFOX_START_URL__" in user_content:
+            failures.append("packaged existing-profile smoke: start URL placeholder was not rendered")
+        if not (profile / ".minafox-packaged-sync.done").exists():
+            failures.append("packaged existing-profile smoke: missing packaged-sync marker")
+
+
+def validate_launcher_missing_firefox_smoke(failures: list[str]) -> None:
+    with tempfile.TemporaryDirectory(prefix="minafox-home-") as home_s, tempfile.TemporaryDirectory(
+        prefix="minafox-share-"
+    ) as share_s:
+        home = Path(home_s)
+        env = os.environ.copy()
+        env.update(
+            {
+                "HOME": str(home),
+                "PATH": "/usr/bin:/bin",
+                "MINAFOX_FIREFOX_BIN": "definitely-missing-minafox-firefox",
+                "MINAFOX_SHARE_DIR": str(Path(share_s)),
+            }
+        )
+        result = subprocess.run(
+            [str(LAUNCHER), "--version"],
+            cwd=ROOT,
+            env=env,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            timeout=30,
+        )
+        if result.returncode != 127:
+            failures.append(f"missing Firefox smoke: expected exit 127, got {result.returncode}\n{result.stdout.strip()}")
+        if "could not find Firefox binary: definitely-missing-minafox-firefox" not in result.stdout:
+            failures.append("missing Firefox smoke: missing actionable error message")
+        if (home / ".mozilla/firefox/minafox").exists():
+            failures.append("missing Firefox smoke: launcher created a profile before validating Firefox binary")
+
+
 def main() -> int:
     failures: list[str] = []
     contents = {
@@ -297,6 +404,8 @@ def main() -> int:
     validate_no_placeholders_or_host_paths(contents, failures)
     validate_no_forced_ublock_install(contents, failures)
     validate_packaged_first_run_smoke(failures)
+    validate_packaged_existing_profile_smoke(failures)
+    validate_launcher_missing_firefox_smoke(failures)
 
     if failures:
         print("MinaFox standalone validation: FAIL")

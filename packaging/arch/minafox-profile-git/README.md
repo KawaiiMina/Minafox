@@ -1,10 +1,10 @@
 # Arch package skeleton: `minafox-profile-git`
 
-This directory is the first Arch packaging sprint for MinaFox's standalone-wrapper phase.
+This directory is the Arch package skeleton for MinaFox's standalone-wrapper phase.
 
 ## Package intent
 
-`minafox-profile-git` packages MinaFox from the PKGBUILD source ref as a user-friendly Arch package while MinaFox still uses the system Firefox binary underneath.
+`minafox-profile-git` packages the current Git checkout as a user-friendly Arch package while MinaFox still uses the system Firefox binary underneath. The package depends on distro `firefox`; it does not provide, conflict with, replace, bundle, or compile Firefox.
 
 It installs:
 
@@ -28,15 +28,11 @@ It does **not** compile Firefox or turn MinaFox into a source fork yet. It also 
 
 ```bash
 git clone https://github.com/KawaiiMina/Minafox.git ~/Minafox
-cd ~/Minafox
-git checkout v0.1.0-rc2
-cd packaging/arch/minafox-profile-git
+cd ~/Minafox/packaging/arch/minafox-profile-git
 makepkg -si
 ```
 
-## Release-candidate source pin
-
-This rc2 PKGBUILD fetches MinaFox from the `v0.1.0-rc2` Git tag instead of the repository default branch. It uses the static candidate package version `pkgver=0.1.0rc2`, `pkgrel=1`; the dynamic VCS `pkgver()` path is not used for this rc. The `v0.1.0-rc2` tag must exist before publishing the rc2 public install path. Once the tag exists, `makepkg -si` resolves the same source even if `main` moves on.
+If you already have a checkout, use that checkout path instead of cloning again.
 
 ## User setup after install
 
@@ -71,9 +67,7 @@ After installing the package, upgrade from the MinaFox git package skeleton with
 minafox-update
 ```
 
-If `~/Minafox` is checked out directly at the `v0.1.0-rc2` tag for rc2 smoke testing, use `minafox-update --no-pull` because the default updater runs `git pull --ff-only`.
-
-By default this uses `~/Minafox`, pulls the repo, runs `makepkg -si` from this package directory, refreshes the installed profile/start-page assets from `/usr/share/minafox`, reloads the systemd user manager, and restarts `minafox-ai-broker.service`, `minafox-searxng.service`, and `minafox-mobile-harness.service` when they are already active or enabled.
+By default this uses `~/Minafox`, pulls the repo, runs `makepkg -si` from this package directory, refreshes the installed profile/start-page assets from `/usr/share/minafox`, reloads the systemd user manager, and restarts `minafox-ai-broker.service`, `minafox-searxng.service`, and `minafox-mobile-harness.service` only when they are already active or enabled. It does not start optional services that are both inactive and disabled.
 
 Useful variants:
 
@@ -143,6 +137,9 @@ From the repo root:
 
 ```bash
 python3 scripts/validate-minafox-arch-package.py
+python3 scripts/test-minafox-update.py
 ```
 
 The validator checks the packaging metadata and simulates the `package()` function with a temporary `pkgdir`, so it can run on non-Arch CI/dev machines that do not have `makepkg`.
+
+The current release path has also passed updater smoke tests and a disposable Arch pacman install/remove smoke for the wrapper package payload.

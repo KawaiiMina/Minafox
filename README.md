@@ -8,9 +8,7 @@ MinaFox is a calm, private, kawaii Firefox wrapper for Arch/Hyprland. It gives t
 
 **Current phase:** Standalone wrapper / profile distribution.
 
-The next public release candidate is `v0.1.0-rc2`. Treat it as a release candidate for the wrapper/profile package, not as a bundled browser binary. The public package install path depends on the Git tag `v0.1.0-rc2` existing before users run `makepkg -si`.
-
-The roadmap is still: standalone wrapper now, release-channel hardening next, source fork later only after the wrapper distribution is reliable.
+The current release includes the standalone wrapper and Arch package skeleton. A Firefox ESR source fork remains a later, separate phase only after the wrapper distribution is reliable.
 
 MinaFox currently ships:
 
@@ -26,6 +24,8 @@ MinaFox currently ships:
 It does **not** bundle, replace, or compile Firefox yet. A future Firefox ESR source-fork phase is tracked separately in the wiki and licensing notes.
 
 ## Quick install on Arch
+
+MinaFox uses the distro `firefox` package. The Arch package depends on `firefox`; it does not provide, conflict with, replace, bundle, or compile Firefox.
 
 ### From a clone
 
@@ -48,26 +48,36 @@ makepkg -si
 minafox
 ```
 
-For rc2, the package skeleton is pinned to `Minafox::git+https://github.com/KawaiiMina/Minafox.git#tag=v0.1.0-rc2` with `pkgver=0.1.0rc2` and `pkgrel=1`. That tag must be created before publishing these commands; once it exists, the package source does not drift when `main` advances. The GitHub pre-release is useful for release notes, tag provenance, and reviewed state. Install commands remain source/package based until a separately approved package channel exists.
+The package installs these commands on `PATH`:
 
-After package installation, update with:
+- `minafox`
+- `minafox-update`
+- `minafox-ai-broker`
+
+On first launch, `minafox` syncs packaged user-local assets from `/usr/share/minafox` into `~/.mozilla/firefox/minafox`, `~/.local/share/minafox`, `~/.local/share/applications`, and `~/.local/share/icons/hicolor`.
+
+After package installation, update from the package checkout with:
 
 ```bash
 minafox-update
 ```
 
-If `~/Minafox` is checked out directly at the `v0.1.0-rc2` tag for release-candidate smoke testing, use `minafox-update --no-pull` so the updater does not try to pull from a detached tag checkout.
-
-`minafox-update` pulls the repo, rebuilds/reinstalls the package, refreshes the installed profile/start-page assets from `/usr/share/minafox`, reloads the systemd user manager, and restarts MinaFox user services that are already active or enabled. Use this when changing browser assets, search, AI broker, or harness code:
+`minafox-update` uses `~/Minafox` by default, pulls the repo, rebuilds/reinstalls the package with `makepkg -si`, refreshes the installed profile/start-page assets from `/usr/share/minafox`, reloads the systemd user manager, and restarts only MinaFox user services that are already active or enabled. Use this when changing browser assets, search, AI broker, or harness code:
 
 ```bash
 minafox-update --no-sync-profile-assets  # preserve local profile/start-page customizations
 minafox-update --no-restart-services     # package update + asset sync only
+minafox-update --repo /path/to/Minafox    # use a different checkout
+MINAFOX_REPO_DIR=/path/to/Minafox minafox-update
 ```
+
+The package path has passed the local package validator, updater smoke tests, and a disposable Arch pacman install/remove smoke. Re-run the current checks from a checkout with `python3 scripts/validate-minafox-arch-package.py` and `python3 scripts/test-minafox-update.py`.
 
 ## Optional services
 
 ### Local search
+
+Installed but not auto-enabled. MinaFox search defaults to local SearXNG at `http://127.0.0.1:8888/search`; upstream engines are configured through SearXNG, not direct browser-side integrations.
 
 ```bash
 /usr/share/minafox/scripts/install-minafox-searxng-arch.sh install-service
@@ -77,6 +87,8 @@ systemctl --user status minafox-searxng.service
 Local URL: `http://127.0.0.1:8888/`
 
 ### Mina AI Den broker
+
+Installed but not auto-enabled. The broker defaults to loopback at `127.0.0.1:8765`.
 
 ```bash
 systemctl --user enable --now minafox-ai-broker.service
@@ -100,7 +112,7 @@ Harness URL: `http://<desktop-lan-ip>:8766/`
 
 Diagnostics from Android: `/health`, `/config`, and `/android-checklist` on the same harness host. The start page includes an Android/LAN test companion card that shows the active endpoints and touch checklist.
 
-Only enable the LAN harness on trusted LAN/Tailscale networks. Keep port `8766` blocked from untrusted networks.
+The harness is installed but not auto-enabled. Only enable it on trusted LAN/Tailscale networks, and keep port `8766` blocked from untrusted networks.
 
 ## Repository map
 
@@ -173,6 +185,9 @@ The versioned docs mirror under [`docs/wiki/`](docs/wiki/) is the reviewed sourc
 - [`docs/wiki/Known-Limitations.md`](docs/wiki/Known-Limitations.md)
 - [Development Guide](../../wiki/Development-Guide) / [`docs/wiki/Development-Guide.md`](docs/wiki/Development-Guide.md)
 - [Troubleshooting](../../wiki/Troubleshooting) / [`docs/wiki/Troubleshooting.md`](docs/wiki/Troubleshooting.md)
+- [Known Limitations](../../wiki/Known-Limitations) / [`docs/wiki/Known-Limitations.md`](docs/wiki/Known-Limitations.md)
+- [Release Notes](../../wiki/Release-Notes) / [`docs/wiki/Release-Notes.md`](docs/wiki/Release-Notes.md)
+- [Publishing Checklist](../../wiki/Publishing-Checklist) / [`docs/wiki/Publishing-Checklist.md`](docs/wiki/Publishing-Checklist.md)
 
 In-repo docs remain available for versioned details:
 

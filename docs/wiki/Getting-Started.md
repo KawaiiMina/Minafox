@@ -7,6 +7,7 @@ This page gets MinaFox installed and running on Arch/Hyprland.
 - Arch Linux or Arch-like environment.
 - `firefox` installed from the distro package.
 - `python3` for helper scripts and validators.
+- `base-devel` for `makepkg` if you install with the Arch package skeleton.
 - Optional for local search: Docker Compose or Podman Compose.
 - Optional for local AI: Ollama on `127.0.0.1:11434`.
 - Optional for GitHub publishing: GitHub SSH key or HTTPS credentials.
@@ -33,18 +34,16 @@ minafox
 
 ## Install with the Arch package skeleton
 
+MinaFox's package is a wrapper/profile package around the distro `firefox` package. It does not install a Firefox binary, replace `/usr/bin/firefox`, or declare itself as Firefox.
+
 ```bash
 git clone https://github.com/KawaiiMina/Minafox.git ~/Minafox
-cd ~/Minafox
-git checkout v0.1.0-rc2
-cd packaging/arch/minafox-profile-git
+cd ~/Minafox/packaging/arch/minafox-profile-git
 makepkg -si
 minafox
 ```
 
-For rc2, the package skeleton fetches `Minafox::git+https://github.com/KawaiiMina/Minafox.git#tag=v0.1.0-rc2` and uses the static candidate package version `pkgver=0.1.0rc2`, `pkgrel=1`. The `v0.1.0-rc2` tag must exist before this public `makepkg -si` path is published or used; after that, the package source remains pinned even if `main` advances.
-
-The package installs `/usr/bin/minafox`, `/usr/bin/minafox-update`, the desktop entry, icons, docs, assets, and optional systemd user units.
+The package installs `/usr/bin/minafox`, `/usr/bin/minafox-update`, `/usr/bin/minafox-ai-broker`, the desktop entry, icons, docs, assets, and optional systemd user units.
 
 On first launch, `/usr/bin/minafox` syncs packaged assets into user-local paths. Later `minafox-update` refreshes the same profile/start-page assets after package upgrades unless you pass `--no-sync-profile-assets`:
 
@@ -53,6 +52,23 @@ On first launch, `/usr/bin/minafox` syncs packaged assets into user-local paths.
 ~/.local/share/minafox
 ~/.local/share/applications/minafox.desktop
 ~/.local/share/icons/hicolor
+```
+
+Update the installed package with:
+
+```bash
+minafox-update
+```
+
+By default, `minafox-update` uses `~/Minafox`, pulls the repo, runs `makepkg -si`, syncs current packaged assets from `/usr/share/minafox`, reloads the systemd user manager, and restarts only MinaFox services that are already active or enabled.
+
+Useful update variants:
+
+```bash
+minafox-update --no-sync-profile-assets
+minafox-update --no-restart-services
+minafox-update --repo /path/to/Minafox
+MINAFOX_REPO_DIR=/path/to/Minafox minafox-update
 ```
 
 ## Launch
@@ -82,3 +98,5 @@ export PATH="$HOME/.local/bin:$PATH"
 - Enable AI broker: [Mina AI Den](Mina-AI-Den).
 - Test on Android: [Android/LAN Testing](Android-LAN-Testing).
 - Package/update workflow: [Packaging and Updating](Packaging-and-Updating).
+- Troubleshoot command, profile, service, and chrome-polish failures: [Troubleshooting](Troubleshooting).
+- Review release boundaries: [Known Limitations](Known-Limitations).

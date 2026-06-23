@@ -1,6 +1,6 @@
 # MinaFox Search
 
-MinaFox uses local SearXNG as the default MinaFox search layer.
+MinaFox uses local SearXNG as the default MinaFox search layer. The Arch package installs the service unit and helper, but it does not auto-enable the service.
 
 ```text
 MinaFox UI → local SearXNG → upstream engines
@@ -35,6 +35,7 @@ Do not add direct browser-side search integrations for upstream engines. MinaFox
 ```bash
 cd ~/Minafox
 ./scripts/install-minafox-searxng-arch.sh start
+curl -fsS http://127.0.0.1:8888/
 ```
 
 Open:
@@ -47,6 +48,7 @@ http://127.0.0.1:8888/
 
 ```bash
 /usr/share/minafox/scripts/install-minafox-searxng-arch.sh install-service
+/usr/share/minafox/scripts/install-minafox-searxng-arch.sh status
 systemctl --user status minafox-searxng.service
 journalctl --user -u minafox-searxng.service -f
 ```
@@ -75,6 +77,7 @@ When adding engine customization later, prefer documenting the desired SearXNG s
 
 - Keep the SearXNG service bound to `127.0.0.1:8888` by default.
 - Keep the start page search form using POST.
+- Manage upstream engines through SearXNG settings, not browser-side provider integrations.
 - Do not commit generated SearXNG secrets.
 - Do not place upstream search API keys or provider credentials in static browser assets.
 - If LAN/mobile testing needs search, route through trusted local/Tailscale access rather than exposing SearXNG publicly.
@@ -83,6 +86,12 @@ When adding engine customization later, prefer documenting the desired SearXNG s
 
 ```bash
 /usr/share/minafox/scripts/install-minafox-searxng-arch.sh stop
+systemctl --user disable minafox-searxng.service
+```
+
+Refresh a running installed service after package or overlay changes:
+
+```bash
 systemctl --user restart minafox-searxng.service
 ```
 
@@ -108,3 +117,5 @@ curl -fsS http://127.0.0.1:8888/search -d 'q=minafox'
 python3 scripts/validate-minafox-searxng.py
 python3 scripts/validate-minafox-ui.py
 ```
+
+For offline service triage and LAN boundaries, see [Troubleshooting](Troubleshooting) and [Known Limitations](Known-Limitations).

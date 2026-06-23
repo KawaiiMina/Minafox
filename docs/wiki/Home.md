@@ -25,6 +25,9 @@ MinaFox is a calm, private, kawaii Firefox wrapper for Arch/Hyprland. It uses th
 - [Privacy and Licensing](Privacy-and-Licensing) — telemetry posture, MPL wrapper phase, and source-fork guardrails.
 - [Known Limitations](Known-Limitations) — current wrapper, service, and release-channel limits.
 - [Troubleshooting](Troubleshooting) — common fixes.
+- [Known Limitations](Known-Limitations) — conservative release limits.
+- [Release Notes](Release-Notes) — draft notes for the current wrapper/package release phase.
+- [Publishing Checklist](Publishing-Checklist) — pre-publish validation and approval gates.
 - [Brand and UX](Brand-and-UX) — mascot, visual language, and UX rules.
 
 ## Repository at a glance
@@ -44,3 +47,4 @@ MinaFox is a calm, private, kawaii Firefox wrapper for Arch/Hyprland. It uses th
 - Firefox for Android does not support desktop `userChrome.css`; use the harness for mobile UX testing.
 - Cloud AI providers are not implemented in the browser surface; secrets must never live in static assets.
 - Hermes Gateway chat remains blocked until pairing/auth and tool-safety UX exist.
+- Optional local services are not auto-enabled and are not public-LAN-safe by default.
