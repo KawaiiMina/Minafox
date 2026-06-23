@@ -17,7 +17,7 @@ pkgbase = minafox-profile-git
 	optdepends = podman-compose: provide Podman Compose for the optional local MinaFox SearXNG service
 	provides = minafox-profile
 	conflicts = minafox-profile
-	source = git+https://github.com/KawaiiMina/Minafox.git
+	source = Minafox::git+https://github.com/KawaiiMina/Minafox.git#tag=v0.1.0-rc2
 	sha256sums = SKIP
 
 pkgname = minafox-profile-git

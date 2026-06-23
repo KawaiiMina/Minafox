@@ -17,13 +17,11 @@ optdepends=(
 provides=('minafox-profile')
 conflicts=('minafox-profile')
 install="${pkgname}.install"
-source=('git+https://github.com/KawaiiMina/Minafox.git')
+_minafox_source_ref='v0.1.0-rc2'
+# Release-candidate builds intentionally pin the fetched source. Once
+# v0.1.0-rc2 is created, public makepkg builds cannot drift when main advances.
+source=("Minafox::git+https://github.com/KawaiiMina/Minafox.git#tag=${_minafox_source_ref}")
 sha256sums=('SKIP')
-
-pkgver() {
-  cd "$srcdir/Minafox"
-  printf '0.1.0.r%s.g%s' "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
-}
 
 package() {
   cd "$srcdir/Minafox"

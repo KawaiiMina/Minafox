@@ -46,6 +46,8 @@ On first launch, `/usr/bin/minafox` syncs packaged files into user-local paths:
 minafox-update
 ```
 
+If the repo was checked out directly at the `v0.1.0-rc2` tag for rc2 smoke testing, use `minafox-update --no-pull` because the default updater runs `git pull --ff-only`.
+
 Default behavior:
 
 1. Use `~/Minafox`, `MINAFOX_REPO_DIR`, or `--repo`.
@@ -100,4 +102,4 @@ python3 scripts/test-minafox-update.py
 
 ## Wrapper/source-fork boundary
 
-The Arch package should keep `depends=('firefox' ...)`, avoid `provides=('firefox')` or `conflicts=('firefox')`, avoid bundled Firefox binaries, and remain honest as a standalone profile wrapper until a deliberate source-fork phase exists.
+The Arch package should keep `depends=('firefox' ...)`, avoid `provides=('firefox')` or `conflicts=('firefox')`, avoid installing `/usr/bin/firefox`, `/usr/lib/firefox`, or bundled Firefox binaries, and remain honest as a standalone profile wrapper until a deliberate source-fork phase exists. Package metadata and docs should not describe MinaFox as a Firefox replacement, rebranded Firefox binary, or compiled Firefox build during the wrapper phase.

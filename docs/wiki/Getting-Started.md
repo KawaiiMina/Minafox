@@ -17,6 +17,7 @@ This page gets MinaFox installed and running on Arch/Hyprland.
 ```bash
 git clone https://github.com/KawaiiMina/Minafox.git ~/Minafox
 cd ~/Minafox
+git checkout v0.1.0-rc2
 ./scripts/install-minafox-arch.sh
 minafox
 ```
@@ -25,6 +26,8 @@ If the repo already exists:
 
 ```bash
 cd ~/Minafox
+git fetch --tags
+git checkout v0.1.0-rc2
 ./scripts/install-minafox-arch.sh
 minafox
 ```

@@ -4,7 +4,7 @@ MinaFox currently ships as a Firefox profile/wrapper distribution. This file tra
 
 ## MinaFox-owned code
 
-- **License:** MPL-2.0, see [`LICENSE`](LICENSE).
+- **License:** MPL-2.0 where applicable, see [`LICENSE`](LICENSE).
 - **Scope:** launcher scripts, profile templates, start page, validators, MinaFox CSS/JS, documentation, icons, packaging skeleton, and optional local helper scripts maintained in this repository.
 
 ## System Firefox
@@ -12,7 +12,7 @@ MinaFox currently ships as a Firefox profile/wrapper distribution. This file tra
 - **Role:** runtime dependency provided by the operating-system package manager.
 - **Arch package dependency:** `firefox`.
 - **License:** Mozilla Public License 2.0 and other notices distributed by Mozilla/Arch with Firefox.
-- **MinaFox handling:** MinaFox does not bundle a Firefox executable, does not copy Firefox source files into MinaFox-owned files, and does not claim Mozilla endorsement. It launches the system `firefox` binary with a MinaFox profile and user-local assets.
+- **MinaFox handling:** MinaFox does not bundle a Firefox executable, does not copy Firefox source files into MinaFox-owned files, does not relicense Firefox, and does not claim Mozilla endorsement. It launches the system `firefox` binary with a MinaFox profile and user-local assets.
 
 ## SearXNG
 

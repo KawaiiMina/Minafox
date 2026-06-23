@@ -22,7 +22,7 @@ It installs:
 - `/usr/share/doc/minafox/THIRD_PARTY_LICENSES.md` and `/usr/share/doc/minafox/licensing-and-source-fork.md` — third-party and MPL/source-fork guardrails.
 - `/usr/share/licenses/minafox-profile-git/LICENSE` — MinaFox's MPL-2.0 license text.
 
-It does **not** compile Firefox or turn MinaFox into a source fork yet.
+It does **not** compile Firefox or turn MinaFox into a source fork yet. It also does not install a Firefox replacement. Firefox remains the distro `firefox` package with its own Mozilla/Arch notices.
 
 ## Build on Arch
 

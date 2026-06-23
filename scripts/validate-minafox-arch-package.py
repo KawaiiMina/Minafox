@@ -35,7 +35,8 @@ REQUIRED_PKGBUILD_SNIPPETS = (
     "license=('MPL-2.0')",
     "depends=('firefox' 'desktop-file-utils' 'hicolor-icon-theme' 'python')",
     "makedepends=('git')",
-    "source=('git+https://github.com/KawaiiMina/Minafox.git')",
+    "_minafox_source_ref='v0.1.0-rc2'",
+    'source=("Minafox::git+https://github.com/KawaiiMina/Minafox.git#tag=${_minafox_source_ref}")',
     "install -Dm755 scripts/minafox-launcher.sh \"$pkgdir/usr/bin/minafox\"",
     "install -Dm755 scripts/minafox-update.sh \"$pkgdir/usr/bin/minafox-update\"",
     "install -Dm755 scripts/minafox-ai-broker.sh \"$pkgdir/usr/bin/minafox-ai-broker\"",
@@ -72,7 +73,7 @@ REQUIRED_SRCINFO_SNIPPETS = (
     "makedepends = git",
     "optdepends = docker-compose: provide Docker Compose for the optional local MinaFox SearXNG service",
     "optdepends = podman-compose: provide Podman Compose for the optional local MinaFox SearXNG service",
-    "source = git+https://github.com/KawaiiMina/Minafox.git",
+    "source = Minafox::git+https://github.com/KawaiiMina/Minafox.git#tag=v0.1.0-rc2",
 )
 
 REQUIRED_STAGED_FILES = (
@@ -135,8 +136,10 @@ def validate_static(failures: list[str]) -> None:
     require("PKGBUILD", pkgbuild, REQUIRED_PKGBUILD_SNIPPETS, failures)
     require(".SRCINFO", srcinfo, REQUIRED_SRCINFO_SNIPPETS, failures)
 
-    if "pkgver()" not in pkgbuild:
-        failures.append("PKGBUILD: missing VCS pkgver() function")
+    if "#tag=" not in pkgbuild and "#commit=" not in pkgbuild:
+        failures.append("PKGBUILD: release-candidate source must be tag- or commit-pinned")
+    if "git+https://github.com/KawaiiMina/Minafox.git')" in pkgbuild:
+        failures.append("PKGBUILD: release-candidate source must not follow the default branch")
     if "post_install()" not in install or "/usr/share/minafox/scripts/install-minafox-arch.sh" not in install:
         failures.append("minafox-profile-git.install: missing user setup post-install guidance")
     if "makepkg -si" not in readme or "python3 scripts/validate-minafox-arch-package.py" not in readme:
