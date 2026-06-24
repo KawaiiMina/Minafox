@@ -108,6 +108,25 @@ def assert_contains(text: str, needle: str, label: str) -> None:
         raise AssertionError(f"{label} missing required snippet: {needle}")
 
 
+def validate_no_direct_browser_search_providers(browser_assets: dict[str, str], failures: list[str]) -> None:
+    forbidden_patterns = [
+        r"(?i)(?:https?:)?//(?:www\.)?google\.",
+        r"(?i)(?:https?:)?//scholar\.google\.",
+        r"(?i)(?:https?:)?//(?:www\.)?duckduckgo\.com(?:/|$)",
+        r"(?i)(?:https?:)?//search\.brave\.com(?:/|$)",
+        r"(?i)(?:https?:)?//(?:www\.)?startpage\.com(?:/|$)",
+        r"(?i)(?:https?:)?//(?:www\.)?bing\.com(?:/|$)",
+        r"(?i)(?:https?:)?//search\.yahoo\.com(?:/|$)",
+    ]
+    for label, text in browser_assets.items():
+        for forbidden in forbidden_patterns:
+            if re.search(forbidden, text):
+                failures.append(
+                    f"{label}: browser-facing search must route through local SearXNG, "
+                    f"not direct external endpoint matching: {forbidden}"
+                )
+
+
 def main() -> int:
     failures: list[str] = []
 
@@ -130,6 +149,10 @@ def main() -> int:
     installer = read("scripts/install-minafox-searxng-arch.sh")
     systemd_unit = read("systemd/user/minafox-searxng.service")
     start_page = read("desktop/start.html")
+    user_js = read("profile/user.js")
+    user_content_css = read("profile/userContent.css")
+    mobile_harness = read("scripts/serve-minafox-mobile.py")
+    policies = read("distribution/policies.json")
     readme = read("README.md")
     overlay_readme = read("searxng/README.md")
     search_wiki = read("docs/wiki/MinaFox-Search.md")
@@ -256,20 +279,17 @@ def main() -> int:
     if "source .env" in installer or ". .env" in installer:
         failures.append("installer must parse .env as data, not source it as shell code")
 
-    forbidden_start_page_search_patterns = [
-        r"(?i)(?:https?:)?//(?:www\.)?google\.",
-        r"(?i)(?:https?:)?//(?:www\.)?duckduckgo\.com(?:/|$)",
-        r"(?i)(?:https?:)?//search\.brave\.com(?:/|$)",
-        r"(?i)(?:https?:)?//(?:www\.)?startpage\.com(?:/|$)",
-        r"(?i)(?:https?:)?//(?:www\.)?bing\.com(?:/|$)",
-        r"(?i)(?:https?:)?//search\.yahoo\.com(?:/|$)",
-    ]
-    for forbidden in forbidden_start_page_search_patterns:
-        if re.search(forbidden, start_page):
-            failures.append(
-                "start page must route searches through local SearXNG, "
-                f"not direct external search endpoint matching: {forbidden}"
-            )
+    validate_no_direct_browser_search_providers(
+        {
+            "desktop/start.html": start_page,
+            "profile/user.js": user_js,
+            "profile/userContent.css": user_content_css,
+            "scripts/serve-minafox-mobile.py": mobile_harness,
+        },
+        failures,
+    )
+    if '"SearchEngines"' in policies:
+        failures.append("distribution/policies.json must not set browser-side search engines; keep upstream selection in SearXNG")
 
     if re.search(r"(?m)^#search,\s*\n\s*\.search_box\s*\{", theme):
         failures.append("theme must not style the whole results-page #search form as a glass card; style #main_index #search and .search_box separately")

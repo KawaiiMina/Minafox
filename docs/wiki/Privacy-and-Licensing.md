@@ -2,11 +2,13 @@
 
 ## Privacy posture
 
-MinaFox disables Firefox telemetry/reporting at both the policy and profile layers.
+MinaFox configures Firefox telemetry/reporting primarily through the dedicated profile prefs that the wrapper syncs on first launch.
 
-### Enterprise policies
+### Policy template
 
-`distribution/policies.json` covers telemetry shutdown, Firefox studies shutdown, default browser agent shutdown, feedback/screenshot/background integrations where policy-supported, and locked telemetry prefs.
+`distribution/policies.json` is a validated enterprise-policy template for telemetry shutdown, Firefox studies shutdown, default browser agent shutdown, feedback/screenshot/background integrations where policy-supported, and locked telemetry prefs.
+
+Do not treat that template as a proven active enterprise-policy layer unless the install path explicitly places it where the distro Firefox build reads enterprise policies.
 
 ### Profile prefs
 
@@ -21,6 +23,8 @@ python3 scripts/validate-no-firefox-telemetry.py
 ## Limits
 
 This is not a Firefox source-code removal. MinaFox currently configures and wraps the distro Firefox binary; it does not physically remove telemetry code paths from a compiled Firefox build.
+
+Clean-profile runtime evidence has shown ordinary distro Firefox first-launch traffic such as remote settings, region/location, and DNS-over-HTTPS requests can still occur. Treat those as wrapper-phase limitations unless future prefs or active policies explicitly disable them.
 
 ## Licensing
 

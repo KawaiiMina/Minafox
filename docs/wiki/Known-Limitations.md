@@ -52,7 +52,9 @@ Only use LAN bindings on trusted LAN/Tailscale networks. There is no public-LAN-
 
 ## Telemetry limit
 
-MinaFox disables Firefox telemetry/reporting through policies and profile prefs. In the wrapper phase, this configures the distro Firefox binary; it does not remove code from Firefox source.
+MinaFox applies telemetry/reporting prefs through the dedicated profile and ships a validated enterprise-policy template. Current wrapper evidence proves the profile prefs sync on first launch; it does not prove the policy template is active in the distro Firefox enterprise-policy path.
+
+First-launch network behavior can still include ordinary distro Firefox remote-settings, region/location, and DNS-over-HTTPS traffic unless additional Firefox prefs or active policies disable those paths. Do not claim "no telemetry," "fully de-Mozilla'd," or "local-only first launch" for the wrapper phase.
 
 ## Update and customization limits
 

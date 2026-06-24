@@ -49,7 +49,6 @@ REQUIRED_INSTALLER_SNIPPETS = (
 REQUIRED_README_SNIPPETS = (
     "minafox",
     "Standalone wrapper",
-    "source fork later",
     "scripts/validate-minafox-standalone.py",
     "BRANDING.md",
     "not affiliated with or endorsed by Mozilla",
@@ -152,7 +151,36 @@ def validate_readme(failures: list[str]) -> str:
     if not text:
         return text
     require_contains("README.md", text, REQUIRED_README_SNIPPETS, failures)
+    validate_readme_source_fork_guardrail(text, failures)
     return text
+
+
+def validate_readme_source_fork_guardrail(text: str, failures: list[str]) -> None:
+    normalized = re.sub(r"[\s\-_]+", " ", text.lower())
+    has_source_fork = "source fork" in normalized
+    has_future_phase = any(
+        marker in normalized
+        for marker in (
+            "later separate phase",
+            "later a separate phase",
+            "later separate project phase",
+            "future firefox esr source fork",
+            "future source fork",
+        )
+    )
+    has_current_wrapper_boundary = any(
+        marker in normalized
+        for marker in (
+            "does not bundle replace or compile firefox",
+            "without pretending to be a compiled firefox fork",
+            "standalone wrapper profile distribution",
+        )
+    )
+    if not (has_source_fork and has_future_phase and has_current_wrapper_boundary):
+        failures.append(
+            "README.md: source-fork guardrail must say the current release is a wrapper/profile "
+            "and any Firefox ESR source fork is a later separate phase"
+        )
 
 
 def validate_branding(failures: list[str]) -> str:

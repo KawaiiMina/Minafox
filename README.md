@@ -137,7 +137,9 @@ See [MinaFox Search](../../wiki/MinaFox-Search) for full setup and troubleshooti
 
 ## Telemetry removal
 
-MinaFox disables telemetry/reporting through both enterprise policies and profile prefs. The policy layer includes `DisableTelemetry`, `DisableFirefoxStudies`, and related locked preferences; the profile layer disables toolkit telemetry, health reports, Normandy/Shield studies, sponsored new-tab content, search/urlbar event telemetry, and similar reporting paths.
+MinaFox applies telemetry/reporting prefs through the dedicated profile `user.js`. Those prefs disable toolkit telemetry, health reports, Normandy/Shield studies, sponsored new-tab content, search/urlbar event telemetry, and similar reporting paths.
+
+The repository also ships a `distribution/policies.json` policy template with `DisableTelemetry`, `DisableFirefoxStudies`, and related locked preferences. Treat that file as a validated policy template, not as a proven active enterprise-policy layer, unless your install path explicitly places it where the distro Firefox build reads enterprise policies.
 
 Validate the telemetry gate with:
 
@@ -145,7 +147,7 @@ Validate the telemetry gate with:
 python3 scripts/validate-no-firefox-telemetry.py
 ```
 
-Important limit: this configures the distro Firefox binary; it does not physically remove telemetry code paths from Firefox source.
+Important limit: this configures the distro Firefox binary through wrapper/profile assets; it does not physically remove telemetry code paths from Firefox source.
 
 ## Validation
 

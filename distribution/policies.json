@@ -19,9 +19,6 @@
       "Locked": false,
       "StartPage": "homepage"
     },
-    "SearchEngines": {
-      "Default": "DuckDuckGo"
-    },
     "DNSOverHTTPS": {
       "Enabled": true,
       "ProviderURL": "https://mozilla.cloudflare-dns.com/dns-query",

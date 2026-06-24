@@ -1,3 +1,14 @@
 .hermes/plans/
 __pycache__/
 *.py[cod]
+
+# OpenClaw agent workspace state; not MinaFox source.
+AGENTS.md
+DREAMS.md
+MEMORY.md
+SOUL.md
+TOOLS.md
+USER.md
+memory/
+local-work/
+openclaw-workspace-state.json
